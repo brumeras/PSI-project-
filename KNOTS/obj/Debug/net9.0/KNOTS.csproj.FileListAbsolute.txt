@@ -76,3 +76,4 @@
 /Users/camila/RiderProjects/KNOTS/KNOTS/obj/Debug/net9.0/KNOTS.pdb
 /Users/camila/RiderProjects/KNOTS/KNOTS/obj/Debug/net9.0/KNOTS.genruntimeconfig.cache
 /Users/camila/RiderProjects/KNOTS/KNOTS/obj/Debug/net9.0/ref/KNOTS.dll
+/Users/camila/RiderProjects/KNOTS/KNOTS/obj/Debug/net9.0/KNOTS.sourcelink.json

@@ -1,0 +1,39 @@
+@page "/"
+@using KNOTS.Components.Layout
+@layout EmptyLayout
+@rendermode InteractiveServer
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4" style="width: 300px;">
+        <h3 class="text-center mb-3">Login</h3>
+
+        <div class="mb-3">
+            <label for="usernameInput">Username</label>
+            <input id="usernameInput" class="form-control" @bind="Username" />
+        </div>
+
+        <div class="mb-3">
+            <label for="passwordInput">Password</label>
+            <input id="passwordInput" type="password" class="form-control" @bind="Password" />
+        </div>
+
+        <button class="btn btn-primary w-100" @onclick="LoginToWeb">Login</button>
+    </div>
+</div>
+
+@code {
+    private string Username;
+    private string Password;
+    
+    private void LoginToWeb()
+    {
+        // Check both username and password to proceed
+        if (!string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password))
+        {
+            // Navigate to your normal Home page
+            NavigationManager.NavigateTo("/Home");
+        }
+    }
+    
+    [Inject] private NavigationManager NavigationManager { get; set; }
+}}
