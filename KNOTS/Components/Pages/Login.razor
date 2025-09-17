@@ -27,10 +27,8 @@
     
     private void LoginToWeb()
     {
-        // Check both username and password to proceed
         if (!string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password))
         {
-            // Navigate to your normal Home page
             NavigationManager.NavigateTo("/Home");
         }
     }
