@@ -1,11 +1,12 @@
-﻿@page "/weather"
+﻿@page "/activity"
 @attribute [StreamRendering]
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>My Activity</PageTitle>
 
-<h1>Weather</h1>
+<h1>My Activity</h1>
 
-<p>This component demonstrates showing data.</p>
+<p>Recent game results</p>
+
 
 @if (forecasts == null)
 {
@@ -19,21 +20,11 @@ else
         <thead>
         <tr>
             <th>Date</th>
-            <th aria-label="Temperature in Celsius">Temp. (C)</th>
-            <th aria-label="Temperature in Farenheit">Temp. (F)</th>
-            <th>Summary</th>
+            <th>Most compatible</th>
+            <th>Least compatible</th>
         </tr>
         </thead>
-        <tbody>
-        @foreach (var forecast in forecasts)
-        {
-            <tr>
-                <td>@forecast.Date.ToShortDateString()</td>
-                <td>@forecast.TemperatureC</td>
-                <td>@forecast.TemperatureF</td>
-                <td>@forecast.Summary</td>
-            </tr>
-        }
+        <tbody> 
         </tbody>
     </table>
 }
