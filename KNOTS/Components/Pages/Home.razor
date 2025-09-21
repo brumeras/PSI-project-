@@ -1,7 +1,15 @@
 ﻿@page "/Home"
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Join a new game now!</h1>
 
-Welcome to your new app.
+<p>You will be connected to an interactive server, where you can find your match based on your answers!</p>
+<button class="btn btn-primary w-20" @onclick="ConnectToServer">Connect to server</button>
+
+
+@code {
+
+    private void ConnectToServer() { }
+}

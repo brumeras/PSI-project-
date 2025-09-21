@@ -1,20 +1,40 @@
-﻿@page "/counter"
+﻿@page "/friends"
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Friends</PageTitle>
 
-<h1>Counter</h1>
+<h1>Friends</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p>Your friend's list</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Friend username</th>
+        <th>Invite</th>
+        <th>Compatibility summary</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<p>Invite other players to be your friend!</p>
+
+<div class="container mt-5" style="max-width: 250px; margin-left:0;">
+    <div class="card p-3">
+        <h3 class="text-center">Add a friend!</h3>
+
+        <div class="text-center mb-3">
+            <label for="usernameInput">Write your friends username here:</label>
+            <input id="usernameInput" class="form-control" @bind="friendUsername" />
+        </div>
+        <button class="btn btn-primary w-100" @onclick="AddFriend">Add friend</button>
+    </div>
+</div>
 
 @code {
-    private int currentCount = 0;
+    private string friendUsername;
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
-
+    private void AddFriend() {}
 }

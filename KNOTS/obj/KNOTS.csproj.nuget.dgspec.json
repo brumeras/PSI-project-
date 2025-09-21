@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/camila/RiderProjects/KNOTS/KNOTS/KNOTS.csproj": {}
+    "/Users/camila/RiderProjects/PSI-project-/KNOTS/KNOTS.csproj": {}
   },
   "projects": {
-    "/Users/camila/RiderProjects/KNOTS/KNOTS/KNOTS.csproj": {
+    "/Users/camila/RiderProjects/PSI-project-/KNOTS/KNOTS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/camila/RiderProjects/KNOTS/KNOTS/KNOTS.csproj",
+        "projectUniqueName": "/Users/camila/RiderProjects/PSI-project-/KNOTS/KNOTS.csproj",
         "projectName": "KNOTS",
-        "projectPath": "/Users/camila/RiderProjects/KNOTS/KNOTS/KNOTS.csproj",
+        "projectPath": "/Users/camila/RiderProjects/PSI-project-/KNOTS/KNOTS.csproj",
         "packagesPath": "/Users/camila/.nuget/packages/",
-        "outputPath": "/Users/camila/RiderProjects/KNOTS/KNOTS/obj/",
+        "outputPath": "/Users/camila/RiderProjects/PSI-project-/KNOTS/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/camila/.nuget/NuGet/NuGet.Config"
@@ -62,7 +62,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/Users/camila/.dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
