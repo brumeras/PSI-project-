@@ -9,57 +9,57 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = KNOTS
 build_property.RootNamespace = KNOTS
-build_property.ProjectDir = /Users/camila/RiderProjects/PSI-project-/KNOTS/
+build_property.ProjectDir = /Users/camila/RiderProjects/KNOTS/KNOTS/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /Users/camila/RiderProjects/PSI-project-/KNOTS
+build_property.MSBuildProjectDirectory = /Users/camila/RiderProjects/KNOTS/KNOTS
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/App.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/App.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9BcHAucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Layout/EmptyLayout.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Layout/EmptyLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvRW1wdHlMYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Pages/Counter.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Pages/Counter.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Db3VudGVyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Pages/Error.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Pages/Error.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9FcnJvci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Pages/Home.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Ib21lLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Pages/Login.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Pages/Login.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Mb2dpbi5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Pages/Weather.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Pages/Weather.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9XZWF0aGVyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Routes.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Routes.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Sb3V0ZXMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/_Imports.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9fSW1wb3J0cy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Layout/MainLayout.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Layout/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvTWFpbkxheW91dC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-i9klgs8v5f
 
-[/Users/camila/RiderProjects/PSI-project-/KNOTS/Components/Layout/NavMenu.razor]
+[/Users/camila/RiderProjects/KNOTS/KNOTS/Components/Layout/NavMenu.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvTmF2TWVudS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-czhrrl3dkw

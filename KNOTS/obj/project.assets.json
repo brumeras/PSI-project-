@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/camila/RiderProjects/PSI-project-/KNOTS/KNOTS.csproj",
+      "projectUniqueName": "/Users/camila/RiderProjects/KNOTS/KNOTS/KNOTS.csproj",
       "projectName": "KNOTS",
-      "projectPath": "/Users/camila/RiderProjects/PSI-project-/KNOTS/KNOTS.csproj",
+      "projectPath": "/Users/camila/RiderProjects/KNOTS/KNOTS/KNOTS.csproj",
       "packagesPath": "/Users/camila/.nuget/packages/",
-      "outputPath": "/Users/camila/RiderProjects/PSI-project-/KNOTS/obj/",
+      "outputPath": "/Users/camila/RiderProjects/KNOTS/KNOTS/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/camila/.nuget/NuGet/NuGet.Config"

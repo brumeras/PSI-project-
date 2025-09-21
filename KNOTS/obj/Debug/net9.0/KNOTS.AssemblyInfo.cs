@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("KNOTS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b61715b15771f7dbd51aa13e8e0299d72ebbd008")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+63b34000522285ac5ff2d658e251db6ed079e4fe")]
 [assembly: System.Reflection.AssemblyProductAttribute("KNOTS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("KNOTS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
