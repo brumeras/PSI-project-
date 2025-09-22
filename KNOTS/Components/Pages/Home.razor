@@ -1,5 +1,7 @@
 ﻿@page "/Home"
 @rendermode InteractiveServer
+@using KNOTS.Services
+@inject GameService serveris
 
 <PageTitle>Home</PageTitle>
 
@@ -7,9 +9,14 @@
 
 <p>You will be connected to an interactive server, where you can find your match based on your answers!</p>
 <button class="btn btn-primary w-20" @onclick="ConnectToServer">Connect to server</button>
+<p>@statusMessage</p>
 
 
 @code {
-
-    private void ConnectToServer() { }
+    private string statusMessage = "";
+    private void ConnectToServer()
+    {
+        serveris.UserJoined();
+        statusMessage = $"{serveris.JoinedUsers} users joined the game!";
+    }
 }
