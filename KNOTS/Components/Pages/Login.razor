@@ -1,39 +1,75 @@
 @page "/"
+@using KNOTS.Services
 @using KNOTS.Components.Layout
 @layout EmptyLayout
 @rendermode InteractiveServer
 
 <div class="container d-flex justify-content-center align-items-center vh-100">
     <div class="card p-4" style="width: 300px;">
-        <h3 class="text-center mb-3">Login</h3>
+        @if (UserService.IsAuthenticated)
+        {
+            <h3 class="text-center mb-3">Welcome, @UserService.CurrentUser!</h3>
+            <button class="btn btn-secondary w-100" @onclick="Logout">Logout</button>
+        }
+        else
+        {
+            <h3 class="text-center mb-3">Login / Sign up</h3>
 
-        <div class="mb-3">
-            <label for="usernameInput">Username</label>
-            <input id="usernameInput" class="form-control" @bind="Username" />
-        </div>
+            <div class="mb-3">
+                <label for="usernameInput">Username</label>
+                <input id="usernameInput" class="form-control" @bind="Username" />
+            </div>
 
-        <div class="mb-3">
-            <label for="passwordInput">Password</label>
-            <input id="passwordInput" type="password" class="form-control" @bind="Password" />
-        </div>
+            <div class="mb-3">
+                <label for="passwordInput">Password</label>
+                <input id="passwordInput" type="password" class="form-control" @bind="Password" />
+            </div>
 
-        <button class="btn btn-primary w-100" @onclick="LoginToWeb">Login</button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary flex-fill" @onclick="LoginToWeb">Login</button>
+                <button class="btn btn-success flex-fill" @onclick="RegisterToWeb">Sign up</button>
+            </div>
+
+            <p class="text-center mt-3">@statusMessage</p>
+        }
     </div>
 </div>
 
 @code {
-    private string Username;
-    private string Password;
-    
+    private string Username = string.Empty;
+    private string Password = string.Empty;
+    private string statusMessage = string.Empty;
+
+    [Inject] private UserService UserService { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
     private void LoginToWeb()
     {
-        if (!string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password))
+        var result = UserService.LoginUser(Username, Password);
+        statusMessage = result.Message;
+
+        if (result.Success)
         {
             NavigationManager.NavigateTo("/Home");
         }
     }
-    
-    [Inject] private NavigationManager NavigationManager { get; set; }
-}
 
-//LABAS
+    private void RegisterToWeb()
+    {
+        var result = UserService.RegisterUser(Username, Password);
+        statusMessage = result.Message;
+
+        if (result.Success)
+        {
+            // After successful registration, you can log them in automatically
+            UserService.LoginUser(Username, Password);
+            NavigationManager.NavigateTo("/Home");
+        }
+    }
+
+    private void Logout()
+    {
+        UserService.LogoutUser();
+        statusMessage = "You have logged out.";
+    }
+}

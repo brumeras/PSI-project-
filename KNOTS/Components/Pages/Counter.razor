@@ -1,40 +1,57 @@
-﻿@page "/friends"
-@rendermode InteractiveServer
+﻿@page "/counter"
+@using KNOTS.Services
+@inject UserService UserService
 
-<PageTitle>Friends</PageTitle>
+<h3>Counter</h3>
 
-<h1>Friends</h1>
+@if (UserService.IsAuthenticated)
+{
+    <p>Logged in as: <b>@UserService.CurrentUser</b></p>
+    <p>Friends count: @UserService.GetUserFriends().Count</p>
+    <button class="btn btn-secondary" @onclick="Logout">Logout</button>
+}
+else
+{
+    <p>You are not logged in.</p>
 
-<p>Your friend's list</p>
-
-<table class="table">
-    <thead>
-    <tr>
-        <th>Friend username</th>
-        <th>Invite</th>
-        <th>Compatibility summary</th>
-    </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
-
-<p>Invite other players to be your friend!</p>
-
-<div class="container mt-5" style="max-width: 250px; margin-left:0;">
-    <div class="card p-3">
-        <h3 class="text-center">Add a friend!</h3>
-
-        <div class="text-center mb-3">
-            <label for="usernameInput">Write your friends username here:</label>
-            <input id="usernameInput" class="form-control" @bind="friendUsername" />
-        </div>
-        <button class="btn btn-primary w-100" @onclick="AddFriend">Add friend</button>
+    <div class="mb-2">
+        <input @bind="username" placeholder="Username" class="form-control" />
     </div>
-</div>
+    <div class="mb-2">
+        <input @bind="password" type="password" placeholder="Password" class="form-control" />
+    </div>
+    <div class="mb-2">
+        <button class="btn btn-primary me-2" @onclick="Login">Login</button>
+        <button class="btn btn-success" @onclick="Register">Register</button>
+    </div>
+
+    <p>@statusMessage</p>
+}
+
+<hr />
+
+<p>Total registered users: @UserService.GetTotalUsersCount()</p>
 
 @code {
-    private string friendUsername;
+    private string username = string.Empty;
+    private string password = string.Empty;
+    private string statusMessage = string.Empty;
 
-    private void AddFriend() {}
+    private void Login()
+    {
+        var result = UserService.LoginUser(username, password);
+        statusMessage = result.Message;
+    }
+
+    private void Register()
+    {
+        var result = UserService.RegisterUser(username, password);
+        statusMessage = result.Message;
+    }
+
+    private void Logout()
+    {
+        UserService.LogoutUser();
+        statusMessage = "You have logged out successfully.";
+    }
 }
