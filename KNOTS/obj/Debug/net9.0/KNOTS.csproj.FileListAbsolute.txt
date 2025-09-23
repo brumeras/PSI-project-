@@ -235,3 +235,4 @@ C:\Users\semil\RiderProjects\PSI-project\KNOTS\obj\Debug\net9.0\refint\KNOTS.dll
 C:\Users\semil\RiderProjects\PSI-project\KNOTS\obj\Debug\net9.0\KNOTS.pdb
 C:\Users\semil\RiderProjects\PSI-project\KNOTS\obj\Debug\net9.0\KNOTS.genruntimeconfig.cache
 C:\Users\semil\RiderProjects\PSI-project\KNOTS\obj\Debug\net9.0\ref\KNOTS.dll
+C:\Users\semil\RiderProjects\PSI-project\KNOTS\bin\Debug\net9.0\users.json
