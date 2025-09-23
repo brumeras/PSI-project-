@@ -14,9 +14,29 @@
 
 @code {
     private string statusMessage = "";
+
+    protected override void OnInitialized()
+    {
+        serveris.OnChange += atnaujinti;
+    }
     private void ConnectToServer()
     {
         serveris.UserJoined();
         statusMessage = $"{serveris.JoinedUsers} users joined the game!";
     }
+
+    private void atnaujinti()
+    {
+        InvokeAsync(() =>
+        {
+            statusMessage = $"{serveris.JoinedUsers} users joined the game!";
+            StateHasChanged();
+        });
+        
+    }
+    public void Dispose()
+    {
+        serveris.OnChange -= atnaujinti;
+    }
+    
 }
