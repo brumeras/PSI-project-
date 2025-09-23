@@ -8,19 +8,19 @@
     "net9.0": []
   },
   "packageFolders": {
-    "/Users/camila/.nuget/packages/": {}
+    "C:\\Users\\semil\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/camila/RiderProjects/KNOTS/KNOTS/KNOTS.csproj",
+      "projectUniqueName": "C:\\Users\\semil\\RiderProjects\\PSI-project\\KNOTS\\KNOTS.csproj",
       "projectName": "KNOTS",
-      "projectPath": "/Users/camila/RiderProjects/KNOTS/KNOTS/KNOTS.csproj",
-      "packagesPath": "/Users/camila/.nuget/packages/",
-      "outputPath": "/Users/camila/RiderProjects/KNOTS/KNOTS/obj/",
+      "projectPath": "C:\\Users\\semil\\RiderProjects\\PSI-project\\KNOTS\\KNOTS.csproj",
+      "packagesPath": "C:\\Users\\semil\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\semil\\RiderProjects\\PSI-project\\KNOTS\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/camila/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\semil\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -68,7 +68,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Users\\semil\\.dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

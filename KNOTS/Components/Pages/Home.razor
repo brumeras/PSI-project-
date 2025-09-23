@@ -1,42 +1,84 @@
 ﻿@page "/Home"
 @rendermode InteractiveServer
 @using KNOTS.Services
-@inject GameService serveris
+@inject GameService GameService
+@inject UserService UserService
 
 <PageTitle>Home</PageTitle>
 
-<h1>Join a new game now!</h1>
+@if (UserService.IsAuthenticated)
+{
+    <h2>Welcome, @UserService.CurrentUser!</h2>
+    <button class="btn btn-secondary mb-3" @onclick="Logout">Logout</button>
 
-<p>You will be connected to an interactive server, where you can find your match based on your answers!</p>
-<button class="btn btn-primary w-20" @onclick="ConnectToServer">Connect to server</button>
-<p>@statusMessage</p>
+    <h4>Your Friends</h4>
+    <ul>
+        @foreach (var friend in UserService.GetUserFriends())
+        {
+            <li>@friend</li>
+        }
+    </ul>
 
+    <div class="mb-3 d-flex gap-2">
+        <input class="form-control" placeholder="Add friend by username" @bind="friendToAdd" />
+        <button class="btn btn-success" @onclick="AddFriend">Add Friend</button>
+    </div>
+    <p>@friendMessage</p>
+
+    <hr />
+
+    <h3>Join a new game now!</h3>
+    <p>You will be connected to an interactive server, where you can find your match based on your answers!</p>
+    <button class="btn btn-primary w-20" @onclick="ConnectToServer">Connect to server</button>
+    <p>@statusMessage</p>
+}
+else
+{
+    <h3>You are not logged in.</h3>
+    <p><a href="/">Go to login page</a></p>
+}
 
 @code {
     private string statusMessage = "";
+    private string friendToAdd = "";
+    private string friendMessage = "";
 
     protected override void OnInitialized()
     {
-        serveris.OnChange += atnaujinti;
-    }
-    private void ConnectToServer()
-    {
-        serveris.UserJoined();
-        statusMessage = $"{serveris.JoinedUsers} users joined the game!";
+        GameService.OnChange += UpdateStatus;
     }
 
-    private void atnaujinti()
+    private void ConnectToServer()
+    {
+        GameService.UserJoined();
+        statusMessage = $"{GameService.JoinedUsers} users joined the game!";
+    }
+
+    private void UpdateStatus()
     {
         InvokeAsync(() =>
         {
-            statusMessage = $"{serveris.JoinedUsers} users joined the game!";
+            statusMessage = $"{GameService.JoinedUsers} users joined the game!";
             StateHasChanged();
         });
-        
     }
+
+    private void AddFriend()
+    {
+        var result = UserService.AddFriend(friendToAdd);
+        friendMessage = result.Message;
+        friendToAdd = "";
+    }
+
+    private void Logout()
+    {
+        UserService.LogoutUser();
+        statusMessage = "";
+        friendMessage = "";
+    }
+
     public void Dispose()
     {
-        serveris.OnChange -= atnaujinti;
+        GameService.OnChange -= UpdateStatus;
     }
-    
 }
