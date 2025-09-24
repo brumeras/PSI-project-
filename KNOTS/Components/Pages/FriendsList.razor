@@ -1,0 +1,37 @@
+﻿@inject KNOTS.Services.UserService UserService
+
+<h3>My Friends</h3>
+
+@if (UserService.GetUserFriends().Count == 0)
+{
+    <p>You don't have any friends yet :(.</p>
+}
+else
+{
+    <ul>
+        @foreach (var friend in UserService.GetUserFriends())
+        {
+            <li>@friend</li>
+        }
+    </ul>
+}
+
+<input @bind="NewFriendUsername" placeholder="Add a friend" />
+<button class="btn btn-primary" @onclick="AddFriend">Add</button>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <p style="color:green;">@StatusMessage</p>
+}
+
+@code {
+    private string NewFriendUsername { get; set; } = string.Empty;
+    private string StatusMessage { get; set; } = string.Empty;
+
+    private void AddFriend()
+    {
+        var result = UserService.AddFriend(NewFriendUsername);
+        StatusMessage = result.Message;
+        NewFriendUsername = string.Empty;
+    }
+}
