@@ -1,0 +1,104 @@
+﻿@page "/newgame"
+@inject KNOTS.Services.UserService UserService
+@using System.IO
+@rendermode InteractiveServer
+
+<h1> Start a New Game</h1>
+
+@if (UserService.IsAuthenticated)
+{
+    <div>
+        <label>Your Name:</label>
+        <input @bind="PlayerName" placeholder="Enter your name" disabled />
+    </div>
+}
+else
+{
+    <div>
+        <label>Your Name:</label>
+        <input @bind="PlayerName" placeholder="Enter your name" />
+    </div>
+}
+
+<hr />
+
+@for (int i = 0; i < Questions.Length && i < Answers.Length; i++)
+{
+    var index = i;
+    <div>
+        <label>@Questions[index]</label><br />
+        <input value="@Answers[index]" @oninput="e => Answers[index] = e.Value?.ToString()" placeholder="Type your answer..." />
+    </div>
+    <br />
+}
+
+<button type="button" class="btn btn-primary" @onclick="SaveAnswers">Save Answers</button>
+
+@if (!string.IsNullOrEmpty(SavedFilePath))
+{
+    <p style="color:green;">Answers saved successfully!</p>
+}
+@if (!string.IsNullOrEmpty(statusMessage))
+{
+    <p style="color:red;">❌ @statusMessage</p>
+}
+
+@code {
+    private string PlayerName { get; set; } = "";
+    private string[] Answers;
+
+    private string[] Questions { get; } =
+    {
+        "What is your favorite movie?",
+        "If you could travel anywhere, where would you go?",
+        "What is one thing you can’t live without?",
+        "What was your childhood dream job?",
+        "What’s your favorite hobby?"
+    };
+
+    private string SavedFilePath { get; set; }
+    private string statusMessage = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        Answers = new string[Questions.Length];
+
+        if (UserService.IsAuthenticated)
+        {
+            PlayerName = UserService.CurrentUser;
+        }
+    }
+
+    private void SaveAnswers()
+    {
+        if (string.IsNullOrWhiteSpace(PlayerName))
+        {
+            statusMessage = "Player name is required.";
+            return;
+        }
+
+        try
+        {
+            var playerData = new
+            {
+                Username = PlayerName,
+                Answers = Answers
+            };
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "answers.json");
+
+            string json = System.Text.Json.JsonSerializer.Serialize(playerData, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            File.WriteAllText(filePath, json);
+            SavedFilePath = filePath;
+            statusMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error saving answers: {ex.Message}";
+        }
+    }
+}
