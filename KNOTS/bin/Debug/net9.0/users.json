@@ -24,19 +24,5 @@
     "Password": "1234",
     "CreatedAt": "2025-09-25T16:57:18.9396209+03:00",
     "Friends": []
-  },
-  {
-    "Username": "aaa",
-    "Password": "aaaa",
-    "CreatedAt": "2025-09-25T17:19:00.1498027+03:00",
-    "Friends": []
-  },
-  {
-    "Username": "emilija3",
-    "Password": "labasd",
-    "CreatedAt": "2025-09-25T21:04:54.191408+03:00",
-    "Friends": [
-      "emilija7"
-    ]
   }
 ]

@@ -1,8 +1,0 @@
-C:\Users\semil\RiderProjects\PSI-project\publish\KNOTS.exe
-C:\Users\semil\RiderProjects\PSI-project\publish\appsettings.Development.json
-C:\Users\semil\RiderProjects\PSI-project\publish\appsettings.json
-C:\Users\semil\RiderProjects\PSI-project\publish\users.json
-C:\Users\semil\RiderProjects\PSI-project\publish\KNOTS.dll
-C:\Users\semil\RiderProjects\PSI-project\publish\KNOTS.deps.json
-C:\Users\semil\RiderProjects\PSI-project\publish\KNOTS.runtimeconfig.json
-C:\Users\semil\RiderProjects\PSI-project\publish\KNOTS.pdb
