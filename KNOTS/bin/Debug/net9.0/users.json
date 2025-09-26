@@ -6,9 +6,23 @@
     "Friends": []
   },
   {
-    "Username": "ugneee",
+    "Username": "emilija7",
+    "Password": "labas",
+    "CreatedAt": "2025-09-25T16:04:01.0194506+03:00",
+    "Friends": [
+      "emilija"
+    ]
+  },
+  {
+    "Username": "emilja7",
+    "Password": "labas",
+    "CreatedAt": "2025-09-25T16:21:31.0119638+03:00",
+    "Friends": []
+  },
+  {
+    "Username": "paskaita",
     "Password": "1234",
-    "CreatedAt": "2025-09-23T21:47:15.7647723+03:00",
+    "CreatedAt": "2025-09-25T16:57:18.9396209+03:00",
     "Friends": []
   }
 ]

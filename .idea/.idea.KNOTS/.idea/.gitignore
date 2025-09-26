@@ -1,5 +1,4 @@
 ### Rider ###
-/.idea/
 /shelf/
 /workspace.xml
 /modules.xml
@@ -9,6 +8,7 @@
 /httpRequests/
 /dataSources/
 /dataSources.local.xml
+.idea/
 
 ### .NET / Visual Studio ###
 bin/
@@ -31,33 +31,21 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 
-# NuGet & MSBuild artifacts
+# NuGet
 *.nupkg
 *.snupkg
 project.lock.json
 project.fragment.lock.json
-project.assets.json
-project.nuget.cache
-project.packagespec.json
-rider.project.*.info
-*.nuget.dgspec.json
-*.nuget.g.props
-*.nuget.g.targets
-*.GeneratedMSBuildEditorConfig.editorconfig
 artifacts/
 packages/
 
 # Logs
 *.log
 
-# Generated binaries/symbols
-*.dll
-*.exe
-*.pdb
-*.cache
-
-# Compressed
+# Generated files 
 *.gz
 
 # Others
 *.db
+*.pdb
+*.cache
