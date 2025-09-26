@@ -1,13 +1,51 @@
-# Default ignored files
+### Rider ###
 /shelf/
 /workspace.xml
-# Rider ignored files
 /modules.xml
 /.idea.KNOTS.iml
 /contentModel.xml
 /projectSettingsUpdater.xml
-# Editor-based HTTP Client requests
 /httpRequests/
-# Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+.idea/
+
+### .NET / Visual Studio ###
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider and VS caches
+*.vs/
+*.vscode/
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+packages/
+
+# Logs
+*.log
+
+# Generated files 
+*.gz
+
+# Others
+*.db
+*.pdb
+*.cache
