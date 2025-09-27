@@ -29,7 +29,13 @@
 
     <h3>Join a new game now!</h3>
     <p>You will be connected to an interactive server, where you can find your match based on your answers!</p>
-    <button class="btn btn-primary w-20" @onclick="ConnectToServer">Connect to server</button>
+    
+    <!-- Pridėta nuoroda į žaidimo puslapį -->
+    <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-primary" @onclick="ConnectToServer">Connect to server</button>
+        <a href="/game" class="btn btn-success">Eiti į žaidimą</a>
+    </div>
+    
     <p>@statusMessage</p>
 }
 else
