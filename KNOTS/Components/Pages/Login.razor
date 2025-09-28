@@ -4,8 +4,14 @@
 @layout EmptyLayout
 @rendermode InteractiveServer
 
-<div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="card p-4" style="width: 300px;">
+<div class="container d-flex justify-content-center align-items-center vh-100" 
+     style="background-color: #b4d0ec; 
+            background-image: url('/images/rope_heart.png');
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: 120% auto;
+            font-family: 'Zalando Sans Expanded', sans-serif;">
+    <div class="card p-4" style="width: 500px; color: black; background: rgba(255, 255, 255, 0.75); font-weight: 600">
         @if (UserService.IsAuthenticated)
         {
             <h3 class="text-center mb-3">Welcome, @UserService.CurrentUser!</h3>
@@ -13,21 +19,29 @@
         }
         else
         {
-            <h3 class="text-center mb-3">Login / Sign up</h3>
+            <h3 class="text-center mb-3">KNOTS</h3>
 
-            <div class="mb-3">
+            <div class="mb-3 text-center">
                 <label for="usernameInput">Username</label>
-                <input id="usernameInput" class="form-control" @bind="Username" />
+                <input id="usernameInput" class="form-control" @bind="Username"/>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 text-center">
                 <label for="passwordInput">Password</label>
-                <input id="passwordInput" type="password" class="form-control" @bind="Password" />
+                <input id="passwordInput" type="password" class="form-control" @bind="Password"/>
             </div>
 
             <div class="d-flex gap-2">
-                <button class="btn btn-primary flex-fill" @onclick="LoginToWeb">Login</button>
-                <button class="btn btn-success flex-fill" @onclick="RegisterToWeb">Sign up</button>
+                <button class="btn flex-fill" 
+                        style="background-color: #f888e9; color: white; font-weight: 600;" 
+                        @onclick="LoginToWeb">
+                    Login
+                </button>
+                <button class="btn flex-fill" 
+                        style="background-color: #bd87f8; color: white; font-weight: 600;" 
+                        @onclick="RegisterToWeb">
+                    Sign up
+                </button>
             </div>
 
             <p class="text-center mt-3">@statusMessage</p>
@@ -61,7 +75,6 @@
 
         if (result.Success)
         {
-            // After successful registration, you can log them in automatically
             UserService.LoginUser(Username, Password);
             NavigationManager.NavigateTo("/Home");
         }
