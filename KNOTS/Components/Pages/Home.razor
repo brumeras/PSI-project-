@@ -1,8 +1,8 @@
 ﻿@page "/Home"
 @rendermode InteractiveServer
 @using KNOTS.Services
-@inject GameService GameService
 @inject UserService UserService
+@inject NavigationManager Navigation
 
 <PageTitle>Home</PageTitle>
 
@@ -29,8 +29,7 @@
     
     <!-- Pridėta nuoroda į žaidimo puslapį -->
     <div class="d-flex gap-2 mb-3">
-        <button class="btn btn-primary" @onclick="ConnectToServer">Connect to server</button>
-        <a href="/game" class="btn btn-success">Eiti į žaidimą</a>
+        <a href="/game" class="btn btn-success">Connect to game</a>
     </div>
     
     <p>@statusMessage</p>
@@ -45,27 +44,7 @@ else
     private string statusMessage = "";
     private string friendToAdd = "";
     private string friendMessage = "";
-
-    protected override void OnInitialized()
-    {
-        GameService.OnChange += UpdateStatus;
-    }
-
-    private void ConnectToServer()
-    {
-        GameService.UserJoined();
-        statusMessage = $"{GameService.JoinedUsers} users joined the game!";
-    }
-
-    private void UpdateStatus()
-    {
-        InvokeAsync(() =>
-        {
-            statusMessage = $"{GameService.JoinedUsers} users joined the game!";
-            StateHasChanged();
-        });
-    }
-
+    
     private void AddFriend()
     {
         var result = UserService.AddFriend(friendToAdd);
@@ -78,10 +57,6 @@ else
         UserService.LogoutUser();
         statusMessage = "";
         friendMessage = "";
-    }
-
-    public void Dispose()
-    {
-        GameService.OnChange -= UpdateStatus;
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 }

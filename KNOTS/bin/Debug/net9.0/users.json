@@ -50,5 +50,11 @@
     "Password": "labukas",
     "CreatedAt": "2025-09-27T23:20:33.5575735+03:00",
     "Friends": []
+  },
+  {
+    "Username": "kamile",
+    "Password": "kamile",
+    "CreatedAt": "2025-09-29T15:38:42.936609+03:00",
+    "Friends": []
   }
 ]
