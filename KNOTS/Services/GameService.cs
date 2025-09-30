@@ -1,4 +1,4 @@
-namespace KNOTS.Services;
+/*namespace KNOTS.Services;
 
 public class GameService
 {
@@ -13,3 +13,4 @@ public class GameService
     }
 
 }
+*/

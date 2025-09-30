@@ -10,22 +10,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
 <script src="/js/gameclient.js"></script>
 
-<h3>Žaidimas</h3>
+<h3>You are now connected!</h3>
 
 @if (!UserService.IsAuthenticated)
 {
     <div class="alert alert-warning">
-        Turite prisijungti, kad galėtumėte žaisti žaidimą.
+        In order to connect to a game, you have to login.
     </div>
 }
 else
 {
     <div class="card">
         <div class="card-header">
-            <h5>Sveiki, @UserService.CurrentUser!</h5>
+            <h5>Hello, @UserService.CurrentUser!</h5>
             @if (!string.IsNullOrEmpty(playerId))
             {
-                <small class="text-muted">Jūsų ID: @playerId</small>
+                <small class="text-muted">Your unique game ID: @playerId</small>
             }
         </div>
         <div class="card-body">
@@ -34,18 +34,18 @@ else
                 <!-- Kambario sukūrimas/prisijungimas -->
                 <div class="row">
                     <div class="col-md-6">
-                        <h6>Sukurti naują kambarį</h6>
+                        <h6>Create a new game room</h6>
                         <button class="btn btn-primary" @onclick="CreateRoom" disabled="@isConnecting">
-                            Sukurti kambarį
+                            Create room
                         </button>
                     </div>
                     <div class="col-md-6">
-                        <h6>Prisijungti prie kambario</h6>
+                        <h6>Connect to an already existing room</h6>
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" @bind="roomCodeToJoin" 
-                                   placeholder="Įveskite kambario kodą" maxlength="4">
+                                   placeholder="Input room code" maxlength="4">
                             <button class="btn btn-success" @onclick="JoinRoom" disabled="@(isConnecting || string.IsNullOrEmpty(roomCodeToJoin))">
-                                Prisijungti
+                                Connect
                             </button>
                         </div>
                     </div>
@@ -55,38 +55,13 @@ else
             {
                 <!-- Esame kambaryje -->
                 <div class="alert alert-success">
-                    <h6>Esate kambaryje: @currentRoomCode</h6>
-                    <p>Žaidėjai kambaryje: @string.Join(", ", playersInRoom)</p>
+                    <h6>You are currently in room: @currentRoomCode</h6>
+                    <p>Other connected players: @string.Join(", ", playersInRoom)</p>
                 </div>
 
-                <!-- Žaidimo valdymas -->
                 <div class="mt-3">
-                    <h6>Žaidimo veiksmai</h6>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-outline-primary" @onclick="SendMoveUp">
-                            Aukštyn
-                        </button>
-                        <button class="btn btn-outline-primary" @onclick="SendMoveDown">
-                            Žemyn
-                        </button>
-                        <button class="btn btn-outline-primary" @onclick="SendMoveLeft">
-                            Kairėn
-                        </button>
-                        <button class="btn btn-outline-primary" @onclick="SendMoveRight">
-                            Dešinėn
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Žaidimo istorija -->
-                <div class="mt-3">
-                    <h6>Žaidimo istorija</h6>
-                    <div class="border p-2" style="height: 200px; overflow-y: scroll;">
-                        @foreach (var message in gameMessages)
-                        {
-                            <div class="small">@message</div>
-                        }
-                    </div>
+                    <h6>Fill in your answers for the game</h6>
+                    <NewGame @ref="newGameFormRef" />
                 </div>
             }
 
@@ -116,7 +91,7 @@ else
         if (UserService.IsAuthenticated)
         {
             isConnecting = true;
-            statusMessage = "Jungiamasi prie serverio...";
+            statusMessage = "Connectting to server...";
         }
     }
 
@@ -151,11 +126,11 @@ else
                 if (connected)
                 {
                     await JSRuntime.InvokeVoidAsync("joinGame", UserService.CurrentUser);
-                    statusMessage = "Prisijungta prie serverio!";
+                    statusMessage = "Connected to server!";
                 }
                 else
                 {
-                    statusMessage = "Error: Nepavyko prisijungti prie serverio";
+                    statusMessage = "Error: Unable to connect to server";
                 }
             
                 isConnecting = false;
@@ -173,7 +148,7 @@ else
     private async Task CreateRoom()
     {
         isConnecting = true;
-        statusMessage = "Kuriamas kambarys...";
+        statusMessage = "Creating room...";
         StateHasChanged();
         
         await JSRuntime.InvokeVoidAsync("createRoom", UserService.CurrentUser);
@@ -182,7 +157,7 @@ else
     private async Task JoinRoom()
     {
         isConnecting = true;
-        statusMessage = $"Jungiamasi prie kambario {roomCodeToJoin}...";
+        statusMessage = $"Connecting to a room {roomCodeToJoin}...";
         StateHasChanged();
         
         await JSRuntime.InvokeVoidAsync("joinRoom", roomCodeToJoin, UserService.CurrentUser);
@@ -194,12 +169,6 @@ else
         gameMessages.Add($"{DateTime.Now:HH:mm:ss} - Jūs: {action} {data}");
         StateHasChanged();
     }
-
-    // Papildomi metodai mygtuakams
-    private async Task SendMoveUp() => await SendGameAction("move", "up");
-    private async Task SendMoveDown() => await SendGameAction("move", "down");
-    private async Task SendMoveLeft() => await SendGameAction("move", "left");
-    private async Task SendMoveRight() => await SendGameAction("move", "right");
 
     // JavaScript callback'ai
     [JSInvokable]
@@ -213,7 +182,7 @@ else
     public async Task OnRoomCreated(string roomCode)
     {
         currentRoomCode = roomCode;
-        statusMessage = $"Kambarys sukurtas! Kodas: {roomCode}";
+        statusMessage = $"Room created! Code: {roomCode}";
         playersInRoom.Clear();
         playersInRoom.Add(UserService.CurrentUser ?? "");
         isConnecting = false;
@@ -224,7 +193,7 @@ else
     public async Task OnJoinedRoom(string roomInfoJson)
     {
         currentRoomCode = roomCodeToJoin;
-        statusMessage = "Sėkmingai prisijungta prie kambario!";
+        statusMessage = "Successfully connected to a room!";
         isConnecting = false;
         await InvokeAsync(StateHasChanged);
     }
@@ -244,7 +213,7 @@ else
         {
             playersInRoom.Add(username);
         }
-        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username} prisijungė prie kambario");
+        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username} connected to room");
         await InvokeAsync(StateHasChanged);
     }
 
@@ -252,7 +221,7 @@ else
     public async Task OnPlayerLeft(string username)
     {
         playersInRoom.Remove(username);
-        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username} paliko kambarį");
+        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username} left the room");
         await InvokeAsync(StateHasChanged);
     }
 
@@ -274,4 +243,13 @@ else
             objectReference.Dispose();
         }
     }
+    
+    private NewGame newGameFormRef;
+
+    private void SaveUserAnswers()
+    {
+        newGameFormRef?.SaveAnswers();
+        statusMessage = "Your answers have been saved!";
+    }
+    
 }

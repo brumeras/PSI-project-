@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Registruojam servisus
 builder.Services.AddSingleton<UserService>();
-builder.Services.AddSingleton<GameService>();
+//builder.Services.AddSingleton<GameService>();
 builder.Services.AddSingleton<GameRoomService>();
 
 builder.Services.AddRazorComponents()

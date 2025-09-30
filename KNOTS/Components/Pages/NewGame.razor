@@ -1,4 +1,4 @@
-﻿@page "/newgame"
+﻿
 @inject KNOTS.Services.UserService UserService
 @using System.IO
 @rendermode InteractiveServer
@@ -69,7 +69,7 @@ else
         }
     }
 
-    private void SaveAnswers()
+    public void SaveAnswers()
     {
         if (string.IsNullOrWhiteSpace(PlayerName))
         {
