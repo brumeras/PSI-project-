@@ -33,3 +33,5 @@ app.MapRazorComponents<App>()
 app.MapHub<GameHub>("/gamehub");
 
 app.Run();
+
+//TESTAS
