@@ -91,7 +91,7 @@ namespace KNOTS.Services
                 return new JoinRoomResult 
                 { 
                     Success = false, 
-                    Message = "Kambarys nerastas" 
+                    Message = "Room not found" 
                 };
             }
 
@@ -100,7 +100,7 @@ namespace KNOTS.Services
                 return new JoinRoomResult 
                 { 
                     Success = false, 
-                    Message = "Kambarys pilnas" 
+                    Message = "Room is full" 
                 };
             }
 
@@ -109,7 +109,7 @@ namespace KNOTS.Services
                 return new JoinRoomResult 
                 { 
                     Success = false, 
-                    Message = "Žaidimas jau prasidėjęs" 
+                    Message = "Game has already started" 
                 };
             }
 
@@ -119,7 +119,7 @@ namespace KNOTS.Services
                 return new JoinRoomResult 
                 { 
                     Success = false, 
-                    Message = "Žaidėjas su tokiu vardu jau kambaryje" 
+                    Message = "A player with this username is already in game" 
                 };
             }
 
@@ -137,7 +137,7 @@ namespace KNOTS.Services
             return new JoinRoomResult 
             { 
                 Success = true, 
-                Message = "Sėkmingai prisijungta prie kambario" 
+                Message = "Successfully connected to a room!" 
             };
         }
 

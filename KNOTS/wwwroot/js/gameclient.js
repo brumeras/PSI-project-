@@ -58,7 +58,7 @@ function setupEventListeners() {
         console.log("Joined room:", roomInfo);
 
         if (window.blazorGameComponent) {
-            window.blazorGameComponent.invokeMethodAsync('OnJoinedRoom', roomInfo);
+            window.blazorGameComponent.invokeMethodAsync('OnJoinedRoom', JSON.stringify(roomInfo));
         }
     });
 

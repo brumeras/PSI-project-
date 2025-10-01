@@ -5,7 +5,8 @@ using KNOTS.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Registruojam servisus
-builder.Services.AddSingleton<UserService>();
+builder.Services.AddScoped<UserService>();
+
 //builder.Services.AddSingleton<GameService>();
 builder.Services.AddSingleton<GameRoomService>();
 

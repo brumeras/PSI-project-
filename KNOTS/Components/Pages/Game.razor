@@ -1,4 +1,5 @@
 ﻿@page "/game"
+@using System.Text.Json
 @using Microsoft.JSInterop
 @using KNOTS.Services
 @inject IJSRuntime JSRuntime
@@ -192,11 +193,15 @@ else
     [JSInvokable]
     public async Task OnJoinedRoom(string roomInfoJson)
     {
-        currentRoomCode = roomCodeToJoin;
+        var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson);
+        currentRoomCode = roomInfo?.RoomCode ?? "";
+        playersInRoom = roomInfo?.Players ?? new List<string>();
+    
         statusMessage = "Successfully connected to a room!";
         isConnecting = false;
         await InvokeAsync(StateHasChanged);
     }
+
 
     [JSInvokable]
     public async Task OnJoinRoomFailed(string message)
@@ -251,5 +256,10 @@ else
         newGameFormRef?.SaveAnswers();
         statusMessage = "Your answers have been saved!";
     }
-    
+    public class RoomInfo
+    {
+        public string RoomCode { get; set; } = "";
+        public List<string> Players { get; set; } = new();
+    }
+
 }
