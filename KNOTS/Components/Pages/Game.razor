@@ -162,6 +162,7 @@ else
         StateHasChanged();
         
         await JSRuntime.InvokeVoidAsync("joinRoom", roomCodeToJoin, UserService.CurrentUser);
+        
     }
 
     private async Task SendGameAction(string action, string data)
@@ -199,7 +200,11 @@ else
     
         statusMessage = "Successfully connected to a room!";
         isConnecting = false;
-        await InvokeAsync(StateHasChanged);
+        if (!string.IsNullOrEmpty(currentRoomCode))
+        {
+            // The InvokeAsync wrapper is critical for Blazor Server.
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
 

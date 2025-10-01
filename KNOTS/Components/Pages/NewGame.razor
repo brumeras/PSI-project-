@@ -101,4 +101,10 @@ else
             statusMessage = $"Error saving answers: {ex.Message}";
         }
     }
+    public void SetPlayerName(string playerName)
+    {
+        PlayerName = playerName;
+        StateHasChanged();
+    }
+
 }
