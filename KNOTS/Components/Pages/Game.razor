@@ -193,12 +193,20 @@ else
     [JSInvokable]
     public async Task OnJoinedRoom(string roomInfoJson)
     {
-        var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson);
+        Console.WriteLine($"OnJoinedRoom called with: {roomInfoJson}"); // DEBUG
+    
+        var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson, new JsonSerializerOptions 
+        { 
+            PropertyNameCaseInsensitive = true 
+        });
+    
         currentRoomCode = roomInfo?.RoomCode ?? "";
         playersInRoom = roomInfo?.Players ?? new List<string>();
+        roomCodeToJoin = ""; // Clear the input field
     
         statusMessage = "Successfully connected to a room!";
         isConnecting = false;
+    
         await InvokeAsync(StateHasChanged);
     }
 
