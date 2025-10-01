@@ -9,8 +9,8 @@ function setBlazorGameComponent(component) {
     window.blazorGameComponent = component;
     console.log("Blazor game component set");
 }
-// Inicializuoja SignalR ryšį
 
+// Inicializuoja SignalR ryšį
 async function initializeGameConnection() {
     try {
         gameConnection = new signalR.HubConnectionBuilder()
@@ -54,11 +54,20 @@ function setupEventListeners() {
 
     // Sėkmingai prisijungta prie kambario
     gameConnection.on("JoinedRoom", function (roomInfo) {
-        currentRoom = roomInfo.roomCode;
-        console.log("Joined room:", roomInfo);
+        currentRoom = roomInfo.roomCode || roomInfo.RoomCode;
+        console.log("Joined room - Raw data:", roomInfo);
+        console.log("Room code:", currentRoom);
+        console.log("Players:", roomInfo.players || roomInfo.Players);
 
         if (window.blazorGameComponent) {
-            window.blazorGameComponent.invokeMethodAsync('OnJoinedRoom', JSON.stringify(roomInfo));
+            // Ensure property names match C# class (PascalCase)
+            const normalizedRoomInfo = {
+                RoomCode: roomInfo.roomCode || roomInfo.RoomCode || "",
+                Players: roomInfo.players || roomInfo.Players || []
+            };
+
+            console.log("Sending to Blazor:", normalizedRoomInfo);
+            window.blazorGameComponent.invokeMethodAsync('OnJoinedRoom', JSON.stringify(normalizedRoomInfo));
         }
     });
 
@@ -160,5 +169,17 @@ async function sendGameAction(action, data) {
     } catch (err) {
         console.error("Error sending game action:", err);
         return false;
+    }
+}
+
+// Atsijungti nuo žaidimo
+async function disconnectFromGame() {
+    if (gameConnection) {
+        try {
+            await gameConnection.stop();
+            console.log("Disconnected from game");
+        } catch (err) {
+            console.error("Error disconnecting:", err);
+        }
     }
 }

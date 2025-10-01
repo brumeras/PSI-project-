@@ -1,4 +1,4 @@
-﻿﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using KNOTS.Services;
 
 namespace KNOTS.Hubs
@@ -31,8 +31,8 @@ namespace KNOTS.Hubs
             var connectionId = Context.ConnectionId;
             var roomCode = _gameRoomService.CreateRoom(connectionId, username);
             
-            // Prisijungiam prie šio kambario grupės
-            await Groups.AddToGroupAsync(connectionId, $"Room_{roomCode}");
+            // Prisijungiam prie šio kambario grupės (BE "Room_" prefix!)
+            await Groups.AddToGroupAsync(connectionId, roomCode);
             
             // Pranešame žaidėjui apie sėkmingą kambario sukūrimą
             await Clients.Caller.SendAsync("RoomCreated", roomCode);
@@ -46,15 +46,30 @@ namespace KNOTS.Hubs
             
             if (result.Success)
             {
-                // Prisijungiam prie kambario grupės
-                await Groups.AddToGroupAsync(connectionId, $"Room_{roomCode}");
+                // Prisijungiam prie kambario grupės (BE "Room_" prefix!)
+                await Groups.AddToGroupAsync(connectionId, roomCode);
                 
-                // Pranešame visiems kambaryje apie naują žaidėją
-                await Clients.Group($"Room_{roomCode}").SendAsync("PlayerJoinedRoom", username);
-                
-                // Siunčiam žaidėjui kambario informaciją
+                // Gauname kambario informaciją
                 var roomInfo = _gameRoomService.GetRoomInfo(roomCode);
-                await Clients.Caller.SendAsync("JoinedRoom", roomInfo);
+                
+                if (roomInfo != null)
+                {
+                    // Siunčiam žaidėjui supaprastintą kambario informaciją
+                    var roomData = new
+                    {
+                        RoomCode = roomInfo.RoomCode,
+                        Players = roomInfo.Players.Select(p => p.Username).ToList()
+                    };
+                    
+                    await Clients.Caller.SendAsync("JoinedRoom", roomData);
+                    
+                    // Pranešame KITIEMS kambaryje apie naują žaidėją (ne caller'iui)
+                    await Clients.OthersInGroup(roomCode).SendAsync("PlayerJoinedRoom", username);
+                }
+                else
+                {
+                    await Clients.Caller.SendAsync("JoinRoomFailed", "Room information not found");
+                }
             }
             else
             {
@@ -69,7 +84,7 @@ namespace KNOTS.Hubs
             var username = _gameRoomService.GetPlayerUsername(connectionId);
             
             // Persiųsti veiksmą visiems kambaryje esantiems žaidėjams
-            await Clients.Group($"Room_{roomCode}").SendAsync("GameAction", username, action, data);
+            await Clients.Group(roomCode).SendAsync("GameAction", username, action, data);
         }
 
         // Atsijungimo valdymas
@@ -80,7 +95,7 @@ namespace KNOTS.Hubs
             
             if (!string.IsNullOrEmpty(disconnectedInfo.RoomCode))
             {
-                await Clients.Group($"Room_{disconnectedInfo.RoomCode}")
+                await Clients.Group(disconnectedInfo.RoomCode)
                     .SendAsync("PlayerLeft", disconnectedInfo.Username);
             }
             
@@ -88,4 +103,3 @@ namespace KNOTS.Hubs
         }
     }
 }
- 
