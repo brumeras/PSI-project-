@@ -1,6 +1,5 @@
 ﻿console.log("gameclient.js loaded!");
 
-// Globalus SignalR connection objektas
 let gameConnection = null;
 let currentPlayerId = null;
 let currentRoom = null;

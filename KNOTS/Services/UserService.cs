@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -45,8 +45,8 @@ namespace KNOTS.Services
                 _users = new List<User>();
             }
         }
-
-        // Save users to file
+        
+        
         private void SaveUsers()
         {
             try
@@ -101,7 +101,7 @@ namespace KNOTS.Services
             return (true, "Registration successful! You can now log in.");
         }
 
-        // Login user
+       
         public (bool Success, string Message) LoginUser(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
@@ -123,14 +123,14 @@ namespace KNOTS.Services
             return (false, "Invalid username or password.");
         }
 
-        // Logout user
+        
         public void LogoutUser()
         {
             CurrentUser = null;
             OnAuthenticationChanged?.Invoke();
         }
 
-        // Add friend
+        
         public (bool Success, string Message) AddFriend(string friendUsername)
         {
             if (!IsAuthenticated)
@@ -147,8 +147,8 @@ namespace KNOTS.Services
             {
                 return (false, "You cannot add yourself as a friend.");
             }
-
-            // Check if friend exists
+            
+            
             var friendExists = _users.Any(u => u.Username.Equals(friendUsername, StringComparison.OrdinalIgnoreCase));
             if (!friendExists)
             {
