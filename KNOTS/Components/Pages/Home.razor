@@ -10,7 +10,7 @@
 {
     <h2>Welcome, @UserService.CurrentUser!</h2>
     <button class="btn btn-secondary mb-3" @onclick="Logout">Logout</button>
-
+    
     <h4>Your Friends</h4>
     <ul>
         @foreach (var friend in UserService.GetUserFriends())
@@ -18,21 +18,26 @@
             <li>@friend</li>
         }
     </ul>
-
     
-    <p>@friendMessage</p>
-
+    @if (!string.IsNullOrEmpty(friendMessage))
+    {
+        <p class="@(friendMessage.Contains("success") ? "text-success" : "text-danger")">@friendMessage</p>
+    }
+    
     <hr />
-
+    
     <h3>Join a new game now!</h3>
     <p>You will be connected to an interactive server, where you can find your match based on your answers!</p>
     
-    <!-- Pridėta nuoroda į žaidimo puslapį -->
+    <!-- Pass username as query parameter -->
     <div class="d-flex gap-2 mb-3">
-        <a href="/game" class="btn btn-success">Connect to game</a>
+        <a href="@GetGameUrl()" class="btn btn-success">Connect to game</a>
     </div>
     
-    <p>@statusMessage</p>
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <p class="text-info">@statusMessage</p>
+    }
 }
 else
 {
@@ -45,13 +50,20 @@ else
     private string friendToAdd = "";
     private string friendMessage = "";
     
+    private string GetGameUrl()
+    {
+        // Pass username as query parameter to preserve it across page loads
+        var username = Uri.EscapeDataString(UserService.CurrentUser ?? "");
+        return $"/game?user={username}";
+    }
+    
     private void AddFriend()
     {
         var result = UserService.AddFriend(friendToAdd);
         friendMessage = result.Message;
         friendToAdd = "";
     }
-
+    
     private void Logout()
     {
         UserService.LogoutUser();

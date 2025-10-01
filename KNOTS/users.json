@@ -1,0 +1,26 @@
+[
+  {
+    "Username": "rokaskancius",
+    "Password": "rokaskancius",
+    "CreatedAt": "2025-10-01T15:12:09.6940485+03:00",
+    "Friends": []
+  },
+  {
+    "Username": "rokas1",
+    "Password": "rokas1",
+    "CreatedAt": "2025-10-01T15:30:17.2129309+03:00",
+    "Friends": []
+  },
+  {
+    "Username": "rokas",
+    "Password": "rokas",
+    "CreatedAt": "2025-10-01T15:49:40.9354891+03:00",
+    "Friends": []
+  },
+  {
+    "Username": "rokas2",
+    "Password": "rokas2",
+    "CreatedAt": "2025-10-01T21:04:52.3003614+03:00",
+    "Friends": []
+  }
+]

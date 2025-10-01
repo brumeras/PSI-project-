@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 
 namespace KNOTS.Services
 {
@@ -13,22 +15,18 @@ namespace KNOTS.Services
         public List<string> Friends { get; set; } = new List<string>();
     }
 
-    public class UserService
+    // Shared user data storage (singleton)
+    public class UserDataStore
     {
         private readonly string _filePath = "users.json";
         private List<User> _users = new List<User>();
+        private readonly object _lock = new object();
 
-        public UserService()
+        public UserDataStore()
         {
             LoadUsers();
         }
 
-        public event Action? OnAuthenticationChanged;
-
-        public string? CurrentUser { get; private set; }
-        public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUser);
-
-        // Load users from file
         private void LoadUsers()
         {
             try
@@ -46,7 +44,6 @@ namespace KNOTS.Services
             }
         }
 
-        // Save users to file
         private void SaveUsers()
         {
             try
@@ -63,45 +60,195 @@ namespace KNOTS.Services
             }
         }
 
-        // Register new user
         public (bool Success, string Message) RegisterUser(string username, string password)
         {
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            lock (_lock)
             {
-                return (false, "Username and password cannot be empty.");
+                if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                {
+                    return (false, "Username and password cannot be empty.");
+                }
+
+                if (username.Length < 3)
+                {
+                    return (false, "Username must be at least 3 characters long.");
+                }
+
+                if (password.Length < 4)
+                {
+                    return (false, "Password must be at least 4 characters long.");
+                }
+
+                if (_users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return (false, "This username is already taken.");
+                }
+
+                var newUser = new User
+                {
+                    Username = username,
+                    Password = password,
+                    CreatedAt = DateTime.Now
+                };
+
+                _users.Add(newUser);
+                SaveUsers();
+
+                return (true, "Registration successful! You can now log in.");
             }
-
-            if (username.Length < 3)
-            {
-                return (false, "Username must be at least 3 characters long.");
-            }
-
-            if (password.Length < 4)
-            {
-                return (false, "Password must be at least 4 characters long.");
-            }
-
-            // Check if username is already taken
-            if (_users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
-            {
-                return (false, "This username is already taken.");
-            }
-
-            // Create new user
-            var newUser = new User
-            {
-                Username = username,
-                Password = password, // In real project, password should be hashed
-                CreatedAt = DateTime.Now
-            };
-
-            _users.Add(newUser);
-            SaveUsers();
-
-            return (true, "Registration successful! You can now log in.");
         }
 
-        // Login user
+        public User? ValidateUser(string username, string password)
+        {
+            lock (_lock)
+            {
+                return _users.FirstOrDefault(u =>
+                    u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) &&
+                    u.Password == password);
+            }
+        }
+
+        public bool UserExists(string username)
+        {
+            lock (_lock)
+            {
+                return _users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        public (bool Success, string Message) AddFriend(string username, string friendUsername)
+        {
+            lock (_lock)
+            {
+                if (friendUsername.Equals(username, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (false, "You cannot add yourself as a friend.");
+                }
+
+                if (!_users.Any(u => u.Username.Equals(friendUsername, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return (false, "User with this username does not exist.");
+                }
+
+                var currentUserData = _users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+                if (currentUserData != null)
+                {
+                    if (currentUserData.Friends.Any(f => f.Equals(friendUsername, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        return (false, "This user is already in your friends list.");
+                    }
+
+                    currentUserData.Friends.Add(friendUsername);
+                    SaveUsers();
+                    return (true, $"Friend {friendUsername} added successfully!");
+                }
+
+                return (false, "Error adding friend.");
+            }
+        }
+
+        public (bool Success, string Message) RemoveFriend(string username, string friendUsername)
+        {
+            lock (_lock)
+            {
+                var currentUserData = _users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+                if (currentUserData != null)
+                {
+                    var removed = currentUserData.Friends.RemoveAll(f => f.Equals(friendUsername, StringComparison.OrdinalIgnoreCase));
+                    if (removed > 0)
+                    {
+                        SaveUsers();
+                        return (true, $"Friend {friendUsername} removed successfully!");
+                    }
+                    return (false, "Friend not found in your friends list.");
+                }
+
+                return (false, "Error removing friend.");
+            }
+        }
+
+        public List<string> GetUserFriends(string username)
+        {
+            lock (_lock)
+            {
+                var user = _users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+                return user?.Friends ?? new List<string>();
+            }
+        }
+
+        public int GetTotalUsersCount()
+        {
+            lock (_lock)
+            {
+                return _users.Count;
+            }
+        }
+    }
+
+    // Circuit handler that stores username in the circuit itself
+    public class AuthenticationCircuitHandler : CircuitHandler
+    {
+        private static readonly ConcurrentDictionary<string, string> _circuitUsers = new();
+
+        public string? CircuitId { get; private set; }
+
+        public string? Username
+        {
+            get => CircuitId != null && _circuitUsers.TryGetValue(CircuitId, out var user) ? user : null;
+            set
+            {
+                if (CircuitId != null)
+                {
+                    if (value != null)
+                    {
+                        _circuitUsers[CircuitId] = value;
+                    }
+                    else
+                    {
+                        _circuitUsers.TryRemove(CircuitId, out _);
+                    }
+                }
+            }
+        }
+
+        public override Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
+        {
+            CircuitId = circuit.Id;
+            Console.WriteLine($"Circuit opened: {circuit.Id}");
+            return base.OnCircuitOpenedAsync(circuit, cancellationToken);
+        }
+
+        public override Task OnCircuitClosedAsync(Circuit circuit, CancellationToken cancellationToken)
+        {
+            _circuitUsers.TryRemove(circuit.Id, out var username);
+            Console.WriteLine($"Circuit closed: {circuit.Id}, User: {username}");
+            return base.OnCircuitClosedAsync(circuit, cancellationToken);
+        }
+    }
+
+    // User service - SCOPED (one per circuit)
+    public class UserService
+    {
+        private readonly UserDataStore _userDataStore;
+        private readonly AuthenticationCircuitHandler _circuitHandler;
+
+        public UserService(UserDataStore userDataStore, AuthenticationCircuitHandler circuitHandler)
+        {
+            _userDataStore = userDataStore;
+            _circuitHandler = circuitHandler;
+        }
+
+        public event Action? OnAuthenticationChanged;
+
+        public string? CurrentUser => _circuitHandler.Username;
+
+        public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUser);
+
+        public (bool Success, string Message) RegisterUser(string username, string password)
+        {
+            return _userDataStore.RegisterUser(username, password);
+        }
+
         public (bool Success, string Message) LoginUser(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
@@ -109,31 +256,30 @@ namespace KNOTS.Services
                 return (false, "Username and password cannot be empty.");
             }
 
-            var user = _users.FirstOrDefault(u =>
-                u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) &&
-                u.Password == password);
+            var user = _userDataStore.ValidateUser(username, password);
 
             if (user != null)
             {
-                CurrentUser = user.Username;
+                _circuitHandler.Username = user.Username;
                 OnAuthenticationChanged?.Invoke();
+                Console.WriteLine($"User {user.Username} logged in on circuit {_circuitHandler.CircuitId}");
                 return (true, "Login successful!");
             }
 
             return (false, "Invalid username or password.");
         }
 
-        // Logout user
         public void LogoutUser()
         {
-            CurrentUser = null;
+            var username = CurrentUser;
+            _circuitHandler.Username = null;
+            Console.WriteLine($"User {username} logged out from circuit {_circuitHandler.CircuitId}");
             OnAuthenticationChanged?.Invoke();
         }
 
-        // Add friend
         public (bool Success, string Message) AddFriend(string friendUsername)
         {
-            if (!IsAuthenticated)
+            if (!IsAuthenticated || CurrentUser == null)
             {
                 return (false, "You must be logged in.");
             }
@@ -143,49 +289,35 @@ namespace KNOTS.Services
                 return (false, "Friend username cannot be empty.");
             }
 
-            if (friendUsername.Equals(CurrentUser, StringComparison.OrdinalIgnoreCase))
-            {
-                return (false, "You cannot add yourself as a friend.");
-            }
-
-            // Check if friend exists
-            var friendExists = _users.Any(u => u.Username.Equals(friendUsername, StringComparison.OrdinalIgnoreCase));
-            if (!friendExists)
-            {
-                return (false, "User with this username does not exist.");
-            }
-
-            var currentUserData = _users.FirstOrDefault(u => u.Username.Equals(CurrentUser, StringComparison.OrdinalIgnoreCase));
-            if (currentUserData != null)
-            {
-                // Check if already a friend
-                if (currentUserData.Friends.Any(f => f.Equals(friendUsername, StringComparison.OrdinalIgnoreCase)))
-                {
-                    return (false, "This user is already in your friends list.");
-                }
-
-                currentUserData.Friends.Add(friendUsername);
-                SaveUsers();
-                return (true, $"Friend {friendUsername} added successfully!");
-            }
-
-            return (false, "Error adding friend.");
+            return _userDataStore.AddFriend(CurrentUser, friendUsername);
         }
 
-        // Get user's friends
+        public (bool Success, string Message) RemoveFriend(string friendUsername)
+        {
+            if (!IsAuthenticated || CurrentUser == null)
+            {
+                return (false, "You must be logged in.");
+            }
+
+            return _userDataStore.RemoveFriend(CurrentUser, friendUsername);
+        }
+
         public List<string> GetUserFriends()
         {
-            if (!IsAuthenticated)
+            if (!IsAuthenticated || CurrentUser == null)
                 return new List<string>();
 
-            var currentUserData = _users.FirstOrDefault(u => u.Username.Equals(CurrentUser, StringComparison.OrdinalIgnoreCase));
-            return currentUserData?.Friends ?? new List<string>();
+            return _userDataStore.GetUserFriends(CurrentUser);
         }
 
-        // Get total users count (statistics)
         public int GetTotalUsersCount()
         {
-            return _users.Count;
+            return _userDataStore.GetTotalUsersCount();
+        }
+
+        public bool UserExists(string username)
+        {
+            return _userDataStore.UserExists(username);
         }
     }
 }

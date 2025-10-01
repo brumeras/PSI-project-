@@ -47,6 +47,10 @@ else
 }
 
 @code {
+    // ADD THIS PARAMETER
+    [Parameter]
+    public string Username { get; set; } = "";
+    
     private string PlayerName { get; set; } = "";
     private string[] Answers;
 
@@ -66,7 +70,12 @@ else
     {
         Answers = new string[Questions.Length];
 
-        if (UserService.IsAuthenticated)
+        // UPDATED: Use Username parameter if provided, otherwise use UserService
+        if (!string.IsNullOrEmpty(Username))
+        {
+            PlayerName = Username;
+        }
+        else if (UserService.IsAuthenticated)
         {
             PlayerName = UserService.CurrentUser;
         }

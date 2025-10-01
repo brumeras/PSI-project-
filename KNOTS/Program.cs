@@ -1,13 +1,19 @@
 using KNOTS.Components;
 using KNOTS.Services;
 using KNOTS.Hubs;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registruojam servisus
-builder.Services.AddSingleton<UserService>();
+// Register UserDataStore as Singleton (shared data file)
+builder.Services.AddSingleton<UserDataStore>();
 
-//builder.Services.AddSingleton<GameService>();
+// Register CircuitHandler and UserService as SCOPED (one per browser tab/circuit)
+builder.Services.AddScoped<AuthenticationCircuitHandler>();
+builder.Services.AddScoped<CircuitHandler>(sp => sp.GetRequiredService<AuthenticationCircuitHandler>());
+builder.Services.AddScoped<UserService>();
+
+// Register GameRoomService as SINGLETON
 builder.Services.AddSingleton<GameRoomService>();
 
 builder.Services.AddRazorComponents()
@@ -23,16 +29,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-//app.UseHttpsRedirection();
-
+app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.UseStaticFiles();
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapHub<GameHub>("/gamehub");
 
 app.Run();
-
-//TESTAS

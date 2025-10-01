@@ -7,23 +7,21 @@
 @implements IAsyncDisposable
 @rendermode InteractiveServer
 
-<!-- PAKEISTI Į ABSOLIUTŲ KELIĄ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
-<script src="/js/gameclient.js"></script>
-
 <h3>You are now connected!</h3>
 
-@if (!UserService.IsAuthenticated)
+@if (string.IsNullOrEmpty(currentUsername))
 {
     <div class="alert alert-warning">
         In order to connect to a game, you have to login.
+        <br/>
+        <a href="/" class="btn btn-primary mt-2">Go to Login</a>
     </div>
 }
 else
 {
     <div class="card">
         <div class="card-header">
-            <h5>Hello, @UserService.CurrentUser!</h5>
+            <h5>Hello, @currentUsername</h5>
             @if (!string.IsNullOrEmpty(playerId))
             {
                 <small class="text-muted">Your unique game ID: @playerId</small>
@@ -32,7 +30,7 @@ else
         <div class="card-body">
             @if (string.IsNullOrEmpty(currentRoomCode))
             {
-                <!-- Kambario sukūrimas/prisijungimas -->
+                <!-- Room creation/joining -->
                 <div class="row">
                     <div class="col-md-6">
                         <h6>Create a new game room</h6>
@@ -54,19 +52,37 @@ else
             }
             else
             {
-                <!-- Esame kambaryje -->
+                <!-- In a room -->
                 <div class="alert alert-success">
                     <h6>You are currently in room: @currentRoomCode</h6>
-                    <p>Other connected players: @string.Join(", ", playersInRoom)</p>
+                    <p>Connected players: @string.Join(", ", playersInRoom)</p>
                 </div>
 
                 <div class="mt-3">
                     <h6>Fill in your answers for the game</h6>
-                    <NewGame @ref="newGameFormRef" />
+                    <NewGame @ref="newGameFormRef" Username="@currentUsername" />
+                    
+                    <button class="btn btn-primary mt-3" @onclick="SaveUserAnswers">
+                        Save and Submit Answers
+                    </button>
                 </div>
+                
+                <!-- Game Messages -->
+                @if (gameMessages.Any())
+                {
+                    <div class="mt-3">
+                        <h6>Game Activity</h6>
+                        <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                            @foreach (var message in gameMessages.TakeLast(10))
+                            {
+                                <div class="small">@message</div>
+                            }
+                        </div>
+                    </div>
+                }
             }
 
-            <!-- Statusas -->
+            <!-- Status -->
             @if (!string.IsNullOrEmpty(statusMessage))
             {
                 <div class="alert @(statusMessage.Contains("Error") ? "alert-danger" : "alert-info") mt-3">
@@ -78,6 +94,10 @@ else
 }
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "user")]
+    public string? UsernameParam { get; set; }
+    
     private DotNetObjectReference<Game>? objectReference;
     private string playerId = "";
     private string currentRoomCode = "";
@@ -86,39 +106,27 @@ else
     private bool isConnecting = false;
     private List<string> playersInRoom = new();
     private List<string> gameMessages = new();
+    private string currentUsername = "";
+    private NewGame? newGameFormRef;
 
     protected override void OnInitialized()
     {
-        if (UserService.IsAuthenticated)
+        currentUsername = UsernameParam ?? UserService.CurrentUser ?? "";
+        
+        if (!string.IsNullOrEmpty(currentUsername))
         {
             isConnecting = true;
-            statusMessage = "Connectting to server...";
+            statusMessage = "Connecting to server...";
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && UserService.IsAuthenticated)
+        if (firstRender && !string.IsNullOrEmpty(currentUsername))
         {
             try
             {
-                // Dinamiškai įkrauti script'us
-                await JSRuntime.InvokeVoidAsync("eval", @"
-                if (!window.signalRLoaded) {
-                    var script1 = document.createElement('script');
-                    script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js';
-                    document.head.appendChild(script1);
-                    
-                    var script2 = document.createElement('script');
-                    script2.src = '/js/gameclient.js';
-                    document.head.appendChild(script2);
-                    
-                    window.signalRLoaded = true;
-                }
-            ");
-
-                // Palaukite truputį, kad script'ai įsikrautų
-                await Task.Delay(1000);
+                await Task.Delay(500);
 
                 objectReference = DotNetObjectReference.Create(this);
                 await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", objectReference);
@@ -126,7 +134,7 @@ else
                 var connected = await JSRuntime.InvokeAsync<bool>("initializeGameConnection");
                 if (connected)
                 {
-                    await JSRuntime.InvokeVoidAsync("joinGame", UserService.CurrentUser);
+                    await JSRuntime.InvokeVoidAsync("joinGame", currentUsername);
                     statusMessage = "Connected to server!";
                 }
                 else
@@ -152,26 +160,40 @@ else
         statusMessage = "Creating room...";
         StateHasChanged();
         
-        await JSRuntime.InvokeVoidAsync("createRoom", UserService.CurrentUser);
+        await JSRuntime.InvokeVoidAsync("createRoom", currentUsername);
     }
 
     private async Task JoinRoom()
     {
         isConnecting = true;
-        statusMessage = $"Connecting to a room {roomCodeToJoin}...";
+        statusMessage = $"Connecting to room {roomCodeToJoin}...";
         StateHasChanged();
         
-        await JSRuntime.InvokeVoidAsync("joinRoom", roomCodeToJoin, UserService.CurrentUser);
+        await JSRuntime.InvokeVoidAsync("joinRoom", roomCodeToJoin, currentUsername);
     }
 
     private async Task SendGameAction(string action, string data)
     {
         await JSRuntime.InvokeVoidAsync("sendGameAction", action, data);
-        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - Jūs: {action} {data}");
+        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - You: {action}");
         StateHasChanged();
     }
 
-    // JavaScript callback'ai
+    private void SaveUserAnswers()
+    {
+        if (newGameFormRef != null)
+        {
+            newGameFormRef.SaveAnswers();
+            statusMessage = "Your answers have been saved!";
+            StateHasChanged();
+        }
+        else
+        {
+            statusMessage = "Error: Form not initialized";
+        }
+    }
+
+    // JavaScript callbacks - FIXED METHOD NAME
     [JSInvokable]
     public async Task OnPlayerIdAssigned(string id)
     {
@@ -185,7 +207,7 @@ else
         currentRoomCode = roomCode;
         statusMessage = $"Room created! Code: {roomCode}";
         playersInRoom.Clear();
-        playersInRoom.Add(UserService.CurrentUser ?? "");
+        playersInRoom.Add(currentUsername);
         isConnecting = false;
         await InvokeAsync(StateHasChanged);
     }
@@ -193,23 +215,23 @@ else
     [JSInvokable]
     public async Task OnJoinedRoom(string roomInfoJson)
     {
-        Console.WriteLine($"OnJoinedRoom called with: {roomInfoJson}"); // DEBUG
+        try
+        {
+            var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson);
+            currentRoomCode = roomInfo?.RoomCode ?? "";
+            playersInRoom = roomInfo?.Players ?? new List<string>();
     
-        var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson, new JsonSerializerOptions 
-        { 
-            PropertyNameCaseInsensitive = true 
-        });
-    
-        currentRoomCode = roomInfo?.RoomCode ?? "";
-        playersInRoom = roomInfo?.Players ?? new List<string>();
-        roomCodeToJoin = ""; // Clear the input field
-    
-        statusMessage = "Successfully connected to a room!";
-        isConnecting = false;
-    
-        await InvokeAsync(StateHasChanged);
+            statusMessage = "Successfully connected to room!";
+            isConnecting = false;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error parsing room info: {ex.Message}";
+            isConnecting = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
-
 
     [JSInvokable]
     public async Task OnJoinRoomFailed(string message)
@@ -241,9 +263,9 @@ else
     [JSInvokable]
     public async Task OnGameAction(string username, string action, string data)
     {
-        if (username != UserService.CurrentUser)
+        if (username != currentUsername)
         {
-            gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username}: {action} {data}");
+            gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username}: {action}");
             await InvokeAsync(StateHasChanged);
         }
     }
@@ -252,22 +274,19 @@ else
     {
         if (objectReference != null)
         {
-            await JSRuntime.InvokeVoidAsync("disconnectFromGame");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("disconnectFromGame");
+            }
+            catch { /* Ignore errors during disposal */ }
+            
             objectReference.Dispose();
         }
     }
     
-    private NewGame newGameFormRef;
-
-    private void SaveUserAnswers()
-    {
-        newGameFormRef?.SaveAnswers();
-        statusMessage = "Your answers have been saved!";
-    }
     public class RoomInfo
     {
         public string RoomCode { get; set; } = "";
         public List<string> Players { get; set; } = new();
     }
-
 }
