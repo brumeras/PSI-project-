@@ -10,5 +10,17 @@
     "Password": "labas",
     "CreatedAt": "2025-10-02T15:29:20.0362584+03:00",
     "Friends": []
+  },
+  {
+    "Username": "rokas1",
+    "Password": "rokas1",
+    "CreatedAt": "2025-10-02T16:53:48.1382019+03:00",
+    "Friends": []
+  },
+  {
+    "Username": "rokas2",
+    "Password": "rokas2",
+    "CreatedAt": "2025-10-02T16:53:58.4060479+03:00",
+    "Friends": []
   }
 ]
