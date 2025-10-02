@@ -1,5 +1,3 @@
-﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -249,6 +247,7 @@ namespace KNOTS.Services
             return _userDataStore.RegisterUser(username, password);
         }
 
+
         public (bool Success, string Message) LoginUser(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
@@ -268,6 +267,7 @@ namespace KNOTS.Services
 
             return (false, "Invalid username or password.");
         }
+
 
         public void LogoutUser()
         {
@@ -289,8 +289,6 @@ namespace KNOTS.Services
                 return (false, "Friend username cannot be empty.");
             }
 
-            return _userDataStore.AddFriend(CurrentUser, friendUsername);
-        }
 
         public (bool Success, string Message) RemoveFriend(string friendUsername)
         {

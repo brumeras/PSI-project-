@@ -5,15 +5,6 @@ using Microsoft.AspNetCore.Components.Server.Circuits;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register UserDataStore as Singleton (shared data file)
-builder.Services.AddSingleton<UserDataStore>();
-
-// Register CircuitHandler and UserService as SCOPED (one per browser tab/circuit)
-builder.Services.AddScoped<AuthenticationCircuitHandler>();
-builder.Services.AddScoped<CircuitHandler>(sp => sp.GetRequiredService<AuthenticationCircuitHandler>());
-builder.Services.AddScoped<UserService>();
-
-// Register GameRoomService as SINGLETON
 builder.Services.AddSingleton<GameRoomService>();
 
 builder.Services.AddRazorComponents()
