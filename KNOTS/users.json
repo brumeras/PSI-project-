@@ -1,14 +1,14 @@
 [
   {
-    "Username": "labas",
-    "Password": "labukas",
-    "CreatedAt": "2025-10-02T15:21:14.1796388+03:00",
-    "Friends": []
+    "Username": "camilalol",
+    "CreatedAt": "2025-10-02T20:57:23.04189+03:00",
+    "Friends": [],
+    "PasswordHash": "$2a$13$/453QvKTxyDU4b8oufRKt..q.xr6KAvUKtIBS32u1VZMhJ2S8tity"
   },
   {
-    "Username": "emilija7",
-    "Password": "labas",
-    "CreatedAt": "2025-10-02T15:29:20.0362584+03:00",
-    "Friends": []
+    "Username": "lalala",
+    "CreatedAt": "2025-10-02T20:58:40.857894+03:00",
+    "Friends": [],
+    "PasswordHash": "$2a$13$1OnMNHc5e9momg/bD24H2O7RuglIigsphJxQGpkEh57cuMq5KLWHO"
   }
 ]
