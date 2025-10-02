@@ -8,9 +8,9 @@ namespace KNOTS.Services
     public class User
     {
         public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public List<string> Friends { get; set; } = new List<string>();
+        public string PasswordHash { get; set; } = string.Empty;
     }
 
     public class UserService
@@ -91,7 +91,7 @@ namespace KNOTS.Services
             var newUser = new User
             {
                 Username = username,
-                Password = password, // In real project, password should be hashed
+                PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(password,13),
                 CreatedAt = DateTime.Now
             };
 
@@ -110,14 +110,17 @@ namespace KNOTS.Services
             }
 
             var user = _users.FirstOrDefault(u =>
-                u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) &&
-                u.Password == password);
+                u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
             if (user != null)
             {
-                CurrentUser = user.Username;
-                OnAuthenticationChanged?.Invoke();
-                return (true, "Login successful!");
+                if (BCrypt.Net.BCrypt.EnhancedVerify(password, user.PasswordHash))
+                {
+                    CurrentUser = user.Username;
+                    OnAuthenticationChanged?.Invoke();
+                    return (true, "Login successful!");
+                }
+                
             }
 
             return (false, "Invalid username or password.");
