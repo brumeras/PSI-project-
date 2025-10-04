@@ -43,25 +43,14 @@ namespace KNOTS.Services
         private string GenerateRoomCode()
         {
             string code;
-            do
-            {
-                code = _random.Next(1000, 9999).ToString();
-            } while (_rooms.ContainsKey(code));
-            
-            return code;
+            do { code = _random.Next(1000, 9999).ToString(); } while (_rooms.ContainsKey(code)); return code;
         }
-
         // Prideda žaidėją prie sistemos
-        public void AddPlayer(string connectionId, string username)
-        {
-            _connectionToUsername[connectionId] = username;
-        }
+        public void AddPlayer(string connectionId, string username) { _connectionToUsername[connectionId] = username; }
 
         // Sukuria naują kambarį
-        public string CreateRoom(string hostConnectionId, string hostUsername)
-        {
+        public string CreateRoom(string hostConnectionId, string hostUsername) {
             var roomCode = GenerateRoomCode();
-            
             var room = new GameRoom
             {
                 RoomCode = roomCode,
@@ -84,21 +73,11 @@ namespace KNOTS.Services
         }
 
         // Prisijungia prie kambario
-        public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username)
-        {
-            if (!_rooms.TryGetValue(roomCode, out var room))
-            {
-                return new JoinRoomResult 
-                { 
-                    Success = false, 
-                    Message = "Room not found" 
-                };
-            }
+        public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username) {
+            if (!_rooms.TryGetValue(roomCode, out var room)) return new JoinRoomResult { Success = false, Message = "Room not found" };
 
             var result = new GameRoom().CanJoin(username);
-            if (!result.Success)
-                return result;
-            
+            if (!result.Success) return result;
             
             var player = new GamePlayer
             {
@@ -119,61 +98,43 @@ namespace KNOTS.Services
         }
 
         // Gauna kambario informaciją
-        public GameRoom? GetRoomInfo(string roomCode)
-        {
+        public GameRoom? GetRoomInfo(string roomCode) {
             _rooms.TryGetValue(roomCode, out var room);
             return room;
         }
 
         // Gauna žaidėjo vardą pagal ConnectionId
-        public string GetPlayerUsername(string connectionId)
-        {
+        public string GetPlayerUsername(string connectionId) {
             _connectionToUsername.TryGetValue(connectionId, out var username);
             return username ?? "";
         }
 
         // Pašalina žaidėją iš sistemos
-        public DisconnectedPlayerInfo RemovePlayer(string connectionId)
-        {
+        public DisconnectedPlayerInfo RemovePlayer(string connectionId) {
             var result = new DisconnectedPlayerInfo();
             
             _connectionToUsername.TryGetValue(connectionId, out var username);
             result.Username = username ?? "";
 
-            if (_playerToRoom.TryRemove(connectionId, out var roomCode))
-            {
+            if (_playerToRoom.TryRemove(connectionId, out var roomCode)) {
                 result.RoomCode = roomCode;
                 
-                if (_rooms.TryGetValue(roomCode, out var room))
-                {
+                if (_rooms.TryGetValue(roomCode, out var room)) { 
                     room.Players.RemoveAll(p => p.ConnectionId == connectionId);
-                    
                     // Jei kambarys tuščias, pašalinam jį
-                    if (room.Players.Count == 0)
-                    {
-                        _rooms.TryRemove(roomCode, out _);
-                    }
+                    if (room.Players.Count == 0) { _rooms.TryRemove(roomCode, out _); }
                     // Jei išėjo host'as, paskiriame naują
-                    else if (room.Host == username && room.Players.Count > 0)
-                    {
-                        room.Host = room.Players.First().Username;
-                    }
+                    else if (room.Host == username && room.Players.Count > 0) { room.Host = room.Players.First().Username; }
                 }
             }
-
             _connectionToUsername.TryRemove(connectionId, out _);
             return result;
         }
 
         // Gauna visų kambarių sąrašą (debug tikslams)
-        public List<GameRoom> GetAllRooms()
-        {
-            return _rooms.Values.ToList();
-        }
-
+        public List<GameRoom> GetAllRooms() { return _rooms.Values.ToList(); }
         // Gauna kambario kodą pagal žaidėjo ConnectionId
-        public string? GetPlayerRoomCode(string connectionId)
-        {
+        public string? GetPlayerRoomCode(string connectionId) {
             _playerToRoom.TryGetValue(connectionId, out var roomCode);
             return roomCode;
         }
