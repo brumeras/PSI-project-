@@ -11,13 +11,7 @@
     <h2>Welcome, @UserService.CurrentUser!</h2>
     <button class="btn btn-secondary mb-3" @onclick="Logout">Logout</button>
 
-    <h4>Your Friends</h4>
-    <ul>
-        @foreach (var friend in UserService.GetUserFriends())
-        {
-            <li>@friend</li>
-        }
-    </ul>
+   
 
     
     <p>@friendMessage</p>

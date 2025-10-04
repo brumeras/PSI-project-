@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using KNOTS.Services;
+using System.Threading.Channels;
 
 namespace KNOTS.Hubs
 {
@@ -87,6 +88,77 @@ namespace KNOTS.Hubs
             await Clients.Group(roomCode).SendAsync("GameAction", username, action, data);
         }
 
+        // Streaming metodas - gauti kambario atnaujinimus realiu laiku
+        public async IAsyncEnumerable<object> StreamRoomUpdates(string roomCode, CancellationToken cancellationToken)
+        {
+            var channel = Channel.CreateUnbounded<object>();
+            
+            // Registruojame listener'į kambario atnaujinimams
+            void UpdateHandler(object update)
+            {
+                channel.Writer.TryWrite(update);
+            }
+            
+            try
+            {
+                await foreach (var update in channel.Reader.ReadAllAsync(cancellationToken))
+                {
+                    yield return update;
+                }
+            }
+            finally
+            {
+                // Išvalome listener'į
+                // _gameRoomService.OnRoomUpdate -= UpdateHandler;
+                channel.Writer.Complete();
+            }
+        }
+
+        // Streaming metodas - siųsti žaidimo veiksmus kaip srautą
+        public async Task UploadGameActions(IAsyncEnumerable<GameActionData> actionsStream)
+        {
+            var connectionId = Context.ConnectionId;
+            var username = _gameRoomService.GetPlayerUsername(connectionId);
+            
+            await foreach (var action in actionsStream)
+            {
+                // Apdorojame kiekvieną veiksmą iš srauto
+                if (!string.IsNullOrEmpty(action.RoomCode))
+                {
+                    await Clients.Group(action.RoomCode)
+                        .SendAsync("GameAction", username, action.Action, action.Data);
+                }
+            }
+        }
+
+        // Streaming metodas - gauti žaidėjų būsenas realiu laiku
+        public async IAsyncEnumerable<PlayerStatus> StreamPlayerStatuses(
+            string roomCode, 
+            CancellationToken cancellationToken)
+        {
+            var updateInterval = TimeSpan.FromSeconds(1);
+            
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var roomInfo = _gameRoomService.GetRoomInfo(roomCode);
+                
+                if (roomInfo != null)
+                {
+                    foreach (var player in roomInfo.Players)
+                    {
+                        yield return new PlayerStatus
+                        {
+                            Username = player.Username,
+                            IsOnline = true,
+                            Timestamp = DateTime.UtcNow
+                        };
+                    }
+                }
+                
+                await Task.Delay(updateInterval, cancellationToken);
+            }
+        }
+
         // Atsijungimo valdymas
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
@@ -101,5 +173,20 @@ namespace KNOTS.Hubs
             
             await base.OnDisconnectedAsync(exception);
         }
+    }
+
+    // Gettreriai ir setteriai streamingo funkcionalumui
+    public class GameActionData
+    {
+        public string RoomCode { get; set; } = string.Empty;
+        public string Action { get; set; } = string.Empty;
+        public object? Data { get; set; }
+    }
+
+    public class PlayerStatus
+    {
+        public string Username { get; set; } = string.Empty;
+        public bool IsOnline { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 }
