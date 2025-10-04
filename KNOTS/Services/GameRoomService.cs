@@ -1,4 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KNOTS.Services
 {
@@ -10,26 +13,50 @@ namespace KNOTS.Services
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsGameStarted { get; set; } = false;
         public int MaxPlayers { get; set; } = 4;
+        public List<string> ActiveStatementIds { get; set; } = new(); // Kokie teiginiai naudojami šiame žaidime
     }
 
-    public class GamePlayer
+    // Pakeista į struct (value type)
+    public struct GamePlayer
     {
-        public string ConnectionId { get; set; } = string.Empty;
-        public string Username { get; set; } = string.Empty;
-        public DateTime JoinedAt { get; set; } = DateTime.Now;
-        public bool IsReady { get; set; } = false;
+        public string ConnectionId { get; set; }
+        public string Username { get; set; }
+        public DateTime JoinedAt { get; set; }
+        public bool IsReady { get; set; }
+
+        public GamePlayer(string connectionId, string username)
+        {
+            ConnectionId = connectionId;
+            Username = username;
+            JoinedAt = DateTime.Now;
+            IsReady = false;
+        }
     }
 
-    public class JoinRoomResult
+    // Pakeista į struct (value type)
+    public struct JoinRoomResult
     {
         public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public string Message { get; set; }
+
+        public JoinRoomResult(bool success, string message)
+        {
+            Success = success;
+            Message = message;
+        }
     }
 
-    public class DisconnectedPlayerInfo
+    // Pakeista į struct (value type)
+    public struct DisconnectedPlayerInfo
     {
-        public string Username { get; set; } = string.Empty;
-        public string RoomCode { get; set; } = string.Empty;
+        public string Username { get; set; }
+        public string RoomCode { get; set; }
+
+        public DisconnectedPlayerInfo(string username, string roomCode)
+        {
+            Username = username;
+            RoomCode = roomCode;
+        }
     }
 
     public class GameRoomService
@@ -68,12 +95,7 @@ namespace KNOTS.Services
                 Host = hostUsername,
                 Players = new List<GamePlayer>
                 {
-                    new GamePlayer
-                    {
-                        ConnectionId = hostConnectionId,
-                        Username = hostUsername,
-                        JoinedAt = DateTime.Now
-                    }
+                    new GamePlayer(hostConnectionId, hostUsername) // Naudojamas konstruktorius
                 }
             };
 
@@ -88,57 +110,32 @@ namespace KNOTS.Services
         {
             if (!_rooms.TryGetValue(roomCode, out var room))
             {
-                return new JoinRoomResult 
-                { 
-                    Success = false, 
-                    Message = "Room not found" 
-                };
+                return new JoinRoomResult(false, "Room not found");
             }
 
             if (room.Players.Count >= room.MaxPlayers)
             {
-                return new JoinRoomResult 
-                { 
-                    Success = false, 
-                    Message = "Room is full" 
-                };
+                return new JoinRoomResult(false, "Room is full");
             }
 
             if (room.IsGameStarted)
             {
-                return new JoinRoomResult 
-                { 
-                    Success = false, 
-                    Message = "Game has already started" 
-                };
+                return new JoinRoomResult(false, "Game has already started");
             }
 
             // Tikrina ar žaidėjas jau kambaryje
             if (room.Players.Any(p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
             {
-                return new JoinRoomResult 
-                { 
-                    Success = false, 
-                    Message = "A player with this username is already in game" 
-                };
+                return new JoinRoomResult(false, "A player with this username is already in game");
             }
 
-            var player = new GamePlayer
-            {
-                ConnectionId = connectionId,
-                Username = username,
-                JoinedAt = DateTime.Now
-            };
+            var player = new GamePlayer(connectionId, username);
 
             room.Players.Add(player);
             _playerToRoom[connectionId] = roomCode;
             _connectionToUsername[connectionId] = username;
 
-            return new JoinRoomResult 
-            { 
-                Success = true, 
-                Message = "Successfully connected to a room!" 
-            };
+            return new JoinRoomResult(true, "Successfully connected to a room!");
         }
 
         // Gauna kambario informaciją
@@ -148,6 +145,16 @@ namespace KNOTS.Services
             return room;
         }
 
+        // Gauna visus kambario žaidėjų vardus
+        public List<string> GetRoomPlayerUsernames(string roomCode)
+        {
+            if (_rooms.TryGetValue(roomCode, out var room))
+            {
+                return room.Players.Select(p => p.Username).ToList();
+            }
+            return new List<string>();
+        }
+
         // Gauna žaidėjo vardą pagal ConnectionId
         public string GetPlayerUsername(string connectionId)
         {
@@ -155,17 +162,88 @@ namespace KNOTS.Services
             return username ?? "";
         }
 
+        // Pažymi žaidėją kaip ready
+        public bool SetPlayerReady(string connectionId, bool isReady)
+        {
+            if (!_playerToRoom.TryGetValue(connectionId, out var roomCode))
+            {
+                return false;
+            }
+
+            if (!_rooms.TryGetValue(roomCode, out var room))
+            {
+                return false;
+            }
+
+            // Randame žaidėją ir atnaujiname jo ready būseną
+            for (int i = 0; i < room.Players.Count; i++)
+            {
+                if (room.Players[i].ConnectionId == connectionId)
+                {
+                    var player = room.Players[i];
+                    player.IsReady = isReady;
+                    room.Players[i] = player; // Struct reikia priskirti atgal
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Patikrina ar visi žaidėjai ready
+        public bool AreAllPlayersReady(string roomCode)
+        {
+            if (!_rooms.TryGetValue(roomCode, out var room))
+            {
+                return false;
+            }
+
+            if (room.Players.Count < 2) // Reikia bent 2 žaidėjų
+            {
+                return false;
+            }
+
+            return room.Players.All(p => p.IsReady);
+        }
+
+        // Pradeda žaidimą kambaryje
+        public bool StartGame(string roomCode, List<string> statementIds)
+        {
+            if (!_rooms.TryGetValue(roomCode, out var room))
+            {
+                return false;
+            }
+
+            if (room.IsGameStarted)
+            {
+                return false;
+            }
+
+            room.IsGameStarted = true;
+            room.ActiveStatementIds = statementIds;
+            return true;
+        }
+
+        // Gauna aktyvių teiginių ID
+        public List<string> GetActiveStatementIds(string roomCode)
+        {
+            if (_rooms.TryGetValue(roomCode, out var room))
+            {
+                return room.ActiveStatementIds;
+            }
+            return new List<string>();
+        }
+
         // Pašalina žaidėją iš sistemos
         public DisconnectedPlayerInfo RemovePlayer(string connectionId)
         {
-            var result = new DisconnectedPlayerInfo();
-            
             _connectionToUsername.TryGetValue(connectionId, out var username);
-            result.Username = username ?? "";
+            var disconnectedUsername = username ?? "";
+            var disconnectedRoomCode = "";
 
             if (_playerToRoom.TryRemove(connectionId, out var roomCode))
             {
-                result.RoomCode = roomCode;
+                disconnectedRoomCode = roomCode;
                 
                 if (_rooms.TryGetValue(roomCode, out var room))
                 {
@@ -177,7 +255,7 @@ namespace KNOTS.Services
                         _rooms.TryRemove(roomCode, out _);
                     }
                     // Jei išėjo host'as, paskiriame naują
-                    else if (room.Host == username && room.Players.Count > 0)
+                    else if (room.Host == disconnectedUsername && room.Players.Count > 0)
                     {
                         room.Host = room.Players.First().Username;
                     }
@@ -185,7 +263,7 @@ namespace KNOTS.Services
             }
 
             _connectionToUsername.TryRemove(connectionId, out _);
-            return result;
+            return new DisconnectedPlayerInfo(disconnectedUsername, disconnectedRoomCode);
         }
 
         // Gauna visų kambarių sąrašą (debug tikslams)
@@ -199,6 +277,23 @@ namespace KNOTS.Services
         {
             _playerToRoom.TryGetValue(connectionId, out var roomCode);
             return roomCode;
+        }
+
+        // Patikrina ar žaidėjas yra kambario host'as
+        public bool IsPlayerHost(string connectionId)
+        {
+            if (!_playerToRoom.TryGetValue(connectionId, out var roomCode))
+            {
+                return false;
+            }
+
+            if (!_rooms.TryGetValue(roomCode, out var room))
+            {
+                return false;
+            }
+
+            var username = GetPlayerUsername(connectionId);
+            return room.Host == username;
         }
     }
 }

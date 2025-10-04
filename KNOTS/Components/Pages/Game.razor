@@ -62,7 +62,7 @@ else
 
                 <div class="mt-3">
                     <h6>Fill in your answers for the game</h6>
-                    <NewGame @ref="newGameFormRef" />
+                    <NewGame @ref="newGameFormRef" RoomCode="@currentRoomCode" />  <!-- Pridėtas RoomCode parametras -->
                 </div>
             }
 
@@ -259,11 +259,11 @@ else
     
     private NewGame newGameFormRef;
 
-    private void SaveUserAnswers()
+    /*private void SaveUserAnswers()
     {
         newGameFormRef?.SaveAnswers();
         statusMessage = "Your answers have been saved!";
-    }
+    }*/ 
     public class RoomInfo
     {
         public string RoomCode { get; set; } = "";
