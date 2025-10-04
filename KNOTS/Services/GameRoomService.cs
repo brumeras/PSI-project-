@@ -95,34 +95,11 @@ namespace KNOTS.Services
                 };
             }
 
-            if (room.Players.Count >= room.MaxPlayers)
-            {
-                return new JoinRoomResult 
-                { 
-                    Success = false, 
-                    Message = "Room is full" 
-                };
-            }
-
-            if (room.IsGameStarted)
-            {
-                return new JoinRoomResult 
-                { 
-                    Success = false, 
-                    Message = "Game has already started" 
-                };
-            }
-
-            // Tikrina ar žaidėjas jau kambaryje
-            if (room.Players.Any(p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
-            {
-                return new JoinRoomResult 
-                { 
-                    Success = false, 
-                    Message = "A player with this username is already in game" 
-                };
-            }
-
+            var result = new GameRoom().CanJoin(username);
+            if (!result.Success)
+                return result;
+            
+            
             var player = new GamePlayer
             {
                 ConnectionId = connectionId,
