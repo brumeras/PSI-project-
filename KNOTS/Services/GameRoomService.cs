@@ -76,7 +76,7 @@ namespace KNOTS.Services
         public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username) {
             if (!_rooms.TryGetValue(roomCode, out var room)) return new JoinRoomResult { Success = false, Message = "Room not found" };
 
-            var result = new GameRoom().CanJoin(username);
+            var result = room.CanJoin(username);
             if (!result.Success) return result;
             
             var player = new GamePlayer
