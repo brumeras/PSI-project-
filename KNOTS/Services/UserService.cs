@@ -175,15 +175,7 @@ namespace KNOTS.Services
             return (false, "Error adding friend.");
         }
 
-        // Get user's friends
-        public List<string> GetUserFriends()
-        {
-            if (!IsAuthenticated)
-                return new List<string>();
-
-            var currentUserData = _users.FirstOrDefault(u => u.Username.Equals(CurrentUser, StringComparison.OrdinalIgnoreCase));
-            return currentUserData?.Friends ?? new List<string>();
-        }
+      
 
         // Get total users count (statistics)
         public int GetTotalUsersCount()
