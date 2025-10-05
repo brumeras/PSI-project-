@@ -2,7 +2,7 @@
 
 namespace KNOTS.Services
 {
-    public enum gameState
+    public enum GameState
     {
         waitingForPlayers,
         inProgress,
@@ -15,7 +15,7 @@ namespace KNOTS.Services
         public List<GamePlayer> Players { get; set; } = new();
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         //public bool IsGameStarted { get; set; } = false;
-        public gameState State { get; set; } = gameState.waitingForPlayers;
+        public GameState State { get; set; } = GameState.waitingForPlayers;
         public int MaxPlayers { get; set; } = 4;
     }
 
@@ -31,6 +31,7 @@ namespace KNOTS.Services
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
+        public GameState State { get; set; }
     }
 
     public class DisconnectedPlayerInfo
@@ -81,7 +82,7 @@ namespace KNOTS.Services
 
         // Prisijungia prie kambario
         public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username) {
-            if (!_rooms.TryGetValue(roomCode, out var room)) return new JoinRoomResult { Success = false, Message = "Room not found" };
+            if (!_rooms.TryGetValue(roomCode, out var room)) return new JoinRoomResult { Success = false, Message = "Room not found", State = GameState.finished };
 
             var result = room.CanJoin(username);
             if (!result.Success) return result;
@@ -96,11 +97,14 @@ namespace KNOTS.Services
             room.Players.Add(player);
             _playerToRoom[connectionId] = roomCode;
             _connectionToUsername[connectionId] = username;
+            
+            if (room.Players.Count >= room.MaxPlayers) { room.State = GameState.inProgress; }
 
             return new JoinRoomResult 
             { 
                 Success = true, 
-                Message = "Successfully connected to a room!" 
+                Message = "Successfully connected to a room!",
+                State = room.State
             };
         }
 
