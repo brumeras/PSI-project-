@@ -3,7 +3,6 @@ using System.Text.Json;
 
 namespace KNOTS.Services
 {
-    // Struct klausimui/teiginniui
     public struct GameStatement
     {
         public string Id { get; set; }
@@ -15,8 +14,7 @@ namespace KNOTS.Services
             Text = text;
         }
     }
-
-    // Struct žaidėjo swipe'ui
+    
     public struct PlayerSwipe
     {
         public string PlayerUsername { get; set; }
@@ -34,8 +32,7 @@ namespace KNOTS.Services
             SwipedAt = DateTime.Now;
         }
     }
-
-    // Struct compatibility rezultatui
+    
     public struct CompatibilityScore
     {
         public string Player1 { get; set; }
@@ -57,8 +54,7 @@ namespace KNOTS.Services
             ? Math.Round((double)MatchingSwipes / TotalStatements * 100, 2)
             : 0;
     }
-
-    // Klasė istorijos saugojimui
+    
     public class GameHistoryEntry
     {
         public string RoomCode { get; set; } = "";
@@ -71,10 +67,8 @@ namespace KNOTS.Services
 
     public class CompatibilityService
     {
-        // In-memory storage (aktyvūs žaidimai)
         private readonly ConcurrentDictionary<string, List<PlayerSwipe>> _roomSwipes = new();
         
-        // Failų keliai
         private readonly string _dataDirectory = "GameData";
         private readonly string _statementsDirectory = "GameStatements";
         private readonly string _defaultStatementsFile = "statements.json";
@@ -91,8 +85,7 @@ namespace KNOTS.Services
             LoadStatementsFromFile();
             LoadActiveSwipesFromFile();
         }
-
-        // === STATEMENTS MANAGEMENT ===
+        
         
         private void LoadStatementsFromFile()
         {
@@ -140,26 +133,27 @@ namespace KNOTS.Services
         {
             _statements = new List<GameStatement>
             {
-                new GameStatement("S1", "Mėgstu anksti keltis rytais"),
-                new GameStatement("S2", "Pirmenybę teikiu namų poilsiui nei vakarėliams"),
-                new GameStatement("S3", "Mėgstu spontaniškas keliones"),
-                new GameStatement("S4", "Gyvūnai yra svarbi mano gyvenimo dalis"),
-                new GameStatement("S5", "Geriau kinas nei teatras"),
-                new GameStatement("S6", "Sportas yra mano kasdienybės dalis"),
-                new GameStatement("S7", "Mėgstu gaminti namuose"),
-                new GameStatement("S8", "Vasara yra geriausia metų laikas"),
-                new GameStatement("S9", "Protingi pokalbiai yra svarbesni už linksmybes"),
-                new GameStatement("S10", "Mėgstu rizikuoti ir išbandyti naujus dalykus"),
-                new GameStatement("S11", "Muzika yra svarbi mano gyvenime"),
-                new GameStatement("S12", "Vertinu asmeninę erdvę santykiuose"),
-                new GameStatement("S13", "Mėgstu planuoti viską iš anksto"),
-                new GameStatement("S14", "Dideliuose vakarėliuose jaučiuosi gerai"),
-                new GameStatement("S15", "Gyvenu čia ir dabar, nerūpinausi ateitimi"),
-                new GameStatement("S16", "Romantiškos pažintys man svarbios"),
-                new GameStatement("S17", "Mėgstu video žaidimus"),
-                new GameStatement("S18", "Knygos geriau nei filmai"),
-                new GameStatement("S19", "Mėgstu gamtą ir žygius"),
-                new GameStatement("S20", "Finansinis stabilumas yra prioritetas")
+                new GameStatement("S1", "I like getting up early in the morning"),
+                new GameStatement("S2", "I prefer relaxing at home over going to parties"),
+                new GameStatement("S3", "I enjoy spontaneous trips"),
+                new GameStatement("S4", "Animals are an important part of my life"),
+                new GameStatement("S5", "I prefer movies over theater"),
+                new GameStatement("S6", "Sports are part of my daily routine"),
+                new GameStatement("S7", "I enjoy cooking at home"),
+                new GameStatement("S8", "Summer is the best season"),
+                new GameStatement("S9", "Meaningful conversations matter more to me than having fun"),
+                new GameStatement("S10", "I like taking risks and trying new things"),
+                new GameStatement("S11", "Music is an important part of my life"),
+                new GameStatement("S12", "I value personal space in relationships"),
+                new GameStatement("S13", "I like to plan everything in advance"),
+                new GameStatement("S14", "I feel good at large parties"),
+                new GameStatement("S15", "I live in the moment and don't worry about the future"),
+                new GameStatement("S16", "Romantic relationships are important to me"),
+                new GameStatement("S17", "I like video games"),
+                new GameStatement("S18", "Books are better than movies"),
+                new GameStatement("S19", "I enjoy nature and hiking"),
+                new GameStatement("S20", "Financial stability is a priority"),
+
             };
         }
 
@@ -173,8 +167,7 @@ namespace KNOTS.Services
             var random = new Random();
             return _statements.OrderBy(x => random.Next()).Take(Math.Min(count, _statements.Count)).ToList();
         }
-
-        // === ACTIVE SWIPES (JSON) ===
+        
 
         private void LoadActiveSwipesFromFile()
         {
@@ -247,6 +240,10 @@ namespace KNOTS.Services
             _roomSwipes[roomCode].Add(playerSwipe);
             
             SaveActiveSwipesToFile();
+            
+            // BOXING/UNBOXING USAGE - Log statistics kada išsaugomas swipe
+            LogRoomStatistics(roomCode);
+            
             return true;
         }
 
@@ -266,6 +263,12 @@ namespace KNOTS.Services
         {
             var roomSwipes = GetRoomSwipes(roomCode);
             
+            // BOXING/UNBOXING USAGE - Naudojame statistiką patikrinti progress
+            var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
+            var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
+            
+            Console.WriteLine($"[HaveAllPlayersFinished] Room {roomCode}: {uniquePlayers} players, {totalSwipes} total swipes");
+            
             foreach (var player in playerUsernames)
             {
                 var playerSwipeCount = roomSwipes.Count(s => s.PlayerUsername == player);
@@ -277,8 +280,6 @@ namespace KNOTS.Services
             
             return true;
         }
-
-        // === COMPATIBILITY CALCULATION ===
 
         public CompatibilityScore CalculateCompatibility(string roomCode, string player1, string player2)
         {
@@ -315,6 +316,10 @@ namespace KNOTS.Services
         {
             var results = new List<CompatibilityScore>();
 
+            // BOXING/UNBOXING USAGE - Log prieš skaičiuojant
+            Console.WriteLine($"[CalculateAllCompatibilities] Starting calculation for room {roomCode}");
+            LogRoomStatistics(roomCode);
+
             for (int i = 0; i < playerUsernames.Count; i++)
             {
                 for (int j = i + 1; j < playerUsernames.Count; j++)
@@ -348,13 +353,15 @@ namespace KNOTS.Services
 
             return scores.OrderByDescending(s => s.Percentage).FirstOrDefault();
         }
-
-        // === GAME HISTORY (JSON) ===
-
+        
         public void SaveGameToHistory(string roomCode, List<string> playerUsernames)
         {
             try
             {
+                // BOXING/UNBOXING USAGE - Log statistiką prieš išsaugant
+                Console.WriteLine($"[SaveGameToHistory] Saving game for room {roomCode}");
+                LogRoomStatistics(roomCode);
+                
                 var allResults = CalculateAllCompatibilities(roomCode, playerUsernames);
                 if (!allResults.Any()) return;
 
@@ -370,11 +377,9 @@ namespace KNOTS.Services
                     AllResults = allResults
                 };
 
-                // Load existing history
                 var history = LoadGameHistory();
                 history.Add(historyEntry);
-
-                // Save updated history
+                
                 string filePath = Path.Combine(_dataDirectory, _historyFile);
                 string json = JsonSerializer.Serialize(history, new JsonSerializerOptions
                 {
@@ -427,34 +432,34 @@ namespace KNOTS.Services
             _roomSwipes.TryRemove(roomCode, out _);
             SaveActiveSwipesToFile();
         }
-
-        // === BOXING/UNBOXING EXAMPLES ===
+        
+        // === BOXING/UNBOXING METHODS ===
 
         public Dictionary<string, object> GetRoomStatistics(string roomCode)
         {
             var roomSwipes = GetRoomSwipes(roomCode);
             
-            // BOXING: value types -> object
+            // BOXING: value types (int, bool) -> object (reference type)
             var stats = new Dictionary<string, object>
             {
-                ["TotalSwipes"] = roomSwipes.Count,
-                ["UniquePlayers"] = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),
-                ["UniqueStatements"] = roomSwipes.Select(s => s.StatementId).Distinct().Count(),
-                ["RightSwipes"] = roomSwipes.Count(s => s.AgreeWithStatement),
-                ["LeftSwipes"] = roomSwipes.Count(s => !s.AgreeWithStatement)
+                ["TotalSwipes"] = roomSwipes.Count,  // int -> object (BOXING)
+                ["UniquePlayers"] = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),  // int -> object (BOXING)
+                ["UniqueStatements"] = roomSwipes.Select(s => s.StatementId).Distinct().Count(),  // int -> object (BOXING)
+                ["RightSwipes"] = roomSwipes.Count(s => s.AgreeWithStatement),  // int -> object (BOXING)
+                ["LeftSwipes"] = roomSwipes.Count(s => !s.AgreeWithStatement)  // int -> object (BOXING)
             };
 
             return stats;
         }
 
-        // UNBOXING
+        // UNBOXING: object -> int
         public int GetStatisticValue(string roomCode, string statKey)
         {
             var stats = GetRoomStatistics(roomCode);
             
             if (stats.ContainsKey(statKey))
             {
-                return (int)stats[statKey];  // Unboxing: object -> int
+                return (int)stats[statKey];  // UNBOXING: object -> int (value type)
             }
             
             return 0;
@@ -466,8 +471,19 @@ namespace KNOTS.Services
             
             if (totalStatements == 0) return 0.0;
             
-            // BOXING happens when returning
             return Math.Round((double)swipes.Count / totalStatements * 100, 2);
+        }
+        
+        // Helper metodas, kuris naudoja boxing/unboxing
+        private void LogRoomStatistics(string roomCode)
+        {
+            // UNBOXING vyksta čia - gauname int iš Dictionary<string, object>
+            var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
+            var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
+            var rightSwipes = GetStatisticValue(roomCode, "RightSwipes");
+            var leftSwipes = GetStatisticValue(roomCode, "LeftSwipes");
+            
+            Console.WriteLine($"[Room {roomCode}] Total: {totalSwipes}, Players: {uniquePlayers}, Right: {rightSwipes}, Left: {leftSwipes}");
         }
     }
 }

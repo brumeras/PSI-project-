@@ -60,9 +60,9 @@
                                     <td>@game.PlayedDate.ToString("yyyy-MM-dd HH:mm")</td>
                                     <td><span class="badge bg-secondary">@game.RoomCode</span></td>
                                     <td>
-                                        @if (game.BestMatch != null)
+                                        @if (!string.IsNullOrEmpty(game.BestMatchPlayer))
                                         {
-                                            <strong>@game.BestMatch.OtherPlayer</strong>
+                                            <strong>@game.BestMatchPlayer</strong>
                                         }
                                         else
                                         {
@@ -70,16 +70,16 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (game.BestMatch != null)
+                                        @if (game.BestMatchPercentage > 0)
                                         {
                                             <div class="progress" style="height: 25px;">
-                                                <div class="progress-bar @GetProgressBarColor(game.BestMatch.Percentage)" 
+                                                <div class="progress-bar @GetProgressBarColor(game.BestMatchPercentage)" 
                                                      role="progressbar" 
-                                                     style="width: @game.BestMatch.Percentage%"
-                                                     aria-valuenow="@game.BestMatch.Percentage" 
+                                                     style="width: @game.BestMatchPercentage%"
+                                                     aria-valuenow="@game.BestMatchPercentage" 
                                                      aria-valuemin="0" 
                                                      aria-valuemax="100">
-                                                    @game.BestMatch.Percentage%
+                                                    @game.BestMatchPercentage%
                                                 </div>
                                             </div>
                                         }
@@ -138,30 +138,30 @@
                         </div>
                         <div class="modal-body">
                             <h6>All Compatibility Results:</h6>
-                            @if (selectedGame.AllMatches != null && selectedGame.AllMatches.Any())
+                            @if (selectedGame.AllResults != null && selectedGame.AllResults.Any())
                             {
                                 <table class="table table-sm">
                                     <thead>
                                         <tr>
                                             <th>Rank</th>
-                                            <th>Player</th>
+                                            <th>Players</th>
                                             <th>Compatibility</th>
                                             <th>Matching Answers</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @for (int i = 0; i < selectedGame.AllMatches.Count; i++)
+                                        @for (int i = 0; i < selectedGame.AllResults.Count; i++)
                                         {
-                                            var match = selectedGame.AllMatches[i];
+                                            var match = selectedGame.AllResults[i];
                                             <tr>
                                                 <td>@(i + 1)</td>
-                                                <td>@match.OtherPlayer</td>
+                                                <td>@match.Player1 & @match.Player2</td>
                                                 <td>
                                                     <span class="badge @GetBadgeColor(match.Percentage)">
                                                         @match.Percentage%
                                                     </span>
                                                 </td>
-                                                <td>@match.MatchingAnswers / @match.TotalStatements</td>
+                                                <td>@match.MatchingSwipes / @match.TotalStatements</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -185,7 +185,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(500); // Simulate loading
+        await Task.Delay(300);
         
         if (UserService.IsAuthenticated)
         {
@@ -197,12 +197,8 @@
 
     private void LoadGameHistory()
     {
-        // TODO: Implement actual game history storage
-        // For now, creating sample data structure
-        gameHistory = new List<GameHistoryEntry>();
-        
-        // This would be loaded from a database or file in real implementation
-        // Example structure shown below
+        // Užkrauna tikrus duomenis iš CompatibilityService
+        gameHistory = CompatibilityService.GetPlayerHistory(UserService.CurrentUser ?? "");
     }
 
     private string GetProgressBarColor(double percentage)
@@ -225,10 +221,7 @@
     {
         if (gameHistory == null || !gameHistory.Any()) return "0";
         
-        var avg = gameHistory
-            .Where(g => g.BestMatch != null)
-            .Average(g => g.BestMatch!.Percentage);
-        
+        var avg = gameHistory.Average(g => g.BestMatchPercentage);
         return avg.ToString("F1");
     }
 
@@ -237,11 +230,10 @@
         if (gameHistory == null || !gameHistory.Any()) return "N/A";
         
         var best = gameHistory
-            .Where(g => g.BestMatch != null)
-            .OrderByDescending(g => g.BestMatch!.Percentage)
+            .OrderByDescending(g => g.BestMatchPercentage)
             .FirstOrDefault();
         
-        return best?.BestMatch?.OtherPlayer ?? "N/A";
+        return best?.BestMatchPlayer ?? "N/A";
     }
 
     private void ShowDetails(GameHistoryEntry game)
@@ -252,23 +244,5 @@
     private void CloseDetails()
     {
         selectedGame = null;
-    }
-
-    // Data structures
-    private class GameHistoryEntry
-    {
-        public string RoomCode { get; set; } = "";
-        public DateTime PlayedDate { get; set; }
-        public int TotalPlayers { get; set; }
-        public MatchResult? BestMatch { get; set; }
-        public List<MatchResult> AllMatches { get; set; } = new();
-    }
-
-    private class MatchResult
-    {
-        public string OtherPlayer { get; set; } = "";
-        public double Percentage { get; set; }
-        public int MatchingAnswers { get; set; }
-        public int TotalStatements { get; set; }
     }
 }

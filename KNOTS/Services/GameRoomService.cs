@@ -13,10 +13,9 @@ namespace KNOTS.Services
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsGameStarted { get; set; } = false;
         public int MaxPlayers { get; set; } = 4;
-        public List<string> ActiveStatementIds { get; set; } = new(); // Kokie teiginiai naudojami šiame žaidime
+        public List<string> ActiveStatementIds { get; set; } = new();
     }
-
-    // Pakeista į struct (value type)
+    
     public struct GamePlayer
     {
         public string ConnectionId { get; set; }
@@ -32,8 +31,7 @@ namespace KNOTS.Services
             IsReady = false;
         }
     }
-
-    // Pakeista į struct (value type)
+    
     public struct JoinRoomResult
     {
         public bool Success { get; set; }

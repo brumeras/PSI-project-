@@ -4,10 +4,11 @@
 @using KNOTS.Services
 @inject IJSRuntime JSRuntime
 @inject UserService UserService
+@inject CompatibilityService CompatibilityService
+@inject GameRoomService GameRoomService
 @implements IAsyncDisposable
 @rendermode InteractiveServer
 
-<!-- PAKEISTI Į ABSOLIUTŲ KELIĄ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
 <script src="/js/gameclient.js"></script>
 
@@ -52,21 +53,55 @@ else
                     </div>
                 </div>
             }
+            else if (showResults)
+            {
+                <!-- REZULTATŲ EKRANAS -->
+                <GameResults 
+                    RoomCode="@currentRoomCode" 
+                    CurrentUsername="@UserService.CurrentUser"
+                    OnResultsSaved="HandleResultsSaved" />
+            }
             else
             {
-                <!-- Esame kambaryje -->
+                <!-- ŽAIDIMAS -->
                 <div class="alert alert-success">
                     <h6>You are currently in room: @currentRoomCode</h6>
                     <p>Other connected players: @string.Join(", ", playersInRoom)</p>
                 </div>
 
+                <!-- STATUS CHECK - PRIEŠ NewGame komponentą -->
+                @if (newGameFormRef != null && newGameFormRef.IsComplete())
+                {
+                    <div class="alert alert-info text-center mb-3">
+                        <h5>You've completed all questions!</h5>
+                        @if (allPlayersFinished)
+                        {
+                            <p>All players have finished. Click below to see results!</p>
+                            <button class="btn btn-success btn-lg" @onclick="ShowResults">
+                                View Results
+                            </button>
+                        }
+                        else
+                        {
+                            <p>Waiting for other players to finish...</p>
+                            <button class="btn btn-outline-primary" @onclick="CheckIfAllFinished">
+                                Check Status
+                            </button>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    Progress: @GetPlayersFinishedCount() / @playersInRoom.Count players finished
+                                </small>
+                            </div>
+                        }
+                    </div>
+                }
+
                 <div class="mt-3">
                     <h6>Fill in your answers for the game</h6>
-                    <NewGame @ref="newGameFormRef" RoomCode="@currentRoomCode" />  <!-- Pridėtas RoomCode parametras -->
+                    <NewGame @ref="newGameFormRef" RoomCode="@currentRoomCode" />
                 </div>
             }
-
-            <!-- Statusas -->
+            
             @if (!string.IsNullOrEmpty(statusMessage))
             {
                 <div class="alert @(statusMessage.Contains("Error") ? "alert-danger" : "alert-info") mt-3">
@@ -84,16 +119,33 @@ else
     private string roomCodeToJoin = "";
     private string statusMessage = "";
     private bool isConnecting = false;
+    private bool showResults = false;
+    private bool allPlayersFinished = false;
     private List<string> playersInRoom = new();
     private List<string> gameMessages = new();
+    private NewGame? newGameFormRef;
+    private System.Threading.Timer? statusCheckTimer;
 
     protected override void OnInitialized()
     {
         if (UserService.IsAuthenticated)
         {
             isConnecting = true;
-            statusMessage = "Connectting to server...";
+            statusMessage = "Connecting to server...";
         }
+        
+        // Auto-check every 3 seconds
+        statusCheckTimer = new System.Threading.Timer(async _ => 
+        {
+            if (!string.IsNullOrEmpty(currentRoomCode) && !showResults)
+            {
+                await InvokeAsync(() => 
+                {
+                    CheckIfAllFinished();
+                    StateHasChanged();
+                });
+            }
+        }, null, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -102,7 +154,6 @@ else
         {
             try
             {
-                // Dinamiškai įkrauti script'us
                 await JSRuntime.InvokeVoidAsync("eval", @"
                 if (!window.signalRLoaded) {
                     var script1 = document.createElement('script');
@@ -116,8 +167,7 @@ else
                     window.signalRLoaded = true;
                 }
             ");
-
-                // Palaukite truputį, kad script'ai įsikrautų
+                
                 await Task.Delay(1000);
 
                 objectReference = DotNetObjectReference.Create(this);
@@ -164,14 +214,73 @@ else
         await JSRuntime.InvokeVoidAsync("joinRoom", roomCodeToJoin, UserService.CurrentUser);
     }
 
-    private async Task SendGameAction(string action, string data)
+    private void CheckIfAllFinished()
     {
-        await JSRuntime.InvokeVoidAsync("sendGameAction", action, data);
-        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - Jūs: {action} {data}");
+        if (string.IsNullOrEmpty(currentRoomCode)) return;
+        
+        var players = GameRoomService.GetRoomPlayerUsernames(currentRoomCode);
+        
+        if (players.Count == 0) return;
+        
+        allPlayersFinished = CompatibilityService.HaveAllPlayersFinished(
+            currentRoomCode, 
+            players, 
+            10
+        );
+        
+        Console.WriteLine($"CheckIfAllFinished: {allPlayersFinished} (Players: {players.Count})");
+        
+        if (allPlayersFinished)
+        {
+            statusMessage = "All players finished! You can now view results.";
+        }
+    }
+    
+    private int GetPlayersFinishedCount()
+    {
+        if (string.IsNullOrEmpty(currentRoomCode)) return 0;
+        
+        var players = GameRoomService.GetRoomPlayerUsernames(currentRoomCode);
+        int finishedCount = 0;
+        
+        foreach (var player in players)
+        {
+            var swipes = CompatibilityService.GetPlayerSwipes(currentRoomCode, player);
+            if (swipes.Count >= 10)
+            {
+                finishedCount++;
+            }
+        }
+        
+        return finishedCount;
+    }
+    
+    private void ShowResults()
+    {
+        CheckIfAllFinished();
+        
+        if (allPlayersFinished)
+        {
+            showResults = true;
+            statusMessage = "";
+            statusCheckTimer?.Dispose();
+        }
+        else
+        {
+            statusMessage = "Please wait for all players to finish before viewing results.";
+        }
+    }
+    
+    private void HandleResultsSaved()
+    {
+        statusMessage = "Results saved! You can view them in the Activity page.";
+        showResults = false;
+        currentRoomCode = "";
+        playersInRoom.Clear();
+        allPlayersFinished = false;
         StateHasChanged();
     }
-
-    // JavaScript callback'ai
+    
     [JSInvokable]
     public async Task OnPlayerIdAssigned(string id)
     {
@@ -193,7 +302,7 @@ else
     [JSInvokable]
     public async Task OnJoinedRoom(string roomInfoJson)
     {
-        Console.WriteLine($"OnJoinedRoom called with: {roomInfoJson}"); // DEBUG
+        Console.WriteLine($"OnJoinedRoom called with: {roomInfoJson}");
     
         var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson, new JsonSerializerOptions 
         { 
@@ -202,14 +311,13 @@ else
     
         currentRoomCode = roomInfo?.RoomCode ?? "";
         playersInRoom = roomInfo?.Players ?? new List<string>();
-        roomCodeToJoin = ""; // Clear the input field
+        roomCodeToJoin = "";
     
         statusMessage = "Successfully connected to a room!";
         isConnecting = false;
     
         await InvokeAsync(StateHasChanged);
     }
-
 
     [JSInvokable]
     public async Task OnJoinRoomFailed(string message)
@@ -227,6 +335,9 @@ else
             playersInRoom.Add(username);
         }
         gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username} connected to room");
+        
+        CheckIfAllFinished();
+        
         await InvokeAsync(StateHasChanged);
     }
 
@@ -250,6 +361,8 @@ else
 
     public async ValueTask DisposeAsync()
     {
+        statusCheckTimer?.Dispose();
+        
         if (objectReference != null)
         {
             await JSRuntime.InvokeVoidAsync("disconnectFromGame");
@@ -257,17 +370,9 @@ else
         }
     }
     
-    private NewGame newGameFormRef;
-
-    /*private void SaveUserAnswers()
-    {
-        newGameFormRef?.SaveAnswers();
-        statusMessage = "Your answers have been saved!";
-    }*/ 
     public class RoomInfo
     {
         public string RoomCode { get; set; } = "";
         public List<string> Players { get; set; } = new();
     }
-
 }
