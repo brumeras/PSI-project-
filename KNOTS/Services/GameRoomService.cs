@@ -7,9 +7,9 @@ namespace KNOTS.Services
 {
     public enum GameState
     {
-        waitingForPlayers,
-        inProgress,
-        finished
+        WaitingForPlayers,
+        InProgress,
+        Finished
     }
     public class GameRoom
     {
@@ -17,7 +17,7 @@ namespace KNOTS.Services
         public string Host { get; set; } = string.Empty;
         public List<GamePlayer> Players { get; set; } = new();
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public GameState State { get; set; } = GameState.waitingForPlayers;
+        public GameState State { get; set; } = GameState.WaitingForPlayers;
         public int MaxPlayers { get; set; } = 4;
         public List<string> ActiveStatementIds { get; set; } = new();
     }
@@ -43,7 +43,7 @@ namespace KNOTS.Services
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
         public GameState State { get; set; }
-        public JoinRoomResult(bool success, string message, GameState state = GameState.waitingForPlayers)
+        public JoinRoomResult(bool success, string message, GameState state = GameState.WaitingForPlayers)
         {
             Success = success;
             Message = message;
@@ -102,12 +102,12 @@ namespace KNOTS.Services
         public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username)
         {
             if (!_rooms.TryGetValue(roomCode, out var room))
-                return new JoinRoomResult(false, "Room not found", GameState.finished);
+                return new JoinRoomResult(false, "Room not found", GameState.Finished);
 
             if (room.Players.Count >= room.MaxPlayers)
                 return new JoinRoomResult(false, "Room is full", room.State);
 
-            if (room.State == GameState.inProgress)
+            if (room.State == GameState.InProgress)
                 return new JoinRoomResult(false, "Game has already started", room.State);
 
             if (room.Players.Any(p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
@@ -120,7 +120,7 @@ namespace KNOTS.Services
             _connectionToUsername[connectionId] = username;
 
             if (room.Players.Count >= room.MaxPlayers)
-                room.State = GameState.inProgress;
+                room.State = GameState.InProgress;
 
             return new JoinRoomResult(true, "Successfully connected to a room!", room.State);
         }
@@ -197,82 +197,13 @@ namespace KNOTS.Services
             if (!_rooms.TryGetValue(roomCode, out var room))
                 return false;
 
-            if (room.State == GameState.inProgress)
+            if (room.State == GameState.InProgress)
                 return false;
 
-            room.State = GameState.inProgress;
+            room.State = GameState.InProgress;
             room.ActiveStatementIds = statementIds;
             return true;
         }
-
-        // Gauna aktyvių teiginių ID
-        public List<string> GetActiveStatementIds(string roomCode) {
-            if (_rooms.TryGetValue(roomCode, out var room)) { return room.ActiveStatementIds; }
-            return new List<string>();
-        }
-
-        // Pažymi žaidėją kaip ready
-        public bool SetPlayerReady(string connectionId, bool isReady)
-        {
-            if (!_playerToRoom.TryGetValue(connectionId, out var roomCode))
-            {
-                return false;
-            }
-
-            if (!_rooms.TryGetValue(roomCode, out var room))
-            {
-                return false;
-            }
-
-            // Randame žaidėją ir atnaujiname jo ready būseną
-            for (int i = 0; i < room.Players.Count; i++)
-            {
-                if (room.Players[i].ConnectionId == connectionId)
-                {
-                    var player = room.Players[i];
-                    player.IsReady = isReady;
-                    room.Players[i] = player; // Struct reikia priskirti atgal
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        // Patikrina ar visi žaidėjai ready
-        public bool AreAllPlayersReady(string roomCode)
-        {
-            if (!_rooms.TryGetValue(roomCode, out var room))
-            {
-                return false;
-            }
-
-            if (room.Players.Count < 2) // Reikia bent 2 žaidėjų
-            {
-                return false;
-            }
-
-            return room.Players.All(p => p.IsReady);
-        }
-
-        // Pradeda žaidimą kambaryje
-        public bool StartGame(string roomCode, List<string> statementIds)
-        {
-            if (!_rooms.TryGetValue(roomCode, out var room))
-            {
-                return false;
-            }
-
-            if (room.IsGameStarted)
-            {
-                return false;
-            }
-
-            room.IsGameStarted = true;
-            room.ActiveStatementIds = statementIds;
-            return true;
-        }
-
         // Gauna aktyvių teiginių ID
         public List<string> GetActiveStatementIds(string roomCode)
         {
