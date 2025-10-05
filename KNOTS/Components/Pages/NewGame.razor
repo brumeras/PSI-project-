@@ -181,6 +181,8 @@
     [Parameter]
     public string? RoomCode { get; set; }
 
+    [Parameter]
+    public string? Username { get; set; }
     private List<GameStatement> statements = new();
     private int currentStatementIndex = 0;
     private string statusMessage = "";
@@ -220,13 +222,19 @@
         isAnimating = true;
         swipeClass = animationClass;
 
-        // Save the swipe
+        // Save the swipe 
         if (!string.IsNullOrEmpty(RoomCode))
         {
             var statement = statements[currentStatementIndex];
+            
+            // Use the Username parameter that was passed in
+            string playerUsername = Username ?? UserService.CurrentUser ?? "";
+            
+            Console.WriteLine($"[SwipeGame] Saving swipe for player: '{playerUsername}' in room: {RoomCode}");
+            
             bool saved = CompatibilityService.SaveSwipe(
                 RoomCode,
-                UserService.CurrentUser ?? "",
+                playerUsername,
                 statement.Id,
                 agreeWithStatement
             );

@@ -6,12 +6,91 @@ using System.Text.Json;
 
 namespace KNOTS.Services
 {
-    public class User
+    public class User : IComparable<User>, IEquatable<User>
     {
         public string Username { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public List<string> Friends { get; set; } = new List<string>();
         public string PasswordHash { get; set; } = string.Empty;
+        
+        // Game statistics for comparison
+        public int TotalGamesPlayed { get; set; } = 0;
+        public double AverageCompatibilityScore { get; set; } = 0.0;
+        public int BestMatchesCount { get; set; } = 0;
+
+        // IComparable<User> implementation
+        public int CompareTo(User? other)
+        {
+            if (other == null) return 1;
+            
+            // Primary: Most best matches (higher is better)
+            int bestMatchComparison = other.BestMatchesCount.CompareTo(this.BestMatchesCount);
+            if (bestMatchComparison != 0) return bestMatchComparison;
+            
+            // Secondary: Highest average compatibility score
+            int avgScoreComparison = other.AverageCompatibilityScore.CompareTo(this.AverageCompatibilityScore);
+            if (avgScoreComparison != 0) return avgScoreComparison;
+            
+            // 3: Most games played
+            int gamesComparison = other.TotalGamesPlayed.CompareTo(this.TotalGamesPlayed);
+            if (gamesComparison != 0) return gamesComparison;
+            
+            // Final tiebreaker: Alphabetically by username
+            return string.Compare(this.Username, other.Username, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // IEquatable<User> implementation
+        public bool Equals(User? other)
+        {
+            if (other == null) return false;
+            return this.Username.Equals(other.Username, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as User);
+        }
+
+        public override int GetHashCode()
+        {
+            return Username.ToLowerInvariant().GetHashCode();
+        }
+
+        // Comparison operators
+        public static bool operator ==(User? left, User? right)
+        {
+            if (ReferenceEquals(left, right)) return true;
+            if (left is null || right is null) return false;
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(User? left, User? right)
+        {
+            return !(left == right);
+        }
+
+        public static bool operator <(User? left, User? right)
+        {
+            if (left is null) return right is not null;
+            return left.CompareTo(right) < 0;
+        }
+
+        public static bool operator >(User? left, User? right)
+        {
+            if (left is null) return false;
+            return left.CompareTo(right) > 0;
+        }
+
+        public static bool operator <=(User? left, User? right)
+        {
+            if (left is null) return true;
+            return left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >=(User? left, User? right)
+        {
+            if (left is null) return right is null;
+            return left.CompareTo(right) >= 0;
+        }
     }
 
     public class UserService
@@ -144,53 +223,58 @@ namespace KNOTS.Services
             OnAuthenticationChanged?.Invoke();
         }
 
-        // Add friend
-        public (bool Success, string Message) AddFriend(string friendUsername)
-        {
-            if (!IsAuthenticated)
-            {
-                return (false, "You must be logged in.");
-            }
-
-            if (string.IsNullOrWhiteSpace(friendUsername))
-            {
-                return (false, "Friend username cannot be empty.");
-            }
-
-            if (friendUsername.Equals(CurrentUser, StringComparison.OrdinalIgnoreCase))
-            {
-                return (false, "You cannot add yourself as a friend.");
-            }
-
-            // Check if friend exists
-            var friendExists = _users.Any(u => u.Username.Equals(friendUsername, StringComparison.OrdinalIgnoreCase));
-            if (!friendExists)
-            {
-                return (false, "User with this username does not exist.");
-            }
-
-            var currentUserData = _users.FirstOrDefault(u => u.Username.Equals(CurrentUser, StringComparison.OrdinalIgnoreCase));
-            if (currentUserData != null)
-            {
-                // Check if already a friend
-                if (currentUserData.Friends.Any(f => f.Equals(friendUsername, StringComparison.OrdinalIgnoreCase)))
-                {
-                    return (false, "This user is already in your friends list.");
-                }
-
-                currentUserData.Friends.Add(friendUsername);
-                SaveUsers();
-                return (true, $"Friend {friendUsername} added successfully!");
-            }
-
-            return (false, "Error adding friend.");
-        }
-        
+        // Add friend (removed)
 
         // Get total users count (statistics)
         public int GetTotalUsersCount()
         {
             return _users.Count;
+        }
+        public void UpdateUserStatistics(string username, double compatibilityScore, bool wasBestMatch)
+        {
+            var user = _users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+    
+            if (user != null)
+            {
+                user.TotalGamesPlayed++;
+        
+                if (wasBestMatch)
+                {
+                    user.BestMatchesCount++;
+                }
+        
+                // Calculate new average using incremental formula
+                // NewAverage = ((OldAverage * OldCount) + NewScore) / NewCount
+                user.AverageCompatibilityScore = 
+                    ((user.AverageCompatibilityScore * (user.TotalGamesPlayed - 1)) + compatibilityScore) 
+                    / user.TotalGamesPlayed;
+        
+                SaveUsers();
+        
+                Console.WriteLine($"Updated stats for {username}: Games={user.TotalGamesPlayed}, AvgScore={user.AverageCompatibilityScore:F2}, BestMatches={user.BestMatchesCount}");
+            }
+        }
+
+        public List<User> GetLeaderboard(int topCount = 10)
+        {
+            // Uses IComparable implementation - sorts users by ranking
+            // load first <3
+            LoadUsers();
+            var sortedUsers = _users.OrderBy(u => u).ToList(); // OrderBy uses CompareTo
+            return sortedUsers.Take(topCount).ToList();
+        }
+
+        public int GetUserRank(string username)
+        {
+            // load first <3
+            LoadUsers();
+            var sortedUsers = _users.OrderBy(u => u).ToList();
+            return sortedUsers.FindIndex(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)) + 1;
+        }
+
+        public User? GetUserByUsername(string username)
+        {
+            return _users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

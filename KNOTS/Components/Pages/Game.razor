@@ -98,7 +98,7 @@ else
 
                 <div class="mt-3">
                     <h6>Fill in your answers for the game</h6>
-                    <NewGame @ref="newGameFormRef" RoomCode="@currentRoomCode" />
+                    <NewGame @ref="newGameFormRef" RoomCode="@currentRoomCode" Username="@UserService.CurrentUser" />
                 </div>
             }
             
@@ -126,6 +126,8 @@ else
     private NewGame? newGameFormRef;
     private System.Threading.Timer? statusCheckTimer;
 
+    [Parameter]
+    public string? Username { get; set; }
     protected override void OnInitialized()
     {
         if (UserService.IsAuthenticated)

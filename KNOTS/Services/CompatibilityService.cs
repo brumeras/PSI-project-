@@ -67,7 +67,7 @@ namespace KNOTS.Services
 
     public class CompatibilityService
     {
-        private readonly ConcurrentDictionary<string, List<PlayerSwipe>> _roomSwipes = new();
+        private static readonly ConcurrentDictionary<string, List<PlayerSwipe>> _roomSwipes = new();
         
         private readonly string _dataDirectory = "GameData";
         private readonly string _statementsDirectory = "GameStatements";
@@ -76,12 +76,13 @@ namespace KNOTS.Services
         private readonly string _historyFile = "game_history.json";
         
         private List<GameStatement> _statements = new();
-
-        public CompatibilityService()
+        private readonly UserService _userService;
+        public CompatibilityService(UserService userService) // Update constructor
         {
+            _userService = userService;
             Directory.CreateDirectory(_dataDirectory);
             Directory.CreateDirectory(_statementsDirectory);
-            
+    
             LoadStatementsFromFile();
             LoadActiveSwipesFromFile();
         }
@@ -386,6 +387,34 @@ namespace KNOTS.Services
                     WriteIndented = true
                 });
                 File.WriteAllText(filePath, json);
+                foreach (var result in allResults)
+                {
+                    // Check if player1 was best match for player2
+                    bool player1WasBestMatch = allResults
+                                                   .Where(r => r.Player1 == result.Player2 || r.Player2 == result.Player2)
+                                                   .OrderByDescending(r => r.Percentage)
+                                                   .First().Player1 == result.Player1 || 
+                                               allResults
+                                                   .Where(r => r.Player1 == result.Player2 || r.Player2 == result.Player2)
+                                                   .OrderByDescending(r => r.Percentage)
+                                                   .First().Player2 == result.Player1;
+            
+                    // Update player1 stats
+                    _userService.UpdateUserStatistics(result.Player1, result.Percentage, player1WasBestMatch);
+            
+                    // Check if player2 was best match for player1
+                    bool player2WasBestMatch = allResults
+                                                   .Where(r => r.Player1 == result.Player1 || r.Player2 == result.Player1)
+                                                   .OrderByDescending(r => r.Percentage)
+                                                   .First().Player1 == result.Player2 || 
+                                               allResults
+                                                   .Where(r => r.Player1 == result.Player1 || r.Player2 == result.Player1)
+                                                   .OrderByDescending(r => r.Percentage)
+                                                   .First().Player2 == result.Player2;
+            
+                    // Update player2 stats
+                    _userService.UpdateUserStatistics(result.Player2, result.Percentage, player2WasBestMatch);
+                }
 
                 Console.WriteLine($"Game history saved for room {roomCode}");
             }
@@ -486,4 +515,5 @@ namespace KNOTS.Services
             Console.WriteLine($"[Room {roomCode}] Total: {totalSwipes}, Players: {uniquePlayers}, Right: {rightSwipes}, Left: {leftSwipes}");
         }
     }
+    
 }

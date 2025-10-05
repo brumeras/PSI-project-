@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Registruojam servisus
 builder.Services.AddScoped<UserService>();
 builder.Services.AddSingleton<GameRoomService>();
-builder.Services.AddSingleton<CompatibilityService>(); // Perkelta į teisingą vietą
+builder.Services.AddScoped<CompatibilityService>(); // Perkelta į teisingą vietą
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
