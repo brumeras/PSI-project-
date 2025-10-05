@@ -104,14 +104,8 @@ namespace KNOTS.Services
             if (!_rooms.TryGetValue(roomCode, out var room))
                 return new JoinRoomResult(false, "Room not found", GameState.Finished);
 
-            if (room.Players.Count >= room.MaxPlayers)
-                return new JoinRoomResult(false, "Room is full", room.State);
-
-            if (room.State == GameState.InProgress)
-                return new JoinRoomResult(false, "Game has already started", room.State);
-
-            if (room.Players.Any(p => p.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
-                return new JoinRoomResult(false, "Username already taken", room.State);
+            var canJoinResult = room.CanJoin(username);
+            if (!canJoinResult.Success) return canJoinResult;
 
             var player = new GamePlayer(connectionId, username);
 

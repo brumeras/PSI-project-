@@ -1,0 +1,95 @@
+[
+  {
+    "RoomCode": "8698",
+    "PlayedDate": "2025-10-05T23:05:11.343952+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "camilalol",
+    "BestMatchPercentage": 100,
+    "AllResults": [
+      {
+        "Player1": "lalala",
+        "Player2": "camilalol",
+        "MatchingSwipes": 10,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "I enjoy spontaneous trips",
+          "I prefer movies over theater",
+          "I like getting up early in the morning",
+          "Sports are part of my daily routine",
+          "Animals are an important part of my life",
+          "Meaningful conversations are more important than having fun",
+          "I like taking risks and trying new things",
+          "I enjoy cooking at home",
+          "Summer is the best season",
+          "I prefer relaxing at home over going to parties"
+        ],
+        "Percentage": 100
+      }
+    ]
+  },
+  {
+    "RoomCode": "2137",
+    "PlayedDate": "2025-10-05T23:09:15.761135+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "lalala",
+    "BestMatchPercentage": 100,
+    "AllResults": [
+      {
+        "Player1": "camilalol",
+        "Player2": "lalala",
+        "MatchingSwipes": 10,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "Summer is the best season",
+          "Sports are part of my daily routine",
+          "I enjoy spontaneous trips",
+          "I enjoy cooking at home",
+          "I like taking risks and trying new things",
+          "I prefer relaxing at home over going to parties",
+          "Animals are an important part of my life",
+          "I like getting up early in the morning",
+          "Meaningful conversations are more important than having fun",
+          "I prefer movies over theater"
+        ],
+        "Percentage": 100
+      }
+    ]
+  },
+  {
+    "RoomCode": "1934",
+    "PlayedDate": "2025-10-06T00:09:37.082702+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "lalala",
+    "BestMatchPercentage": 20,
+    "AllResults": [
+      {
+        "Player1": "camilalol",
+        "Player2": "lalala",
+        "MatchingSwipes": 2,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "I like taking risks and trying new things",
+          "I like getting up early in the morning"
+        ],
+        "Percentage": 20
+      }
+    ]
+  },
+  {
+    "RoomCode": "1934",
+    "PlayedDate": "2025-10-06T00:09:39.794508+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "lalala",
+    "BestMatchPercentage": 0,
+    "AllResults": [
+      {
+        "Player1": "camilalol",
+        "Player2": "lalala",
+        "MatchingSwipes": 0,
+        "TotalStatements": 0,
+        "MatchedStatements": [],
+        "Percentage": 0
+      }
+    ]
+  }
+]
