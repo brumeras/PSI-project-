@@ -1,165 +1,290 @@
-﻿@inject KNOTS.Services.UserService UserService
-@using System.IO
-@using System.Text.Json
+﻿@using KNOTS.Services
+@inject UserService UserService
+@inject CompatibilityService CompatibilityService
 @rendermode InteractiveServer
 
-<h3>Fill in your answers for the game</h3>
+<div class="swipe-container">
+    <h3 class="text-center mb-4">Swipe Your Answers</h3>
 
-@if (UserService.IsAuthenticated)
-{
-    <div class="mb-3">
-        <label class="form-label">Your Name:</label>
-        <input class="form-control" @bind="PlayerName" placeholder="Enter your name" disabled />
-    </div>
-}
-else
-{
-    <div class="mb-3">
-        <label class="form-label">Your Name:</label>
-        <input class="form-control" @bind="PlayerName" placeholder="Enter your name" />
-    </div>
-}
+    @if (!UserService.IsAuthenticated)
+    {
+        <div class="alert alert-warning">
+            Please login to participate in the game.
+        </div>
+    }
+    else if (statements == null || !statements.Any())
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading statements...</span>
+            </div>
+            <p class="mt-2">Loading game statements...</p>
+        </div>
+    }
+    else if (currentStatementIndex >= statements.Count)
+    {
+        <!-- All statements completed -->
+        <div class="card text-center shadow-lg">
+            <div class="card-body p-5">
+                <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                <h4 class="mt-3">All Done!</h4>
+                <p class="text-muted">You've answered all statements. Waiting for other players...</p>
+                <div class="mt-4">
+                    <p><strong>Your Progress:</strong></p>
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%">
+                            @statements.Count / @statements.Count
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary mt-3" @onclick="ResetSwipes">Review Answers</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Current statement card -->
+        <div class="card shadow-lg statement-card @swipeClass" style="@swipeStyle">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <span class="badge bg-primary">Statement @(currentStatementIndex + 1) of @statements.Count</span>
+                </div>
 
-<hr />
+                <h2 class="text-center mb-5">@statements[currentStatementIndex].Text</h2>
 
-@for (int i = 0; i < Questions.Length && i < Answers.Length; i++)
-{
-    var index = i;
-    <div class="mb-3">
-        <label class="form-label"><strong>@(index + 1). @Questions[index]</strong></label>
-        <input class="form-control" value="@Answers[index]" @oninput="e => Answers[index] = e.Value?.ToString()" placeholder="Type your answer..." />
-    </div>
-}
+                <div class="swipe-buttons d-flex justify-content-center gap-4 mt-5">
+                    <button class="btn btn-danger btn-lg rounded-circle swipe-btn" 
+                            @onclick="() => SwipeLeft()"
+                            disabled="@isAnimating">
+                        <i class="bi bi-x-lg" style="font-size: 2rem;"></i>
+                        <div class="btn-label">Disagree</div>
+                    </button>
 
-<button type="button" class="btn btn-primary" @onclick="SaveAnswers">Save Answers</button>
+                    <button class="btn btn-success btn-lg rounded-circle swipe-btn" 
+                            @onclick="() => SwipeRight()"
+                            disabled="@isAnimating">
+                        <i class="bi bi-check-lg" style="font-size: 2rem;"></i>
+                        <div class="btn-label">Agree</div>
+                    </button>
+                </div>
 
-@if (!string.IsNullOrEmpty(SavedFilePath))
-{
-    <div class="alert alert-success mt-3" role="alert">
-        ✅ Answers saved successfully to @SavedFilePath
-    </div>
-}
-@if (!string.IsNullOrEmpty(statusMessage))
-{
-    <div class="alert alert-danger mt-3" role="alert">
-        ❌ @statusMessage
-    </div>
-}
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i> Swipe right if you agree, left if you disagree
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="mt-4">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Progress</span>
+                <span class="text-muted">@currentStatementIndex / @statements.Count</span>
+            </div>
+            <div class="progress" style="height: 20px;">
+                <div class="progress-bar" 
+                     role="progressbar" 
+                     style="width: @GetProgressPercentage()%">
+                    @GetProgressPercentage()%
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="d-flex justify-content-between mt-3">
+            <button class="btn btn-outline-secondary" 
+                    @onclick="GoBack" 
+                    disabled="@(currentStatementIndex == 0 || isAnimating)">
+                <i class="bi bi-arrow-left"></i> Previous
+            </button>
+            <button class="btn btn-outline-primary" 
+                    @onclick="SkipStatement" 
+                    disabled="@isAnimating">
+                Skip <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <div class="alert alert-info mt-3">
+            @statusMessage
+        </div>
+    }
+</div>
+
+<style>
+    .swipe-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .statement-card {
+        min-height: 400px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        border: none;
+        border-radius: 20px;
+    }
+
+    .statement-card.swipe-left {
+        animation: swipeLeft 0.5s ease;
+    }
+
+    .statement-card.swipe-right {
+        animation: swipeRight 0.5s ease;
+    }
+
+    @@keyframes swipeLeft {
+        0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateX(-100%) rotate(-20deg); opacity: 0; }
+    }
+
+    @@keyframes swipeRight {
+        0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateX(100%) rotate(20deg); opacity: 0; }
+    }
+
+    .swipe-btn {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: transform 0.2s ease;
+    }
+
+    .swipe-btn:hover:not(:disabled) {
+        transform: scale(1.1);
+    }
+
+    .swipe-btn:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    .btn-label {
+        position: absolute;
+        bottom: -30px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .swipe-buttons {
+        margin-bottom: 40px;
+    }
+</style>
 
 @code {
-    private string PlayerName { get; set; } = "";
-    private string[] Answers;
+    [Parameter]
+    public string? RoomCode { get; set; }
 
-    private string[] Questions { get; } =
-    {
-        "What is your favorite movie?",
-        "If you could travel anywhere, where would you go?",
-        "What is one thing you can't live without?",
-        "What was your childhood dream job?",
-        "What's your favorite hobby?"
-    };
-
-    private string SavedFilePath { get; set; }
-    private string statusMessage = string.Empty;
+    private List<GameStatement> statements = new();
+    private int currentStatementIndex = 0;
+    private string statusMessage = "";
+    private bool isAnimating = false;
+    private string swipeClass = "";
+    private string swipeStyle = "";
 
     protected override void OnInitialized()
     {
-        Answers = new string[Questions.Length];
-
         if (UserService.IsAuthenticated)
         {
-            PlayerName = UserService.CurrentUser;
+            LoadStatements();
         }
     }
 
-    public void SaveAnswers()
+    private void LoadStatements()
     {
-        if (string.IsNullOrWhiteSpace(PlayerName))
+        // Load 10 random statements for the game
+        statements = CompatibilityService.GetRandomStatements(10);
+        statusMessage = $"Loaded {statements.Count} statements. Let's begin!";
+    }
+
+    private async Task SwipeRight()
+    {
+        await PerformSwipe(true, "swipe-right");
+    }
+
+    private async Task SwipeLeft()
+    {
+        await PerformSwipe(false, "swipe-left");
+    }
+
+    private async Task PerformSwipe(bool agreeWithStatement, string animationClass)
+    {
+        if (isAnimating || currentStatementIndex >= statements.Count) return;
+
+        isAnimating = true;
+        swipeClass = animationClass;
+
+        // Save the swipe
+        if (!string.IsNullOrEmpty(RoomCode))
         {
-            statusMessage = "Player name is required.";
-            SavedFilePath = string.Empty;
-            return;
+            var statement = statements[currentStatementIndex];
+            bool saved = CompatibilityService.SaveSwipe(
+                RoomCode,
+                UserService.CurrentUser ?? "",
+                statement.Id,
+                agreeWithStatement
+            );
+
+            if (!saved)
+            {
+                statusMessage = "Error saving your answer. Please try again.";
+            }
         }
 
-        // Check if all answers are filled
-        if (Answers.Any(string.IsNullOrWhiteSpace))
+        // Wait for animation
+        await Task.Delay(500);
+
+        // Move to next statement
+        currentStatementIndex++;
+        swipeClass = "";
+        isAnimating = false;
+
+        StateHasChanged();
+    }
+
+    private void SkipStatement()
+    {
+        if (currentStatementIndex < statements.Count - 1)
         {
-            statusMessage = "Please answer all questions before saving.";
-            SavedFilePath = string.Empty;
-            return;
-        }
-
-        try
-        {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(),  "answers.json");
-            
-            // Create directory if it doesn't exist
-            var directory = Path.GetDirectoryName(filePath);
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            // Read existing data or create new list
-            List<PlayerAnswers> allPlayersAnswers;
-            
-            if (File.Exists(filePath))
-            {
-                try
-                {
-                    string existingJson = File.ReadAllText(filePath);
-                    allPlayersAnswers = JsonSerializer.Deserialize<List<PlayerAnswers>>(existingJson) ?? new List<PlayerAnswers>();
-                }
-                catch
-                {
-                    // If file is corrupted, start fresh
-                    allPlayersAnswers = new List<PlayerAnswers>();
-                }
-            }
-            else
-            {
-                allPlayersAnswers = new List<PlayerAnswers>();
-            }
-
-            // Remove existing entry for this player if exists
-            allPlayersAnswers.RemoveAll(p => p.Username.Equals(PlayerName, StringComparison.OrdinalIgnoreCase));
-
-            // Add new entry
-            var playerData = new PlayerAnswers
-            {
-                Username = PlayerName,
-                Answers = Answers.ToList(),
-                Timestamp = DateTime.Now
-            };
-
-            allPlayersAnswers.Add(playerData);
-
-            // Save to file
-            string json = JsonSerializer.Serialize(allPlayersAnswers, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-
-            File.WriteAllText(filePath, json);
-            
-            SavedFilePath = filePath;
-            statusMessage = string.Empty;
-            
-            Console.WriteLine($"Answers saved successfully to: {filePath}");
-            Console.WriteLine($"File content: {json}");
-        }
-        catch (Exception ex)
-        {
-            statusMessage = $"Error saving answers: {ex.Message}";
-            SavedFilePath = string.Empty;
-            Console.WriteLine($"Error saving answers: {ex}");
+            currentStatementIndex++;
+            statusMessage = "Statement skipped.";
         }
     }
 
-    public class PlayerAnswers
+    private void GoBack()
     {
-        public string Username { get; set; } = "";
-        public List<string> Answers { get; set; } = new();
-        public DateTime Timestamp { get; set; }
+        if (currentStatementIndex > 0)
+        {
+            currentStatementIndex--;
+            statusMessage = "";
+        }
+    }
+
+    private void ResetSwipes()
+    {
+        currentStatementIndex = 0;
+        statusMessage = "Reviewing your answers...";
+    }
+
+    private double GetProgressPercentage()
+    {
+        if (statements.Count == 0) return 0;
+        return Math.Round((double)currentStatementIndex / statements.Count * 100, 1);
+    }
+
+    public bool IsComplete()
+    {
+        return currentStatementIndex >= statements.Count;
+    }
+
+    public int GetCompletedCount()
+    {
+        return Math.Min(currentStatementIndex, statements.Count);
     }
 }

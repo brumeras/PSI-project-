@@ -1,69 +1,246 @@
-﻿@page "/activity"
-@attribute [StreamRendering]
+﻿@using KNOTS.Services
+@inject CompatibilityService CompatibilityService
+@inject GameRoomService GameRoomService
 
-<PageTitle>My Activity</PageTitle>
+<div class="results-container">
+    @if (isCalculating)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Calculating compatibility...</span>
+            </div>
+            <p class="mt-2">Analyzing your answers...</p>
+        </div>
+    }
+    else if (compatibilityResults != null && compatibilityResults.Any())
+    {
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center">
+                <h3>Compatibility Results</h3>
+                <p class="mb-0">Room: @RoomCode</p>
+            </div>
+            <div class="card-body">
+                <h5 class="mb-4">Top Matches:</h5>
+                
+                @for (int i = 0; i < compatibilityResults.Count; i++)
+                {
+                    var result = compatibilityResults[i];
+                    var medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "";
+                    
+                    <div class="result-card mb-3 @(i == 0 ? "best-match" : "")">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">
+                                @medal @result.Player1 & @result.Player2
+                            </h5>
+                            <span class="badge @GetBadgeColor(result.Percentage) fs-5">
+                                @result.Percentage%
+                            </span>
+                        </div>
+                        
+                        <div class="progress mb-2" style="height: 30px;">
+                            <div class="progress-bar @GetProgressBarColor(result.Percentage)" 
+                                 role="progressbar" 
+                                 style="width: @result.Percentage%">
+                                @result.MatchingSwipes / @result.TotalStatements matches
+                            </div>
+                        </div>
+                        
+                        @if (result.MatchedStatements.Any())
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" 
+                                    @onclick="() => ToggleDetails(i)">
+                                @(expandedIndex == i ? "Hide" : "Show") matched statements
+                            </button>
+                            
+                            @if (expandedIndex == i)
+                            {
+                                <div class="matched-statements mt-2">
+                                    <small class="text-muted">You both agreed on:</small>
+                                    <ul class="mt-2">
+                                        @foreach (var statement in result.MatchedStatements)
+                                        {
+                                            <li>@statement</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                
+                <!-- My Matches Section -->
+                @if (!string.IsNullOrEmpty(CurrentUsername))
+                {
+                    var myMatches = compatibilityResults
+                        .Where(r => r.Player1 == CurrentUsername || r.Player2 == CurrentUsername)
+                        .OrderByDescending(r => r.Percentage)
+                        .ToList();
+                    
+                    @if (myMatches.Any())
+                    {
+                        <hr class="my-4" />
+                        <h5 class="mb-3">Your Personal Matches:</h5>
+                        
+                        @foreach (var match in myMatches)
+                        {
+                            var otherPlayer = match.Player1 == CurrentUsername ? match.Player2 : match.Player1;
+                            
+                            <div class="my-match-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>You & @otherPlayer</strong>
+                                    </div>
+                                    <div>
+                                        <span class="badge @GetBadgeColor(match.Percentage)">
+                                            @match.Percentage%
+                                        </span>
+                                        <small class="text-muted ms-2">
+                                            (@match.MatchingSwipes/@match.TotalStatements)
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+                
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary" @onclick="SaveToHistory">
+                        Save Results & Finish
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> No compatibility results available. 
+            Make sure all players have answered the questions.
+        </div>
+    }
+</div>
 
-<h1>My Activity</h1>
+<style>
+    .results-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-<p>Recent game results</p>
+    .result-card {
+        padding: 20px;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+    }
 
-@if (gameResults == null)
-{
-    <p>
-        <em>Loading...</em>
-    </p>
-}
-else
-{
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Most compatible</th>
-            <th>Least compatible</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var result in gameResults)
-        {
-            <tr>
-                <td>@result.Date.ToString("yyyy-MM-dd")</td>
-                <td>@result.MostCompatible</td>
-                <td>@result.LeastCompatible</td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
+    .best-match {
+        border-color: #ffd700;
+        background: linear-gradient(135deg, #fffbea 0%, #fff9db 100%);
+    }
+
+    .matched-statements {
+        padding: 10px;
+        background-color: white;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+
+    .matched-statements ul {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+
+    .my-match-card {
+        padding: 15px;
+        background-color: #e7f3ff;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 4px solid #0d6efd;
+    }
+</style>
 
 @code {
-    private GameResult[]? gameResults;
-
-    protected override async Task OnInitializedAsync()
+    [Parameter]
+    public string? RoomCode { get; set; }
+    
+    [Parameter]
+    public string? CurrentUsername { get; set; }
+    
+    [Parameter]
+    public EventCallback OnResultsSaved { get; set; }
+    
+    private List<CompatibilityScore>? compatibilityResults;
+    private bool isCalculating = false;
+    private int expandedIndex = -1;
+    
+    protected override void OnInitialized()
     {
-        
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        
-        // Sample game results data
-        gameResults = Enumerable.Range(1, 5).Select(index => new GameResult
+        if (!string.IsNullOrEmpty(RoomCode))
         {
-            Date = startDate.AddDays(-index), // Show recent results (past dates)
-            MostCompatible = GetRandomCompatibility(),
-            LeastCompatible = GetRandomCompatibility()
-        }).ToArray();
+            CalculateResults();
+        }
     }
-//Pavyzdiniai dalykai, ateity bus atnaujinti su buvusių žaidimų statistika
-    private string GetRandomCompatibility()
+    
+    private void CalculateResults()
     {
-        var compatibilities = new[] { "Player A", "Player B", "Player C", "Player D", "Team Alpha", "Team Beta", "User123", "Gamer456" };
-        return compatibilities[Random.Shared.Next(compatibilities.Length)];
+        isCalculating = true;
+        StateHasChanged();
+        
+        try
+        {
+            var players = GameRoomService.GetRoomPlayerUsernames(RoomCode ?? "");
+            
+            if (players.Count >= 2)
+            {
+                compatibilityResults = CompatibilityService.CalculateAllCompatibilities(
+                    RoomCode ?? "", 
+                    players
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error calculating results: {ex.Message}");
+        }
+        finally
+        {
+            isCalculating = false;
+            StateHasChanged();
+        }
     }
-
-    private class GameResult
+    
+    private void ToggleDetails(int index)
     {
-        public DateOnly Date { get; set; }
-        public string? MostCompatible { get; set; }
-        public string? LeastCompatible { get; set; }
+        expandedIndex = expandedIndex == index ? -1 : index;
+    }
+    
+    private string GetProgressBarColor(double percentage)
+    {
+        if (percentage >= 80) return "bg-success";
+        if (percentage >= 60) return "bg-info";
+        if (percentage >= 40) return "bg-warning";
+        return "bg-danger";
+    }
+    
+    private string GetBadgeColor(double percentage)
+    {
+        if (percentage >= 80) return "bg-success";
+        if (percentage >= 60) return "bg-info";
+        if (percentage >= 40) return "bg-warning";
+        return "bg-danger";
+    }
+    
+    private async Task SaveToHistory()
+    {
+        if (!string.IsNullOrEmpty(RoomCode))
+        {
+            var players = GameRoomService.GetRoomPlayerUsernames(RoomCode);
+            CompatibilityService.SaveGameToHistory(RoomCode, players);
+            CompatibilityService.ClearRoomData(RoomCode);
+            
+            await OnResultsSaved.InvokeAsync();
+        }
     }
 }

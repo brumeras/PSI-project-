@@ -1,0 +1,248 @@
+﻿@page "/activity"
+@using KNOTS.Services
+@inject CompatibilityService CompatibilityService
+@inject UserService UserService
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+<PageTitle>My Activity</PageTitle>
+
+<div class="container mt-4">
+    <h1>My Activity</h1>
+    
+    @if (!UserService.IsAuthenticated)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> Please login to view your game history.
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">Recent compatibility results for @UserService.CurrentUser</p>
+
+        @if (isLoading)
+        {
+            <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading your game history...</p>
+            </div>
+        }
+        else if (gameHistory == null || !gameHistory.Any())
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No game history found. Play some games to see your results here!
+            </div>
+        }
+        else
+        {
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Your Game Results</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Room Code</th>
+                                <th>Best Match</th>
+                                <th>Compatibility %</th>
+                                <th>Total Players</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var game in gameHistory)
+                            {
+                                <tr>
+                                    <td>@game.PlayedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td><span class="badge bg-secondary">@game.RoomCode</span></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(game.BestMatchPlayer))
+                                        {
+                                            <strong>@game.BestMatchPlayer</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (game.BestMatchPercentage > 0)
+                                        {
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar @GetProgressBarColor(game.BestMatchPercentage)" 
+                                                     role="progressbar" 
+                                                     style="width: @game.BestMatchPercentage%"
+                                                     aria-valuenow="@game.BestMatchPercentage" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                    @game.BestMatchPercentage%
+                                                </div>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>@game.TotalPlayers</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowDetails(game)">
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Games</h5>
+                            <p class="display-4">@gameHistory.Count</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Average Compatibility</h5>
+                            <p class="display-4">@GetAverageCompatibility()%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Best Match Ever</h5>
+                            <p class="display-4">@GetBestMatchEver()</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Details Modal -->
+        @if (selectedGame != null)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Game Details - Room @selectedGame.RoomCode</h5>
+                            <button type="button" class="btn-close" @onclick="CloseDetails"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h6>All Compatibility Results:</h6>
+                            @if (selectedGame.AllResults != null && selectedGame.AllResults.Any())
+                            {
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Players</th>
+                                            <th>Compatibility</th>
+                                            <th>Matching Answers</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < selectedGame.AllResults.Count; i++)
+                                        {
+                                            var match = selectedGame.AllResults[i];
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td>@match.Player1 & @match.Player2</td>
+                                                <td>
+                                                    <span class="badge @GetBadgeColor(match.Percentage)">
+                                                        @match.Percentage%
+                                                    </span>
+                                                </td>
+                                                <td>@match.MatchingSwipes / @match.TotalStatements</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseDetails">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<GameHistoryEntry>? gameHistory;
+    private bool isLoading = true;
+    private GameHistoryEntry? selectedGame;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(300);
+        
+        if (UserService.IsAuthenticated)
+        {
+            LoadGameHistory();
+        }
+        
+        isLoading = false;
+    }
+
+    private void LoadGameHistory()
+    {
+        // Užkrauna tikrus duomenis iš CompatibilityService
+        gameHistory = CompatibilityService.GetPlayerHistory(UserService.CurrentUser ?? "");
+    }
+
+    private string GetProgressBarColor(double percentage)
+    {
+        if (percentage >= 80) return "bg-success";
+        if (percentage >= 60) return "bg-info";
+        if (percentage >= 40) return "bg-warning";
+        return "bg-danger";
+    }
+
+    private string GetBadgeColor(double percentage)
+    {
+        if (percentage >= 80) return "bg-success";
+        if (percentage >= 60) return "bg-info";
+        if (percentage >= 40) return "bg-warning";
+        return "bg-danger";
+    }
+
+    private string GetAverageCompatibility()
+    {
+        if (gameHistory == null || !gameHistory.Any()) return "0";
+        
+        var avg = gameHistory.Average(g => g.BestMatchPercentage);
+        return avg.ToString("F1");
+    }
+
+    private string GetBestMatchEver()
+    {
+        if (gameHistory == null || !gameHistory.Any()) return "N/A";
+        
+        var best = gameHistory
+            .OrderByDescending(g => g.BestMatchPercentage)
+            .FirstOrDefault();
+        
+        return best?.BestMatchPlayer ?? "N/A";
+    }
+
+    private void ShowDetails(GameHistoryEntry game)
+    {
+        selectedGame = game;
+    }
+
+    private void CloseDetails()
+    {
+        selectedGame = null;
+    }
+}

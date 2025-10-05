@@ -1,4 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KNOTS.Services
 {
@@ -85,12 +88,7 @@ namespace KNOTS.Services
                 Host = hostUsername,
                 Players = new List<GamePlayer>
                 {
-                    new GamePlayer
-                    {
-                        ConnectionId = hostConnectionId,
-                        Username = hostUsername,
-                        JoinedAt = DateTime.Now
-                    }
+                    new GamePlayer(hostConnectionId, hostUsername) // Naudojamas konstruktorius
                 }
             };
 
@@ -131,6 +129,16 @@ namespace KNOTS.Services
         public GameRoom? GetRoomInfo(string roomCode) {
             _rooms.TryGetValue(roomCode, out var room);
             return room;
+        }
+
+        // Gauna visus kambario žaidėjų vardus
+        public List<string> GetRoomPlayerUsernames(string roomCode)
+        {
+            if (_rooms.TryGetValue(roomCode, out var room))
+            {
+                return room.Players.Select(p => p.Username).ToList();
+            }
+            return new List<string>();
         }
 
         // Gauna žaidėjo vardą pagal ConnectionId
@@ -200,6 +208,78 @@ namespace KNOTS.Services
         // Gauna aktyvių teiginių ID
         public List<string> GetActiveStatementIds(string roomCode) {
             if (_rooms.TryGetValue(roomCode, out var room)) { return room.ActiveStatementIds; }
+            return new List<string>();
+        }
+
+        // Pažymi žaidėją kaip ready
+        public bool SetPlayerReady(string connectionId, bool isReady)
+        {
+            if (!_playerToRoom.TryGetValue(connectionId, out var roomCode))
+            {
+                return false;
+            }
+
+            if (!_rooms.TryGetValue(roomCode, out var room))
+            {
+                return false;
+            }
+
+            // Randame žaidėją ir atnaujiname jo ready būseną
+            for (int i = 0; i < room.Players.Count; i++)
+            {
+                if (room.Players[i].ConnectionId == connectionId)
+                {
+                    var player = room.Players[i];
+                    player.IsReady = isReady;
+                    room.Players[i] = player; // Struct reikia priskirti atgal
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Patikrina ar visi žaidėjai ready
+        public bool AreAllPlayersReady(string roomCode)
+        {
+            if (!_rooms.TryGetValue(roomCode, out var room))
+            {
+                return false;
+            }
+
+            if (room.Players.Count < 2) // Reikia bent 2 žaidėjų
+            {
+                return false;
+            }
+
+            return room.Players.All(p => p.IsReady);
+        }
+
+        // Pradeda žaidimą kambaryje
+        public bool StartGame(string roomCode, List<string> statementIds)
+        {
+            if (!_rooms.TryGetValue(roomCode, out var room))
+            {
+                return false;
+            }
+
+            if (room.IsGameStarted)
+            {
+                return false;
+            }
+
+            room.IsGameStarted = true;
+            room.ActiveStatementIds = statementIds;
+            return true;
+        }
+
+        // Gauna aktyvių teiginių ID
+        public List<string> GetActiveStatementIds(string roomCode)
+        {
+            if (_rooms.TryGetValue(roomCode, out var room))
+            {
+                return room.ActiveStatementIds;
+            }
             return new List<string>();
         }
 
