@@ -6,12 +6,20 @@ using System.Text.Json;
 
 namespace KNOTS.Services
 {
-    public class User
+    public class User : IEquatable<User>
     {
         public string Username { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public List<string> Friends { get; set; } = new List<string>();
         public string PasswordHash { get; set; } = string.Empty;
+
+        public bool Equals(User? other) {
+            if(other is null) return false;
+            return Username.Equals(other.Username, StringComparison.InvariantCultureIgnoreCase);
+        }
+        
+        public override bool Equals(object? obj) => Equals(obj as User);
+        public override int GetHashCode() => Username.ToLowerInvariant().GetHashCode();
     }
 
     public class UserService
@@ -94,7 +102,7 @@ namespace KNOTS.Services
             }
 
             // Check if username is already taken
-            if (_users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
+            if (_users.Contains(new User { Username = username}))
             {
                 return (false, "This username is already taken.");
             }
