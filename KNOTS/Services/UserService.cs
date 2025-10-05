@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 
@@ -28,15 +29,24 @@ namespace KNOTS.Services
         public string? CurrentUser { get; private set; }
         public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUser);
 
-        // Load users from file
+        // Load users from file using stream
         private void LoadUsers()
         {
             try
             {
                 if (File.Exists(_filePath))
                 {
-                    string jsonString = File.ReadAllText(_filePath);
-                    _users = JsonSerializer.Deserialize<List<User>>(jsonString) ?? new List<User>();
+                    using (FileStream fileStream = new FileStream(_filePath, FileMode.Open, FileAccess.Read))
+                    {
+                        if (fileStream.Length > 0)
+                        {
+                            _users = JsonSerializer.Deserialize<List<User>>(fileStream) ?? new List<User>();
+                        }
+                        else
+                        {
+                            _users = new List<User>();
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -46,16 +56,18 @@ namespace KNOTS.Services
             }
         }
 
-        // Save users to file
+        // Save users to file using stream
         private void SaveUsers()
         {
             try
             {
-                string jsonString = JsonSerializer.Serialize(_users, new JsonSerializerOptions
+                using (FileStream fileStream = new FileStream(_filePath, FileMode.Create, FileAccess.Write))
                 {
-                    WriteIndented = true
-                });
-                File.WriteAllText(_filePath, jsonString);
+                    JsonSerializer.Serialize(fileStream, _users, new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -91,7 +103,7 @@ namespace KNOTS.Services
             var newUser = new User
             {
                 Username = username,
-                PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(password,13),
+                PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(password, 13),
                 CreatedAt = DateTime.Now
             };
 
@@ -120,7 +132,6 @@ namespace KNOTS.Services
                     OnAuthenticationChanged?.Invoke();
                     return (true, "Login successful!");
                 }
-                
             }
 
             return (false, "Invalid username or password.");
@@ -174,16 +185,7 @@ namespace KNOTS.Services
 
             return (false, "Error adding friend.");
         }
-
-        // Get user's friends
-        public List<string> GetUserFriends()
-        {
-            if (!IsAuthenticated)
-                return new List<string>();
-
-            var currentUserData = _users.FirstOrDefault(u => u.Username.Equals(CurrentUser, StringComparison.OrdinalIgnoreCase));
-            return currentUserData?.Friends ?? new List<string>();
-        }
+        
 
         // Get total users count (statistics)
         public int GetTotalUsersCount()

@@ -6,9 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Registruojam servisus
 builder.Services.AddScoped<UserService>();
-
-//builder.Services.AddSingleton<GameService>();
 builder.Services.AddSingleton<GameRoomService>();
+builder.Services.AddSingleton<CompatibilityService>(); // Perkelta į teisingą vietą
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -34,5 +33,3 @@ app.MapRazorComponents<App>()
 app.MapHub<GameHub>("/gamehub");
 
 app.Run();
-
-//TESTAS

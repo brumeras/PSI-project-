@@ -6,6 +6,22 @@
     "PasswordHash": "$2a$13$/453QvKTxyDU4b8oufRKt..q.xr6KAvUKtIBS32u1VZMhJ2S8tity"
   },
   {
+    "Username": "lalala",
+    "CreatedAt": "2025-10-02T20:58:40.857894+03:00",
+    "Friends": [],
+    "PasswordHash": "$2a$13$1OnMNHc5e9momg/bD24H2O7RuglIigsphJxQGpkEh57cuMq5KLWHO"
+  },
+  {
+    "Username": "emilija7",
+    "CreatedAt": "2025-10-04T13:42:08.8341747+03:00",
+    "Friends": [],
+    "PasswordHash": "$2a$13$Pq9RX3OZtO3dDjgu/80FnO1CRv1MvouBqssZF9X4X2F0LC5M8VzqO"
+  },
+  {
+    "Username": "labas",
+    "CreatedAt": "2025-10-04T14:36:18.9878318+03:00",
+    "Friends": [],
+    "PasswordHash": "$2a$13$676xnsbWT6xzTLjHk5MD8OA7Sm2qXuanWY0EitqPV2e/2d75JENxi"
     "Username": "emilija7",
     "Password": "labas",
     "CreatedAt": "2025-10-02T15:29:20.0362584+03:00",
