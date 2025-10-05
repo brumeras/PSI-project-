@@ -6,7 +6,7 @@ public static class GameRoomExs
 {
 
     public static bool isFull(this GameRoom room) {return room.Players.Count >= room.MaxPlayers;}
-    public static bool hasStarted(this GameRoom room) {return room.IsGameStarted;}
+    public static bool hasStarted(this GameRoom room) {return room.State == gameState.inProgress;}
     public static bool hasPlayer(this GameRoom room, string username) {return room.Players.Any(x => x.Username == username);}
 
 
@@ -20,6 +20,7 @@ public static class GameRoomExs
 
         if (room.hasPlayer(username))
             return new JoinRoomResult { Success = false, Message = "Username is already taken" };
+        
 
         return new JoinRoomResult { Success = true };
     }

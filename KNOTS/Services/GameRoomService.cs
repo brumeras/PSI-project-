@@ -2,13 +2,20 @@
 
 namespace KNOTS.Services
 {
+    public enum gameState
+    {
+        waitingForPlayers,
+        inProgress,
+        finished
+    }
     public class GameRoom
     {
         public string RoomCode { get; set; } = string.Empty;
         public string Host { get; set; } = string.Empty;
         public List<GamePlayer> Players { get; set; } = new();
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public bool IsGameStarted { get; set; } = false;
+        //public bool IsGameStarted { get; set; } = false;
+        public gameState State { get; set; } = gameState.waitingForPlayers;
         public int MaxPlayers { get; set; } = 4;
     }
 
