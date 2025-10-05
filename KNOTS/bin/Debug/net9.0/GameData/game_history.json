@@ -1,0 +1,22 @@
+[
+  {
+    "RoomCode": "9458",
+    "PlayedDate": "2025-10-05T15:32:47.4669351+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "emilija7",
+    "BestMatchPercentage": 20,
+    "AllResults": [
+      {
+        "Player1": "labas",
+        "Player2": "emilija7",
+        "MatchingSwipes": 2,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "I like taking risks and trying new things",
+          "Music is an important part of my life"
+        ],
+        "Percentage": 20
+      }
+    ]
+  }
+]
