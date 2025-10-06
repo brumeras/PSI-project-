@@ -38,13 +38,6 @@ else
     private string statusMessage = "";
     private string friendToAdd = "";
     private string friendMessage = "";
-    
-    private void AddFriend()
-    {
-        var result = UserService.AddFriend(friendToAdd);
-        friendMessage = result.Message;
-        friendToAdd = "";
-    }
 
     private void Logout()
     {
