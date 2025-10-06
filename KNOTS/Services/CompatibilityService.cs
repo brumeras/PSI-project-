@@ -448,27 +448,26 @@ namespace KNOTS.Services
         {
             var roomSwipes = GetRoomSwipes(roomCode);
             
-            // BOXING: value types (int, bool) -> object (reference type)
             var stats = new Dictionary<string, object>
             {
-                ["TotalSwipes"] = roomSwipes.Count,  // int -> object (BOXING)
-                ["UniquePlayers"] = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),  // int -> object (BOXING)
-                ["UniqueStatements"] = roomSwipes.Select(s => s.StatementId).Distinct().Count(),  // int -> object (BOXING)
-                ["RightSwipes"] = roomSwipes.Count(s => s.AgreeWithStatement),  // int -> object (BOXING)
-                ["LeftSwipes"] = roomSwipes.Count(s => !s.AgreeWithStatement)  // int -> object (BOXING)
+                ["TotalSwipes"] = roomSwipes.Count,  
+                ["UniquePlayers"] = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),  
+                ["UniqueStatements"] = roomSwipes.Select(s => s.StatementId).Distinct().Count(),  
+                ["RightSwipes"] = roomSwipes.Count(s => s.AgreeWithStatement),  
+                ["LeftSwipes"] = roomSwipes.Count(s => !s.AgreeWithStatement)  
             };
 
             return stats;
         }
 
-        // UNBOXING: object -> int
+        
         public int GetStatisticValue(string roomCode, string statKey)
         {
             var stats = GetRoomStatistics(roomCode);
             
             if (stats.ContainsKey(statKey))
             {
-                return (int)stats[statKey];  // UNBOXING: object -> int (value type)
+                return (int)stats[statKey];  
             }
             
             return 0;
