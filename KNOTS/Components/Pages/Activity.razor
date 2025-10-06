@@ -197,7 +197,6 @@
 
     private void LoadGameHistory()
     {
-        // Užkrauna tikrus duomenis iš CompatibilityService
         gameHistory = CompatibilityService.GetPlayerHistory(UserService.CurrentUser ?? "");
     }
 

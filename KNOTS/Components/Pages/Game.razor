@@ -55,7 +55,6 @@ else
             }
             else if (showResults)
             {
-                <!-- REZULTATŲ EKRANAS -->
                 <GameResults 
                     RoomCode="@currentRoomCode" 
                     CurrentUsername="@UserService.CurrentUser"
@@ -63,13 +62,12 @@ else
             }
             else
             {
-                <!-- ŽAIDIMAS -->
+                
                 <div class="alert alert-success">
                     <h6>You are currently in room: @currentRoomCode</h6>
                     <p>Other connected players: @string.Join(", ", playersInRoom)</p>
                 </div>
-
-                <!-- STATUS CHECK - PRIEŠ NewGame komponentą -->
+                
                 @if (newGameFormRef != null && newGameFormRef.IsComplete())
                 {
                     <div class="alert alert-info text-center mb-3">
@@ -136,7 +134,6 @@ else
             statusMessage = "Connecting to server...";
         }
         
-        // Auto-check every 3 seconds
         statusCheckTimer = new System.Threading.Timer(async _ => 
         {
             if (!string.IsNullOrEmpty(currentRoomCode) && !showResults)

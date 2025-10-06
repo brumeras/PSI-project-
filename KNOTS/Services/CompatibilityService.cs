@@ -77,7 +77,7 @@ namespace KNOTS.Services
         
         private List<GameStatement> _statements = new();
         private readonly UserService _userService;
-        public CompatibilityService(UserService userService) // Update constructor
+        public CompatibilityService(UserService userService) 
         {
             _userService = userService;
             Directory.CreateDirectory(_dataDirectory);
@@ -157,12 +157,7 @@ namespace KNOTS.Services
 
             };
         }
-
-        public List<GameStatement> GetAllStatements()
-        {
-            return _statements.ToList();
-        }
-
+        
         public List<GameStatement> GetRandomStatements(int count)
         {
             var random = new Random();
@@ -338,22 +333,7 @@ namespace KNOTS.Services
             var allScores = CalculateAllCompatibilities(roomCode, playerUsernames);
             return allScores.FirstOrDefault();
         }
-
-        public CompatibilityScore? GetBestMatchForPlayer(string roomCode, string playerUsername, List<string> otherPlayers)
-        {
-            var scores = new List<CompatibilityScore>();
-
-            foreach (var otherPlayer in otherPlayers)
-            {
-                if (otherPlayer != playerUsername)
-                {
-                    var score = CalculateCompatibility(roomCode, playerUsername, otherPlayer);
-                    scores.Add(score);
-                }
-            }
-
-            return scores.OrderByDescending(s => s.Percentage).FirstOrDefault();
-        }
+        
         
         public void SaveGameToHistory(string roomCode, List<string> playerUsernames)
         {
@@ -492,15 +472,6 @@ namespace KNOTS.Services
             }
             
             return 0;
-        }
-
-        public double GetPlayerProgressPercentage(string roomCode, string playerUsername, int totalStatements)
-        {
-            var swipes = GetPlayerSwipes(roomCode, playerUsername);
-            
-            if (totalStatements == 0) return 0.0;
-            
-            return Math.Round((double)swipes.Count / totalStatements * 100, 2);
         }
         
         // Helper metodas, kuris naudoja boxing/unboxing

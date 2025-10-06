@@ -12,33 +12,26 @@ namespace KNOTS.Services
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string PasswordHash { get; set; } = string.Empty;
         
-        // Game statistics for comparison
         public int TotalGamesPlayed { get; set; } = 0;
         public double AverageCompatibilityScore { get; set; } = 0.0;
         public int BestMatchesCount { get; set; } = 0;
-
-        // IComparable<User> implementation
+        
         public int CompareTo(User? other)
         {
             if (other == null) return 1;
             
-            // Primary: Most best matches (higher is better)
             int bestMatchComparison = other.BestMatchesCount.CompareTo(this.BestMatchesCount);
             if (bestMatchComparison != 0) return bestMatchComparison;
             
-            // Secondary: Highest average compatibility score
             int avgScoreComparison = other.AverageCompatibilityScore.CompareTo(this.AverageCompatibilityScore);
             if (avgScoreComparison != 0) return avgScoreComparison;
             
-            // 3: Most games played
             int gamesComparison = other.TotalGamesPlayed.CompareTo(this.TotalGamesPlayed);
             if (gamesComparison != 0) return gamesComparison;
             
-            // Final tiebreaker: Alphabetically by username
             return string.Compare(this.Username, other.Username, StringComparison.OrdinalIgnoreCase);
         }
-
-        // IEquatable<User> implementation
+        
         public bool Equals(User? other)
         {
             if (other == null) return false;
@@ -134,8 +127,7 @@ namespace KNOTS.Services
                 _users = new List<User>();
             }
         }
-
-        // Save users to file using stream
+        
         private void SaveUsers()
         {
             try
@@ -153,8 +145,7 @@ namespace KNOTS.Services
                 Console.WriteLine($"Error saving users file: {ex.Message}");
             }
         }
-
-        // Register new user
+        
         public (bool Success, string Message) RegisterUser(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
@@ -171,14 +162,12 @@ namespace KNOTS.Services
             {
                 return (false, "Password must be at least 4 characters long.");
             }
-
-            // Check if username is already taken
+            
             if (_users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
             {
                 return (false, "This username is already taken.");
             }
-
-            // Create new user
+            
             var newUser = new User
             {
                 Username = username,
@@ -191,8 +180,7 @@ namespace KNOTS.Services
 
             return (true, "Registration successful! You can now log in.");
         }
-
-        // Login user
+        
         public (bool Success, string Message) LoginUser(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
@@ -215,17 +203,14 @@ namespace KNOTS.Services
 
             return (false, "Invalid username or password.");
         }
-
-        // Logout user
+        
         public void LogoutUser()
         {
             CurrentUser = null;
             OnAuthenticationChanged?.Invoke();
         }
 
-        // Add friend (removed)
-
-        // Get total users count (statistics)
+        
         public int GetTotalUsersCount()
         {
             return _users.Count;
@@ -242,9 +227,7 @@ namespace KNOTS.Services
                 {
                     user.BestMatchesCount++;
                 }
-        
-                // Calculate new average using incremental formula
-                // NewAverage = ((OldAverage * OldCount) + NewScore) / NewCount
+                
                 user.AverageCompatibilityScore = 
                     ((user.AverageCompatibilityScore * (user.TotalGamesPlayed - 1)) + compatibilityScore) 
                     / user.TotalGamesPlayed;
@@ -257,8 +240,6 @@ namespace KNOTS.Services
 
         public List<User> GetLeaderboard(int topCount = 10)
         {
-            // Uses IComparable implementation - sorts users by ranking
-            // load first <3
             LoadUsers();
             var sortedUsers = _users.OrderBy(u => u).ToList(); // OrderBy uses CompareTo
             return sortedUsers.Take(topCount).ToList();

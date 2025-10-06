@@ -1,30 +1,18 @@
 [
   {
-    "Username": "camilalol",
-    "CreatedAt": "2025-10-02T20:57:23.04189+03:00",
-    "Friends": [],
-    "PasswordHash": "$2a$13$/453QvKTxyDU4b8oufRKt..q.xr6KAvUKtIBS32u1VZMhJ2S8tity"
-  },
-  {
-    "Username": "lalala",
-    "CreatedAt": "2025-10-02T20:58:40.857894+03:00",
-    "Friends": [],
-    "PasswordHash": "$2a$13$1OnMNHc5e9momg/bD24H2O7RuglIigsphJxQGpkEh57cuMq5KLWHO"
-  },
-  {
     "Username": "emilija7",
-    "CreatedAt": "2025-10-04T13:42:08.8341747+03:00",
-    "Friends": [],
-    "PasswordHash": "$2a$13$Pq9RX3OZtO3dDjgu/80FnO1CRv1MvouBqssZF9X4X2F0LC5M8VzqO"
+    "CreatedAt": "2025-10-06T11:11:41.1970128+03:00",
+    "PasswordHash": "$2a$13$c8ogCBN01j5AU.HdualomOFI49IRiA2cY8bDpkkxaOLJrvEvSUYE.",
+    "TotalGamesPlayed": 0,
+    "AverageCompatibilityScore": 0,
+    "BestMatchesCount": 0
   },
   {
     "Username": "labas",
-    "CreatedAt": "2025-10-04T14:36:18.9878318+03:00",
-    "Friends": [],
-    "PasswordHash": "$2a$13$676xnsbWT6xzTLjHk5MD8OA7Sm2qXuanWY0EitqPV2e/2d75JENxi"
-    "Username": "emilija7",
-    "Password": "labas",
-    "CreatedAt": "2025-10-02T15:29:20.0362584+03:00",
-    "Friends": []
+    "CreatedAt": "2025-10-06T11:12:18.0340317+03:00",
+    "PasswordHash": "$2a$13$sq78BWTk3hRjI0Ndz3ewgOQJYMMxavuYAD7mBsSH6fFhnh1bjc5oK",
+    "TotalGamesPlayed": 0,
+    "AverageCompatibilityScore": 0,
+    "BestMatchesCount": 0
   }
 ]
