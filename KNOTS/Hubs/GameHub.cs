@@ -109,7 +109,6 @@ namespace KNOTS.Hubs
             finally
             {
                 // Išvalome listener'į
-                // _gameRoomService.OnRoomUpdate -= UpdateHandler;
                 channel.Writer.Complete();
             }
         }
