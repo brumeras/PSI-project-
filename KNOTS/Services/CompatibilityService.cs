@@ -96,8 +96,12 @@ namespace KNOTS.Services
 
                 if (File.Exists(filePath))
                 {
-                    string jsonString = File.ReadAllText(filePath);
-                    _statements = JsonSerializer.Deserialize<List<GameStatement>>(jsonString) ?? new List<GameStatement>();
+                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    using (StreamReader reader = new StreamReader(fs))
+                    {
+                        string jsonString = reader.ReadToEnd();
+                        _statements = JsonSerializer.Deserialize<List<GameStatement>>(jsonString) ?? new List<GameStatement>();
+                    }
                 }
                 else
                 {
@@ -112,17 +116,22 @@ namespace KNOTS.Services
             }
         }
 
+
         private void SaveStatementsToFile()
         {
             try
             {
                 string filePath = Path.Combine(_statementsDirectory, _defaultStatementsFile);
-                
                 string jsonString = JsonSerializer.Serialize(_statements, new JsonSerializerOptions
                 {
                     WriteIndented = true
                 });
-                File.WriteAllText(filePath, jsonString);
+
+                using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                using (StreamWriter writer = new StreamWriter(fs))
+                {
+                    writer.Write(jsonString);
+                }
             }
             catch (Exception ex)
             {
@@ -172,14 +181,18 @@ namespace KNOTS.Services
                 string filePath = Path.Combine(_dataDirectory, _swipesFile);
                 if (File.Exists(filePath))
                 {
-                    string json = File.ReadAllText(filePath);
-                    var data = JsonSerializer.Deserialize<Dictionary<string, List<PlayerSwipe>>>(json);
-                    
-                    if (data != null)
+                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    using (StreamReader reader = new StreamReader(fs))
                     {
-                        foreach (var kvp in data)
+                        string json = reader.ReadToEnd();
+                        var data = JsonSerializer.Deserialize<Dictionary<string, List<PlayerSwipe>>>(json);
+
+                        if (data != null)
                         {
-                            _roomSwipes[kvp.Key] = kvp.Value;
+                            foreach (var kvp in data)
+                            {
+                                _roomSwipes[kvp.Key] = kvp.Value;
+                            }
                         }
                     }
                 }
@@ -196,13 +209,16 @@ namespace KNOTS.Services
             {
                 string filePath = Path.Combine(_dataDirectory, _swipesFile);
                 var data = _roomSwipes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                
                 string json = JsonSerializer.Serialize(data, new JsonSerializerOptions
                 {
                     WriteIndented = true
                 });
-                
-                File.WriteAllText(filePath, json);
+
+                using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                using (StreamWriter writer = new StreamWriter(fs))
+                {
+                    writer.Write(json);
+                }
             }
             catch (Exception ex)
             {
@@ -352,7 +368,13 @@ namespace KNOTS.Services
                 {
                     WriteIndented = true
                 });
-                File.WriteAllText(filePath, json);
+                // Stream naudojimas saugojimui į JSON failą
+                   using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                        using (StreamWriter writer = new StreamWriter(fs))
+                        {
+                            writer.Write(json);
+                        }
+                
                 foreach (var result in allResults)
                 {
                     // Check if player1 was best match for player2
@@ -393,14 +415,19 @@ namespace KNOTS.Services
                 string filePath = Path.Combine(_dataDirectory, _historyFile);
                 if (File.Exists(filePath))
                 {
-                    string json = File.ReadAllText(filePath);
-                    return JsonSerializer.Deserialize<List<GameHistoryEntry>>(json) ?? new List<GameHistoryEntry>();
+                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    using (StreamReader reader = new StreamReader(fs))
+                    {
+                        string json = reader.ReadToEnd();
+                        return JsonSerializer.Deserialize<List<GameHistoryEntry>>(json) ?? new List<GameHistoryEntry>();
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error loading game history: {ex.Message}");
             }
+
             return new List<GameHistoryEntry>();
         }
 

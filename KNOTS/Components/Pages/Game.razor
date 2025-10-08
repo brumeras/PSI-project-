@@ -82,9 +82,7 @@ else
                         else
                         {
                             <p>Waiting for other players to finish...</p>
-                            <button class="btn btn-outline-primary" @onclick="CheckIfAllFinished">
-                                Check Status
-                            </button>
+                            
                             <div class="mt-2">
                                 <small class="text-muted">
                                     Progress: @GetPlayersFinishedCount() / @playersInRoom.Count players finished
