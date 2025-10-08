@@ -264,39 +264,25 @@ namespace KNOTS.Services
             var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
             
             Console.WriteLine($"[HaveAllPlayersFinished] Room {roomCode}: {uniquePlayers} players, {totalSwipes} total swipes");
-            
-            foreach (var player in playerUsernames)
-            {
-                var playerSwipeCount = roomSwipes.Count(s => s.PlayerUsername == player);
-                if (playerSwipeCount < totalStatements)
-                {
-                    return false;
-                }
-            }
-            
-            return true;
-        }
 
+            return playerUsernames
+                .All(player => roomSwipes.Count(s => s.PlayerUsername == player) >= totalStatements);
+        }
         public CompatibilityScore CalculateCompatibility(string roomCode, string player1, string player2)
         {
             var player1Swipes = GetPlayerSwipes(roomCode, player1);
             var player2Swipes = GetPlayerSwipes(roomCode, player2);
 
-            int matchingSwipes = 0;
-            var matchedStatements = new List<string>();
-
-            foreach (var swipe1 in player1Swipes)
-            {
-                var swipe2 = player2Swipes.FirstOrDefault(s => s.StatementId == swipe1.StatementId);
-                
-                if (swipe2.StatementId != null && 
-                    swipe1.AgreeWithStatement == swipe2.AgreeWithStatement)
-                {
-                    matchingSwipes++;
-                    matchedStatements.Add(swipe1.StatementText);
-                }
-            }
-
+            var matchedStatements = player1Swipes
+                .Join(player2Swipes,
+                    s1 => s1.StatementId,
+                    s2 => s2.StatementId,
+                    (s1, s2) => new { s1, s2 })
+                .Where(pair => pair.s1.AgreeWithStatement == pair.s2.AgreeWithStatement)
+                .Select(pair => pair.s1.StatementText)
+                .ToList();
+            
+            int matchingSwipes = matchedStatements.Count;
             int totalStatements = Math.Min(player1Swipes.Count, player2Swipes.Count);
 
             return new CompatibilityScore(
@@ -370,27 +356,23 @@ namespace KNOTS.Services
                 foreach (var result in allResults)
                 {
                     // Check if player1 was best match for player2
-                    bool player1WasBestMatch = allResults
-                                                   .Where(r => r.Player1 == result.Player2 || r.Player2 == result.Player2)
-                                                   .OrderByDescending(r => r.Percentage)
-                                                   .First().Player1 == result.Player1 || 
-                                               allResults
-                                                   .Where(r => r.Player1 == result.Player2 || r.Player2 == result.Player2)
-                                                   .OrderByDescending(r => r.Percentage)
-                                                   .First().Player2 == result.Player1;
-            
+                    var bestForPlayer2 = allResults
+                        .Where(r => r.Player1 == result.Player2 || r.Player2 == result.Player2)
+                        .OrderByDescending(r => r.Percentage)
+                        .FirstOrDefault();
+                    
+                    bool player1WasBestMatch = bestForPlayer2.Player1 == result.Player1 || bestForPlayer2.Player2 == result.Player1;
+                    
                     // Update player1 stats
                     _userService.UpdateUserStatistics(result.Player1, result.Percentage, player1WasBestMatch);
             
                     // Check if player2 was best match for player1
-                    bool player2WasBestMatch = allResults
-                                                   .Where(r => r.Player1 == result.Player1 || r.Player2 == result.Player1)
-                                                   .OrderByDescending(r => r.Percentage)
-                                                   .First().Player1 == result.Player2 || 
-                                               allResults
-                                                   .Where(r => r.Player1 == result.Player1 || r.Player2 == result.Player1)
-                                                   .OrderByDescending(r => r.Percentage)
-                                                   .First().Player2 == result.Player2;
+                    var bestForPlayer1 = allResults
+                        .Where(r => r.Player1 == result.Player1 || r.Player2 == result.Player1)
+                        .OrderByDescending(r => r.Percentage)
+                        .FirstOrDefault();
+                    
+                    bool player2WasBestMatch = bestForPlayer1.Player1 == result.Player2 || bestForPlayer1.Player2 == result.Player2;
             
                     // Update player2 stats
                     _userService.UpdateUserStatistics(result.Player2, result.Percentage, player2WasBestMatch);

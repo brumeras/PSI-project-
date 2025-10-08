@@ -91,5 +91,89 @@
         "Percentage": 0
       }
     ]
+  },
+  {
+    "RoomCode": "9341",
+    "PlayedDate": "2025-10-06T18:39:42.003937+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "pavardenis",
+    "BestMatchPercentage": 80,
+    "AllResults": [
+      {
+        "Player1": "vardenis",
+        "Player2": "pavardenis",
+        "MatchingSwipes": 8,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "I prefer relaxing at home over going to parties",
+          "Meaningful conversations are more important than having fun",
+          "Summer is the best season",
+          "I like taking risks and trying new things",
+          "I like getting up early in the morning",
+          "Sports are part of my daily routine",
+          "I prefer movies over theater",
+          "I enjoy spontaneous trips"
+        ],
+        "Percentage": 80
+      }
+    ]
+  },
+  {
+    "RoomCode": "9341",
+    "PlayedDate": "2025-10-06T18:39:46.7848322+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "pavardenis",
+    "BestMatchPercentage": 0,
+    "AllResults": [
+      {
+        "Player1": "vardenis",
+        "Player2": "pavardenis",
+        "MatchingSwipes": 0,
+        "TotalStatements": 0,
+        "MatchedStatements": [],
+        "Percentage": 0
+      }
+    ]
+  },
+  {
+    "RoomCode": "9200",
+    "PlayedDate": "2025-10-06T18:42:15.2200185+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "pavardenis",
+    "BestMatchPercentage": 60,
+    "AllResults": [
+      {
+        "Player1": "vardenis",
+        "Player2": "pavardenis",
+        "MatchingSwipes": 6,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "Meaningful conversations are more important than having fun",
+          "Animals are an important part of my life",
+          "I prefer movies over theater",
+          "I enjoy cooking at home",
+          "I like taking risks and trying new things",
+          "I prefer relaxing at home over going to parties"
+        ],
+        "Percentage": 60
+      }
+    ]
+  },
+  {
+    "RoomCode": "9200",
+    "PlayedDate": "2025-10-06T18:42:16.8497473+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "pavardenis",
+    "BestMatchPercentage": 0,
+    "AllResults": [
+      {
+        "Player1": "vardenis",
+        "Player2": "pavardenis",
+        "MatchingSwipes": 0,
+        "TotalStatements": 0,
+        "MatchedStatements": [],
+        "Percentage": 0
+      }
+    ]
   }
 ]

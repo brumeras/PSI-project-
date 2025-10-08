@@ -14,5 +14,21 @@
     "TotalGamesPlayed": 0,
     "AverageCompatibilityScore": 0,
     "BestMatchesCount": 0
+  },
+  {
+    "Username": "vardenis",
+    "CreatedAt": "2025-10-06T15:26:20.3073158+03:00",
+    "PasswordHash": "$2a$13$4dncA2ld.6mZj3wFmoornOgHbvCjYoZgcNyxk4WrOnJaj4AuU7gfy",
+    "TotalGamesPlayed": 2,
+    "AverageCompatibilityScore": 0,
+    "BestMatchesCount": 2
+  },
+  {
+    "Username": "pavardenis",
+    "CreatedAt": "2025-10-06T18:41:17.0185691+03:00",
+    "PasswordHash": "$2a$13$BulQQQ8SgSXzt1Rpyo9hM.Ikt8upr.muKR5SxY.6anIzERAvKf5IS",
+    "TotalGamesPlayed": 1,
+    "AverageCompatibilityScore": 0,
+    "BestMatchesCount": 1
   }
 ]
