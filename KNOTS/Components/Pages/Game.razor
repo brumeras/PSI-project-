@@ -12,43 +12,57 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
 <script src="/js/gameclient.js"></script>
 
-<h3>You are now connected!</h3>
+<PageTitle>Game - KNOTS</PageTitle>
 
-@if (!UserService.IsAuthenticated)
-{
-    <div class="alert alert-warning">
-        In order to connect to a game, you have to login.
-    </div>
-}
-else
-{
-    <div class="card">
-        <div class="card-header">
-            <h5>Hello, @UserService.CurrentUser!</h5>
-            @if (!string.IsNullOrEmpty(playerId))
-            {
-                <small class="text-muted">Your unique game ID: @playerId</small>
-            }
+<div class="game-container">
+    @if (!UserService.IsAuthenticated)
+    {
+        <div class="auth-warning">
+            <i class="bi bi-lock-fill"></i>
+            <h3>Authentication Required</h3>
+            <p>In order to connect to a game, you have to login.</p>
+            <a href="/" class="btn-login-link">Go to Login</a>
         </div>
-        <div class="card-body">
+    }
+    else
+    {
+        <div class="game-content">
             @if (string.IsNullOrEmpty(currentRoomCode))
             {
-                <!-- Kambario sukūrimas/prisijungimas -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Create a new game room</h6>
-                        <button class="btn btn-primary" @onclick="CreateRoom" disabled="@isConnecting">
-                            Create room
-                        </button>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Connect to an already existing room</h6>
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" @bind="roomCodeToJoin" 
-                                   placeholder="Input room code" maxlength="4">
-                            <button class="btn btn-success" @onclick="JoinRoom" disabled="@(isConnecting || string.IsNullOrEmpty(roomCodeToJoin))">
-                                Connect
+                <div class="lobby-section">
+                    <h2 class="section-title">🎮 Game Lobby</h2>
+                    <p class="welcome-text">Hello, <strong>@UserService.CurrentUser</strong>!</p>
+                    @if (!string.IsNullOrEmpty(playerId))
+                    {
+                        <p class="player-id">Your game ID: <span>@playerId</span></p>
+                    }
+
+                    <div class="lobby-options">
+                        <div class="option-card">
+                            <i class="bi bi-plus-circle" style="font-size: 3rem; color: #f888e9;"></i>
+                            <h4>Create New Room</h4>
+                            <p>Start a new game and invite friends</p>
+                            <button class="btn-create" @onclick="CreateRoom" disabled="@isConnecting">
+                                <i class="bi bi-plus-lg"></i> Create Room
                             </button>
+                        </div>
+
+                        <div class="option-card">
+                            <i class="bi bi-door-open" style="font-size: 3rem; color: #bd87f8;"></i>
+                            <h4>Join Existing Room</h4>
+                            <p>Enter a room code to join friends</p>
+                            <div class="join-input-group">
+                                <input type="text" 
+                                       class="room-code-input" 
+                                       @bind="roomCodeToJoin" 
+                                       placeholder="Enter 4-digit code" 
+                                       maxlength="4">
+                                <button class="btn-join" 
+                                        @onclick="JoinRoom" 
+                                        disabled="@(isConnecting || string.IsNullOrEmpty(roomCodeToJoin))">
+                                    <i class="bi bi-box-arrow-in-right"></i> Join
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -62,51 +76,457 @@ else
             }
             else
             {
-                
-                <div class="alert alert-success">
-                    <h6>You are currently in room: @currentRoomCode</h6>
-                    <p>Other connected players: @string.Join(", ", playersInRoom)</p>
-                </div>
-                
-                @if (newGameFormRef != null && newGameFormRef.IsComplete())
-                {
-                    <div class="alert alert-info text-center mb-3">
-                        <h5>You've completed all questions!</h5>
-                        @if (allPlayersFinished)
-                        {
-                            <p>All players have finished. Click below to see results!</p>
-                            <button class="btn btn-success btn-lg" @onclick="ShowResults">
-                                View Results
-                            </button>
-                        }
-                        else
-                        {
-                            <p>Waiting for other players to finish...</p>
-                            
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    Progress: @GetPlayersFinishedCount() / @playersInRoom.Count players finished
-                                </small>
+                <div class="game-room-section">
+                    <div class="room-info-card">
+                        <div class="room-header">
+                            <div>
+                                <h3>Room Code: <span class="room-code">@currentRoomCode</span></h3>
+                                <p class="players-count">👥 @playersInRoom.Count player(s) connected</p>
                             </div>
-                        }
+                        </div>
+                        
+                        <div class="players-list">
+                            <strong>Connected Players:</strong>
+                            <div class="player-badges">
+                                @foreach (var player in playersInRoom)
+                                {
+                                    <span class="player-badge @(player == UserService.CurrentUser ? "current" : "")">
+                                        @player
+                                        @if (player == UserService.CurrentUser)
+                                        {
+                                            <span class="you-indicator">(You)</span>
+                                        }
+                                    </span>
+                                }
+                            </div>
+                        </div>
                     </div>
-                }
+                    
+                    @if (newGameFormRef != null && newGameFormRef.IsComplete())
+                    {
+                        <div class="completion-card">
+                            <i class="bi bi-check-circle-fill" style="font-size: 3rem; color: #4caf50;"></i>
+                            <h4>You've Completed All Questions!</h4>
+                            @if (allPlayersFinished)
+                            {
+                                <p>All players have finished. Ready to see the results?</p>
+                                <button class="btn-results" @onclick="ShowResults">
+                                    <i class="bi bi-trophy-fill"></i> View Results
+                                </button>
+                            }
+                            else
+                            {
+                                <p>Waiting for other players to finish...</p>
+                                <div class="waiting-progress">
+                                    <div class="progress-text">
+                                        @GetPlayersFinishedCount() / @playersInRoom.Count players finished
+                                    </div>
+                                    <div class="progress-bar-wrapper">
+                                        <div class="progress-fill" style="width: @GetFinishedPercentage()%"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
 
-                <div class="mt-3">
-                    <h6>Fill in your answers for the game</h6>
-                    <NewGame @ref="newGameFormRef" RoomCode="@currentRoomCode" Username="@UserService.CurrentUser" />
+                    <div class="game-form-section">
+                        <NewGame @ref="newGameFormRef" 
+                                 RoomCode="@currentRoomCode" 
+                                 Username="@UserService.CurrentUser" />
+                    </div>
                 </div>
             }
             
             @if (!string.IsNullOrEmpty(statusMessage))
             {
-                <div class="alert @(statusMessage.Contains("Error") ? "alert-danger" : "alert-info") mt-3">
+                <div class="status-message @(statusMessage.Contains("Error") ? "error" : "info")">
+                    <i class="bi @(statusMessage.Contains("Error") ? "bi-exclamation-circle" : "bi-info-circle")"></i>
                     @statusMessage
                 </div>
             }
         </div>
-    </div>
-}
+    }
+</div>
+
+<style>
+    .game-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .auth-warning {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .auth-warning i {
+        font-size: 4rem;
+        color: #f888e9;
+        margin-bottom: 1rem;
+    }
+
+    .auth-warning h3 {
+        color: #333;
+        font-size: 2rem;
+        margin: 1rem 0;
+    }
+
+    .auth-warning p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-login-link {
+        display: inline-block;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .btn-login-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
+        color: white;
+    }
+
+    .game-content {
+        width: 100%;
+    }
+
+    .lobby-section {
+        text-align: center;
+    }
+
+    .section-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .welcome-text {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .player-id {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+    }
+
+    .player-id span {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .lobby-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .option-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .option-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .option-card h4 {
+        color: #333;
+        font-size: 1.5rem;
+        margin: 1rem 0;
+    }
+
+    .option-card p {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-create, .btn-join {
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-create:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
+    }
+
+    .btn-create:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .join-input-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .room-code-input {
+        flex: 1;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        text-align: center;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+    }
+
+    .room-code-input:focus {
+        outline: none;
+        border-color: #bd87f8;
+        box-shadow: 0 0 0 3px rgba(189, 135, 248, 0.1);
+    }
+
+    .btn-join {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+    }
+
+    .btn-join:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(76, 175, 80, 0.6);
+    }
+
+    .btn-join:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .game-room-section {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .room-info-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .room-header h3 {
+        color: #333;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .room-code {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 1.8rem;
+        letter-spacing: 2px;
+    }
+
+    .players-count {
+        color: #666;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .players-list {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #e0e0e0;
+    }
+
+    .players-list strong {
+        color: #333;
+        display: block;
+        margin-bottom: 0.75rem;
+    }
+
+    .player-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .player-badge {
+        background: #f0f0f0;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        color: #333;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .player-badge.current {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+    }
+
+    .you-indicator {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .completion-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .completion-card h4 {
+        color: #333;
+        font-size: 1.5rem;
+        margin: 1rem 0;
+    }
+
+    .completion-card p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-results {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-results:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(76, 175, 80, 0.6);
+    }
+
+    .waiting-progress {
+        margin-top: 1.5rem;
+    }
+
+    .progress-text {
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-bar-wrapper {
+        background: #e0e0e0;
+        border-radius: 10px;
+        height: 25px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        background: linear-gradient(90deg, #f888e9 0%, #bd87f8 100%);
+        height: 100%;
+        transition: width 0.5s ease;
+    }
+
+    .game-form-section {
+        margin-top: 2rem;
+    }
+
+    .status-message {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-message.info {
+        color: #2196f3;
+        border-left: 4px solid #2196f3;
+    }
+
+    .status-message.error {
+        color: #f44336;
+        border-left: 4px solid #f44336;
+    }
+
+    .status-message i {
+        font-size: 1.25rem;
+    }
+
+    @@media (max-width: 768px) {
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .lobby-options {
+            grid-template-columns: 1fr;
+        }
+
+        .room-code {
+            font-size: 1.4rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .join-input-group {
+            flex-direction: column;
+        }
+
+        .btn-join {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
 
 @code {
     private DotNetObjectReference<Game>? objectReference;
@@ -124,6 +544,7 @@ else
 
     [Parameter]
     public string? Username { get; set; }
+    
     protected override void OnInitialized()
     {
         if (UserService.IsAuthenticated)
@@ -205,7 +626,7 @@ else
     private async Task JoinRoom()
     {
         isConnecting = true;
-        statusMessage = $"Connecting to a room {roomCodeToJoin}...";
+        statusMessage = $"Connecting to room {roomCodeToJoin}...";
         StateHasChanged();
         
         await JSRuntime.InvokeVoidAsync("joinRoom", roomCodeToJoin, UserService.CurrentUser);
@@ -216,7 +637,6 @@ else
         if (string.IsNullOrEmpty(currentRoomCode)) return;
         
         var players = GameRoomService.GetRoomPlayerUsernames(currentRoomCode);
-        
         if (players.Count == 0) return;
         
         allPlayersFinished = CompatibilityService.HaveAllPlayersFinished(
@@ -224,8 +644,6 @@ else
             players, 
             10
         );
-        
-        Console.WriteLine($"CheckIfAllFinished: {allPlayersFinished} (Players: {players.Count})");
         
         if (allPlayersFinished)
         {
@@ -250,6 +668,12 @@ else
         }
         
         return finishedCount;
+    }
+
+    private double GetFinishedPercentage()
+    {
+        if (playersInRoom.Count == 0) return 0;
+        return (double)GetPlayersFinishedCount() / playersInRoom.Count * 100;
     }
     
     private void ShowResults()
@@ -299,8 +723,6 @@ else
     [JSInvokable]
     public async Task OnJoinedRoom(string roomInfoJson)
     {
-        Console.WriteLine($"OnJoinedRoom called with: {roomInfoJson}");
-    
         var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson, new JsonSerializerOptions 
         { 
             PropertyNameCaseInsensitive = true 
@@ -310,7 +732,7 @@ else
         playersInRoom = roomInfo?.Players ?? new List<string>();
         roomCodeToJoin = "";
     
-        statusMessage = "Successfully connected to a room!";
+        statusMessage = "Successfully connected to room!";
         isConnecting = false;
     
         await InvokeAsync(StateHasChanged);
@@ -331,10 +753,8 @@ else
         {
             playersInRoom.Add(username);
         }
-        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username} connected to room");
         
         CheckIfAllFinished();
-        
         await InvokeAsync(StateHasChanged);
     }
 
@@ -342,7 +762,6 @@ else
     public async Task OnPlayerLeft(string username)
     {
         playersInRoom.Remove(username);
-        gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username} left the room");
         await InvokeAsync(StateHasChanged);
     }
 
@@ -351,7 +770,6 @@ else
     {
         if (username != UserService.CurrentUser)
         {
-            gameMessages.Add($"{DateTime.Now:HH:mm:ss} - {username}: {action} {data}");
             await InvokeAsync(StateHasChanged);
         }
     }

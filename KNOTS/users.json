@@ -3,17 +3,17 @@
     "Username": "emilija7",
     "CreatedAt": "2025-10-06T11:11:41.1970128+03:00",
     "PasswordHash": "$2a$13$c8ogCBN01j5AU.HdualomOFI49IRiA2cY8bDpkkxaOLJrvEvSUYE.",
-    "TotalGamesPlayed": 0,
-    "AverageCompatibilityScore": 0,
-    "BestMatchesCount": 0
+    "TotalGamesPlayed": 3,
+    "AverageCompatibilityScore": 100,
+    "BestMatchesCount": 3
   },
   {
     "Username": "labas",
     "CreatedAt": "2025-10-06T11:12:18.0340317+03:00",
     "PasswordHash": "$2a$13$sq78BWTk3hRjI0Ndz3ewgOQJYMMxavuYAD7mBsSH6fFhnh1bjc5oK",
-    "TotalGamesPlayed": 0,
-    "AverageCompatibilityScore": 0,
-    "BestMatchesCount": 0
+    "TotalGamesPlayed": 3,
+    "AverageCompatibilityScore": 100,
+    "BestMatchesCount": 3
   },
   {
     "Username": "vardenis",

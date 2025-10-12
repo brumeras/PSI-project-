@@ -4,101 +4,94 @@
 @rendermode InteractiveServer
 
 <div class="swipe-container">
-    <h3 class="text-center mb-4">Swipe Your Answers</h3>
+    <h3 class="swipe-title">💭 Swipe Your Answers</h3>
 
     @if (!UserService.IsAuthenticated)
     {
-        <div class="alert alert-warning">
-            Please login to participate in the game.
+        <div class="warning-card">
+            <i class="bi bi-exclamation-triangle"></i>
+            <p>Please login to participate in the game.</p>
         </div>
     }
     else if (statements == null || !statements.Any())
     {
-        <div class="text-center">
-            <div class="spinner-border text-primary" role="status">
+        <div class="loading-card">
+            <div class="spinner-border" style="color: #f888e9;" role="status">
                 <span class="visually-hidden">Loading statements...</span>
             </div>
-            <p class="mt-2">Loading game statements...</p>
+            <p class="mt-3">Loading game statements...</p>
         </div>
     }
     else if (currentStatementIndex >= statements.Count)
     {
-        <!-- All statements completed -->
-        <div class="card text-center shadow-lg">
-            <div class="card-body p-5">
-                <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
-                <h4 class="mt-3">All Done!</h4>
-                <p class="text-muted">You've answered all statements. Waiting for other players...</p>
-                <div class="mt-4">
-                    <p><strong>Your Progress:</strong></p>
-                    <div class="progress" style="height: 30px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%">
-                            @statements.Count / @statements.Count
-                        </div>
+        <div class="completed-card">
+            <i class="bi bi-check-circle-fill" style="font-size: 4rem; color: #4caf50;"></i>
+            <h4>All Done!</h4>
+            <p>You've answered all statements. Waiting for other players...</p>
+            <div class="progress-info">
+                <p><strong>Your Progress:</strong></p>
+                <div class="progress-bar-complete">
+                    <div class="progress-bar-fill-complete">
+                        @statements.Count / @statements.Count
                     </div>
                 </div>
-                <button class="btn btn-outline-primary mt-3" @onclick="ResetSwipes">Review Answers</button>
             </div>
+            <button class="btn-review" @onclick="ResetSwipes">
+                <i class="bi bi-arrow-clockwise"></i> Review Answers
+            </button>
         </div>
     }
     else
     {
-        <!-- Current statement card -->
-        <div class="card shadow-lg statement-card @swipeClass" style="@swipeStyle">
-            <div class="card-body p-5">
-                <div class="text-center mb-4">
-                    <span class="badge bg-primary">Statement @(currentStatementIndex + 1) of @statements.Count</span>
+        <div class="statement-card @swipeClass" style="@swipeStyle">
+            <div class="card-content">
+                <div class="progress-badge">
+                    Statement @(currentStatementIndex + 1) of @statements.Count
                 </div>
 
-                <h2 class="text-center mb-5">@statements[currentStatementIndex].Text</h2>
+                <h2 class="statement-text">@statements[currentStatementIndex].Text</h2>
 
-                <div class="swipe-buttons d-flex justify-content-center gap-4 mt-5">
-                    <button class="btn btn-danger btn-lg rounded-circle swipe-btn" 
+                <div class="swipe-buttons">
+                    <button class="swipe-btn disagree" 
                             @onclick="() => SwipeLeft()"
                             disabled="@isAnimating">
-                        <i class="bi bi-x-lg" style="font-size: 2rem;"></i>
-                        <div class="btn-label">Disagree</div>
+                        <i class="bi bi-x-lg"></i>
+                        <span class="btn-label">Disagree</span>
                     </button>
 
-                    <button class="btn btn-success btn-lg rounded-circle swipe-btn" 
+                    <button class="swipe-btn agree" 
                             @onclick="() => SwipeRight()"
                             disabled="@isAnimating">
-                        <i class="bi bi-check-lg" style="font-size: 2rem;"></i>
-                        <div class="btn-label">Agree</div>
+                        <i class="bi bi-check-lg"></i>
+                        <span class="btn-label">Agree</span>
                     </button>
                 </div>
 
-                <div class="text-center mt-4">
-                    <small class="text-muted">
-                        <i class="bi bi-info-circle"></i> Swipe right if you agree, left if you disagree
-                    </small>
+                <div class="hint-text">
+                    <i class="bi bi-info-circle"></i> Swipe right if you agree, left if you disagree
                 </div>
             </div>
         </div>
 
-        <!-- Progress bar -->
-        <div class="mt-4">
-            <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Progress</span>
-                <span class="text-muted">@currentStatementIndex / @statements.Count</span>
+        <div class="progress-section">
+            <div class="progress-header">
+                <span>Progress</span>
+                <span>@currentStatementIndex / @statements.Count</span>
             </div>
-            <div class="progress" style="height: 20px;">
-                <div class="progress-bar" 
-                     role="progressbar" 
-                     style="width: @GetProgressPercentage()%">
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar-current" style="width: @GetProgressPercentage()%">
                     @GetProgressPercentage()%
                 </div>
             </div>
         </div>
 
-        <!-- Navigation buttons -->
-        <div class="d-flex justify-content-between mt-3">
-            <button class="btn btn-outline-secondary" 
+        <div class="navigation-buttons">
+            <button class="nav-btn prev" 
                     @onclick="GoBack" 
                     disabled="@(currentStatementIndex == 0 || isAnimating)">
                 <i class="bi bi-arrow-left"></i> Previous
             </button>
-            <button class="btn btn-outline-primary" 
+            <button class="nav-btn skip" 
                     @onclick="SkipStatement" 
                     disabled="@isAnimating">
                 Skip <i class="bi bi-arrow-right"></i>
@@ -108,7 +101,7 @@
 
     @if (!string.IsNullOrEmpty(statusMessage))
     {
-        <div class="alert alert-info mt-3">
+        <div class="status-message">
             @statusMessage
         </div>
     }
@@ -116,16 +109,114 @@
 
 <style>
     .swipe-container {
-        max-width: 600px;
+        max-width: 650px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 1rem;
+    }
+
+    .swipe-title {
+        text-align: center;
+        color: white;
+        font-size: 2rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    .warning-card, .loading-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .warning-card i {
+        font-size: 3rem;
+        color: #ff9800;
+    }
+
+    .warning-card p, .loading-card p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-top: 1rem;
+    }
+
+    .completed-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .completed-card h4 {
+        color: #333;
+        font-size: 2rem;
+        margin: 1rem 0;
+    }
+
+    .completed-card > p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .progress-info {
+        margin: 2rem 0;
+    }
+
+    .progress-info p {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-bar-complete {
+        background: #e0e0e0;
+        border-radius: 10px;
+        height: 35px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill-complete {
+        background: linear-gradient(90deg, #4caf50 0%, #45a049 100%);
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+
+    .btn-review {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn-review:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
     }
 
     .statement-card {
-        min-height: 400px;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        border: none;
+        background: rgba(255, 255, 255, 0.95);
         border-radius: 20px;
+        min-height: 450px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, opacity 0.3s ease;
     }
 
     .statement-card.swipe-left {
@@ -146,34 +237,194 @@
         100% { transform: translateX(100%) rotate(20deg); opacity: 0; }
     }
 
-    .swipe-btn {
-        width: 80px;
-        height: 80px;
+    .card-content {
+        padding: 3rem 2rem;
+    }
+
+    .progress-badge {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        display: inline-block;
+        font-weight: 600;
+        margin-bottom: 2rem;
+    }
+
+    .statement-text {
+        text-align: center;
+        color: #333;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin: 2rem 0;
+        line-height: 1.4;
+    }
+
+    .swipe-buttons {
         display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin: 3rem 0 2rem 0;
+    }
+
+    .swipe-btn {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
         position: relative;
-        transition: transform 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .swipe-btn i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .swipe-btn.disagree {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    }
+
+    .swipe-btn.agree {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
     }
 
     .swipe-btn:hover:not(:disabled) {
         transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     }
 
     .swipe-btn:active:not(:disabled) {
         transform: scale(0.95);
     }
 
-    .btn-label {
-        position: absolute;
-        bottom: -30px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        white-space: nowrap;
+    .swipe-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
-    .swipe-buttons {
-        margin-bottom: 40px;
+    .btn-label {
+        position: absolute;
+        bottom: -35px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .hint-text {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
+        margin-top: 3rem;
+    }
+
+    .progress-section {
+        margin: 2rem 0;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        color: white;
+        font-weight: 600;
+    }
+
+    .progress-bar-wrapper {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        height: 25px;
+        overflow: hidden;
+    }
+
+    .progress-bar-current {
+        background: linear-gradient(90deg, #f888e9 0%, #bd87f8 100%);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: width 0.3s ease;
+    }
+
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+    }
+
+    .nav-btn {
+        background: rgba(255, 255, 255, 0.95);
+        color: #333;
+        border: 2px solid #e0e0e0;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+        background: white;
+        border-color: #f888e9;
+        color: #f888e9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .status-message {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 1rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .swipe-title {
+            font-size: 1.5rem;
+        }
+
+        .statement-text {
+            font-size: 1.4rem;
+        }
+
+        .swipe-buttons {
+            gap: 2rem;
+        }
+
+        .swipe-btn {
+            width: 75px;
+            height: 75px;
+        }
+
+        .swipe-btn i {
+            font-size: 1.5rem;
+        }
+
+        .card-content {
+            padding: 2rem 1rem;
+        }
     }
 </style>
 
@@ -183,6 +434,7 @@
 
     [Parameter]
     public string? Username { get; set; }
+    
     private List<GameStatement> statements = new();
     private int currentStatementIndex = 0;
     private string statusMessage = "";
@@ -200,7 +452,6 @@
 
     private void LoadStatements()
     {
-        // Load 10 random statements for the game
         statements = CompatibilityService.GetRandomStatements(10);
         statusMessage = $"Loaded {statements.Count} statements. Let's begin!";
     }
@@ -222,12 +473,9 @@
         isAnimating = true;
         swipeClass = animationClass;
 
-        // Save the swipe 
         if (!string.IsNullOrEmpty(RoomCode))
         {
             var statement = statements[currentStatementIndex];
-            
-            // Use the Username parameter that was passed in
             string playerUsername = Username ?? UserService.CurrentUser ?? "";
             
             Console.WriteLine($"[SwipeGame] Saving swipe for player: '{playerUsername}' in room: {RoomCode}");
@@ -245,14 +493,10 @@
             }
         }
 
-        // Wait for animation
         await Task.Delay(500);
-
-        // Move to next statement
         currentStatementIndex++;
         swipeClass = "";
         isAnimating = false;
-
         StateHasChanged();
     }
 

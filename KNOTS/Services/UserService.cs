@@ -20,15 +20,19 @@ namespace KNOTS.Services
         {
             if (other == null) return 1;
             
+            // Higher BestMatchesCount = better (other.BestMatchesCount compared to this)
             int bestMatchComparison = other.BestMatchesCount.CompareTo(this.BestMatchesCount);
             if (bestMatchComparison != 0) return bestMatchComparison;
             
+            // Higher average score = better
             int avgScoreComparison = other.AverageCompatibilityScore.CompareTo(this.AverageCompatibilityScore);
             if (avgScoreComparison != 0) return avgScoreComparison;
             
+            // More games = better
             int gamesComparison = other.TotalGamesPlayed.CompareTo(this.TotalGamesPlayed);
             if (gamesComparison != 0) return gamesComparison;
             
+            // Alphabetical as last resort
             return string.Compare(this.Username, other.Username, StringComparison.OrdinalIgnoreCase);
         }
         
@@ -48,7 +52,6 @@ namespace KNOTS.Services
             return Username.ToLowerInvariant().GetHashCode();
         }
 
-        // Comparison operators
         public static bool operator ==(User? left, User? right)
         {
             if (ReferenceEquals(left, right)) return true;
@@ -101,7 +104,6 @@ namespace KNOTS.Services
         public string? CurrentUser { get; private set; }
         public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUser);
 
-        // Load users from file using stream
         private void LoadUsers()
         {
             try
@@ -113,12 +115,18 @@ namespace KNOTS.Services
                         if (fileStream.Length > 0)
                         {
                             _users = JsonSerializer.Deserialize<List<User>>(fileStream) ?? new List<User>();
+                            Console.WriteLine($"Loaded {_users.Count} users from file");
                         }
                         else
                         {
                             _users = new List<User>();
+                            Console.WriteLine("Users file is empty");
                         }
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Users file does not exist yet");
                 }
             }
             catch (Exception ex)
@@ -139,6 +147,7 @@ namespace KNOTS.Services
                         WriteIndented = true
                     });
                 }
+                Console.WriteLine($"Saved {_users.Count} users to file");
             }
             catch (Exception ex)
             {
@@ -210,11 +219,12 @@ namespace KNOTS.Services
             OnAuthenticationChanged?.Invoke();
         }
 
-        
         public int GetTotalUsersCount()
         {
+            LoadUsers(); // Reload to get latest count
             return _users.Count;
         }
+
         public void UpdateUserStatistics(string username, double compatibilityScore, bool wasBestMatch)
         {
             var user = _users.FirstOrDefault(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
@@ -240,17 +250,29 @@ namespace KNOTS.Services
 
         public List<User> GetLeaderboard(int topCount = 10)
         {
-            LoadUsers();
-            var sortedUsers = _users.OrderBy(u => u).ToList(); // OrderBy uses CompareTo
+            LoadUsers(); // Reload to get latest data
+            
+            Console.WriteLine($"GetLeaderboard called. Total users: {_users.Count}");
+            
+            // Sort using CompareTo (which handles the ranking logic)
+            var sortedUsers = _users.OrderBy(u => u).ToList();
+            
+            // Debug output
+            foreach (var user in sortedUsers.Take(topCount))
+            {
+                Console.WriteLine($"User: {user.Username}, Games: {user.TotalGamesPlayed}, Avg: {user.AverageCompatibilityScore:F2}, Best: {user.BestMatchesCount}");
+            }
+            
             return sortedUsers.Take(topCount).ToList();
         }
 
         public int GetUserRank(string username)
         {
-            // load first <3
-            LoadUsers();
+            LoadUsers(); // Reload to get latest data
             var sortedUsers = _users.OrderBy(u => u).ToList();
-            return sortedUsers.FindIndex(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)) + 1;
+            var rank = sortedUsers.FindIndex(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)) + 1;
+            Console.WriteLine($"Rank for {username}: {rank}");
+            return rank;
         }
 
         public User? GetUserByUsername(string username)

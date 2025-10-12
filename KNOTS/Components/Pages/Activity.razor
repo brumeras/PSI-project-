@@ -7,62 +7,114 @@
 
 <PageTitle>My Activity</PageTitle>
 
-<div class="container mt-4">
-    <h1>My Activity</h1>
+<div class="activity-container">
+    <div class="activity-header">
+        <h1>📊 My Activity</h1>
+        @if (UserService.IsAuthenticated)
+        {
+            <p>Recent compatibility results for <strong>@UserService.CurrentUser</strong></p>
+        }
+    </div>
     
     @if (!UserService.IsAuthenticated)
     {
-        <div class="alert alert-warning">
-            <i class="bi bi-exclamation-triangle"></i> Please login to view your game history.
+        <div class="warning-card">
+            <i class="bi bi-exclamation-triangle"></i>
+            <h3>Authentication Required</h3>
+            <p>Please login to view your game history.</p>
+            <a href="/" class="btn-login">Go to Login</a>
         </div>
     }
     else
     {
-        <p class="text-muted">Recent compatibility results for @UserService.CurrentUser</p>
-
         @if (isLoading)
         {
-            <div class="text-center my-5">
-                <div class="spinner-border text-primary" role="status">
+            <div class="loading-card">
+                <div class="spinner-border" style="color: #f888e9;" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-2">Loading your game history...</p>
+                <p class="mt-3">Loading your game history...</p>
             </div>
         }
         else if (gameHistory == null || !gameHistory.Any())
         {
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> No game history found. Play some games to see your results here!
+            <div class="no-data-card">
+                <i class="bi bi-controller" style="font-size: 4rem; color: #f888e9;"></i>
+                <h3>No Game History</h3>
+                <p>You haven't played any games yet. Start playing to see your results here!</p>
+                <a href="/game" class="btn-play">Play Your First Game</a>
             </div>
         }
         else
         {
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Your Game Results</h5>
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>@gameHistory.Count</h3>
+                        <p>Total Games</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <table class="table table-hover">
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>@GetAverageCompatibility()%</h3>
+                        <p>Avg Compatibility</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>@GetBestMatchEver()</h3>
+                        <p>Best Match Ever</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game History Table -->
+            <div class="history-card">
+                <div class="history-header">
+                    <h4>🎮 Your Game Results</h4>
+                </div>
+                <div class="table-responsive">
+                    <table class="history-table">
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Room Code</th>
+                                <th>Room</th>
                                 <th>Best Match</th>
-                                <th>Compatibility %</th>
-                                <th>Total Players</th>
-                                <th>Details</th>
+                                <th>Compatibility</th>
+                                <th>Players</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var game in gameHistory)
                             {
                                 <tr>
-                                    <td>@game.PlayedDate.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td><span class="badge bg-secondary">@game.RoomCode</span></td>
+                                    <td>
+                                        <div class="date-cell">
+                                            <i class="bi bi-calendar3"></i>
+                                            @game.PlayedDate.ToString("MMM dd, yyyy")
+                                            <small>@game.PlayedDate.ToString("HH:mm")</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="room-badge">@game.RoomCode</span>
+                                    </td>
                                     <td>
                                         @if (!string.IsNullOrEmpty(game.BestMatchPlayer))
                                         {
-                                            <strong>@game.BestMatchPlayer</strong>
+                                            <strong class="match-name">@game.BestMatchPlayer</strong>
                                         }
                                         else
                                         {
@@ -72,22 +124,24 @@
                                     <td>
                                         @if (game.BestMatchPercentage > 0)
                                         {
-                                            <div class="progress" style="height: 25px;">
-                                                <div class="progress-bar @GetProgressBarColor(game.BestMatchPercentage)" 
-                                                     role="progressbar" 
-                                                     style="width: @game.BestMatchPercentage%"
-                                                     aria-valuenow="@game.BestMatchPercentage" 
-                                                     aria-valuemin="0" 
-                                                     aria-valuemax="100">
-                                                    @game.BestMatchPercentage%
+                                            <div class="compatibility-display">
+                                                <div class="progress-mini">
+                                                    <div class="progress-fill-mini @GetProgressClass(game.BestMatchPercentage)" 
+                                                         style="width: @game.BestMatchPercentage%">
+                                                    </div>
                                                 </div>
+                                                <span class="percentage-text">@game.BestMatchPercentage%</span>
                                             </div>
                                         }
                                     </td>
-                                    <td>@game.TotalPlayers</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowDetails(game)">
-                                            View Details
+                                        <span class="players-count">
+                                            <i class="bi bi-people-fill"></i> @game.TotalPlayers
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-details" @onclick="() => ShowDetails(game)">
+                                            <i class="bi bi-eye"></i> View
                                         </button>
                                     </td>
                                 </tr>
@@ -96,87 +150,569 @@
                     </table>
                 </div>
             </div>
-
-            <!-- Statistics Card -->
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Total Games</h5>
-                            <p class="display-4">@gameHistory.Count</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Average Compatibility</h5>
-                            <p class="display-4">@GetAverageCompatibility()%</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Best Match Ever</h5>
-                            <p class="display-4">@GetBestMatchEver()</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         }
 
         <!-- Details Modal -->
         @if (selectedGame != null)
         {
-            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Game Details - Room @selectedGame.RoomCode</h5>
-                            <button type="button" class="btn-close" @onclick="CloseDetails"></button>
+            <div class="modal-overlay" @onclick="CloseDetails">
+                <div class="modal-container" @onclick:stopPropagation="true">
+                    <div class="modal-header-custom">
+                        <h3>Game Details - Room @selectedGame.RoomCode</h3>
+                        <button class="btn-close-modal" @onclick="CloseDetails">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body-custom">
+                        <div class="game-info">
+                            <div class="info-item">
+                                <i class="bi bi-calendar3"></i>
+                                <span>@selectedGame.PlayedDate.ToString("MMMM dd, yyyy 'at' HH:mm")</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="bi bi-people-fill"></i>
+                                <span>@selectedGame.TotalPlayers players</span>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                            <h6>All Compatibility Results:</h6>
-                            @if (selectedGame.AllResults != null && selectedGame.AllResults.Any())
-                            {
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Rank</th>
-                                            <th>Players</th>
-                                            <th>Compatibility</th>
-                                            <th>Matching Answers</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @for (int i = 0; i < selectedGame.AllResults.Count; i++)
-                                        {
-                                            var match = selectedGame.AllResults[i];
-                                            <tr>
-                                                <td>@(i + 1)</td>
-                                                <td>@match.Player1 & @match.Player2</td>
-                                                <td>
-                                                    <span class="badge @GetBadgeColor(match.Percentage)">
-                                                        @match.Percentage%
-                                                    </span>
-                                                </td>
-                                                <td>@match.MatchingSwipes / @match.TotalStatements</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            }
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" @onclick="CloseDetails">Close</button>
-                        </div>
+
+                        <h5 class="results-title">All Compatibility Results:</h5>
+                        @if (selectedGame.AllResults != null && selectedGame.AllResults.Any())
+                        {
+                            <div class="results-list">
+                                @for (int i = 0; i < selectedGame.AllResults.Count; i++)
+                                {
+                                    var match = selectedGame.AllResults[i];
+                                    var medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "";
+                                    
+                                    <div class="result-row @(i == 0 ? "top-match" : "")">
+                                        <div class="rank-badge">
+                                            @if (!string.IsNullOrEmpty(medal))
+                                            {
+                                                <span class="medal">@medal</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@(i + 1)</span>
+                                            }
+                                        </div>
+                                        <div class="players-info">
+                                            <strong>@match.Player1 & @match.Player2</strong>
+                                            <small>@match.MatchingSwipes / @match.TotalStatements matches</small>
+                                        </div>
+                                        <div class="percentage-badge @GetBadgeClass(match.Percentage)">
+                                            @match.Percentage%
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer-custom">
+                        <button class="btn-close-footer" @onclick="CloseDetails">Close</button>
                     </div>
                 </div>
             </div>
         }
     }
 </div>
+
+<style>
+    .activity-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .activity-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .activity-header h1 {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 0.5rem;
+    }
+
+    .activity-header p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+    }
+
+    .warning-card, .loading-card, .no-data-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .warning-card i, .no-data-card i {
+        font-size: 4rem;
+        color: #f888e9;
+        margin-bottom: 1rem;
+    }
+
+    .warning-card h3, .no-data-card h3 {
+        color: #333;
+        font-size: 2rem;
+        margin: 1rem 0;
+    }
+
+    .warning-card p, .loading-card p, .no-data-card p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-login, .btn-play {
+        display: inline-block;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .btn-login:hover, .btn-play:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
+        color: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+    }
+
+    .stat-content h3 {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+    }
+
+    .stat-content p {
+        color: #666;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .history-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    .history-header {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+    }
+
+    .history-header h4 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .history-table thead tr {
+        background: #f8f9fa;
+    }
+
+    .history-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .history-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .history-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .history-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .date-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .date-cell i {
+        color: #f888e9;
+        margin-right: 0.5rem;
+    }
+
+    .date-cell small {
+        color: #999;
+        font-size: 0.85rem;
+    }
+
+    .room-badge {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    .match-name {
+        color: #333;
+    }
+
+    .compatibility-display {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .progress-mini {
+        flex: 1;
+        background: #e0e0e0;
+        border-radius: 10px;
+        height: 20px;
+        overflow: hidden;
+        max-width: 150px;
+    }
+
+    .progress-fill-mini {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+
+    .progress-fill-mini.high {
+        background: linear-gradient(90deg, #4caf50 0%, #45a049 100%);
+    }
+
+    .progress-fill-mini.medium {
+        background: linear-gradient(90deg, #2196f3 0%, #1976d2 100%);
+    }
+
+    .progress-fill-mini.low {
+        background: linear-gradient(90deg, #ff9800 0%, #f57c00 100%);
+    }
+
+    .progress-fill-mini.verylow {
+        background: linear-gradient(90deg, #f44336 0%, #d32f2f 100%);
+    }
+
+    .percentage-text {
+        font-weight: bold;
+        color: #333;
+        min-width: 45px;
+    }
+
+    .players-count {
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .players-count i {
+        color: #f888e9;
+    }
+
+    .btn-details {
+        background: transparent;
+        border: 2px solid #bd87f8;
+        color: #bd87f8;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-details:hover {
+        background: #bd87f8;
+        color: white;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 1rem;
+    }
+
+    .modal-container {
+        background: white;
+        border-radius: 20px;
+        max-width: 800px;
+        width: 100%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header-custom {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header-custom h3 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .btn-close-modal {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-close-modal:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-body-custom {
+        padding: 2rem;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .game-info {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+    }
+
+    .info-item i {
+        color: #f888e9;
+        font-size: 1.2rem;
+    }
+
+    .results-title {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .result-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .result-row:hover {
+        background: #e9ecef;
+    }
+
+    .result-row.top-match {
+        background: linear-gradient(135deg, #fffbea 0%, #fff9db 100%);
+        border: 2px solid #ffd700;
+    }
+
+    .rank-badge {
+        min-width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .medal {
+        font-size: 1.5rem;
+    }
+
+    .players-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .players-info strong {
+        color: #333;
+    }
+
+    .players-info small {
+        color: #999;
+    }
+
+    .percentage-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        color: white;
+        min-width: 70px;
+        text-align: center;
+    }
+
+    .percentage-badge.high {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    }
+
+    .percentage-badge.medium {
+        background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    }
+
+    .percentage-badge.low {
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    }
+
+    .percentage-badge.verylow {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    }
+
+    .modal-footer-custom {
+        padding: 1.5rem 2rem;
+        border-top: 2px solid #e0e0e0;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-close-footer {
+        background: #666;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-close-footer:hover {
+        background: #555;
+    }
+
+    @@media (max-width: 768px) {
+        .activity-header h1 {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .history-table {
+            font-size: 0.9rem;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .compatibility-display {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .game-info {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .result-row {
+            flex-wrap: wrap;
+        }
+    }
+</style>
 
 @code {
     private List<GameHistoryEntry>? gameHistory;
@@ -200,20 +736,20 @@
         gameHistory = CompatibilityService.GetPlayerHistory(UserService.CurrentUser ?? "");
     }
 
-    private string GetProgressBarColor(double percentage)
+    private string GetProgressClass(double percentage)
     {
-        if (percentage >= 80) return "bg-success";
-        if (percentage >= 60) return "bg-info";
-        if (percentage >= 40) return "bg-warning";
-        return "bg-danger";
+        if (percentage >= 80) return "high";
+        if (percentage >= 60) return "medium";
+        if (percentage >= 40) return "low";
+        return "verylow";
     }
 
-    private string GetBadgeColor(double percentage)
+    private string GetBadgeClass(double percentage)
     {
-        if (percentage >= 80) return "bg-success";
-        if (percentage >= 60) return "bg-info";
-        if (percentage >= 40) return "bg-warning";
-        return "bg-danger";
+        if (percentage >= 80) return "high";
+        if (percentage >= 60) return "medium";
+        if (percentage >= 40) return "low";
+        return "verylow";
     }
 
     private string GetAverageCompatibility()

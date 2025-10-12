@@ -175,5 +175,89 @@
         "Percentage": 0
       }
     ]
+  },
+  {
+    "RoomCode": "3277",
+    "PlayedDate": "2025-10-07T15:44:20.7283376+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "emilija7",
+    "BestMatchPercentage": 100,
+    "AllResults": [
+      {
+        "Player1": "labas",
+        "Player2": "emilija7",
+        "MatchingSwipes": 10,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "I enjoy spontaneous trips",
+          "Animals are an important part of my life",
+          "I prefer relaxing at home over going to parties",
+          "Sports are part of my daily routine",
+          "I enjoy cooking at home",
+          "Summer is the best season",
+          "I like getting up early in the morning",
+          "I like taking risks and trying new things",
+          "Meaningful conversations are more important than having fun",
+          "I prefer movies over theater"
+        ],
+        "Percentage": 100
+      }
+    ]
+  },
+  {
+    "RoomCode": "3742",
+    "PlayedDate": "2025-10-09T17:35:47.824952+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "emilija7",
+    "BestMatchPercentage": 100,
+    "AllResults": [
+      {
+        "Player1": "labas",
+        "Player2": "emilija7",
+        "MatchingSwipes": 10,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "Sports are part of my daily routine",
+          "Meaningful conversations are more important than having fun",
+          "Animals are an important part of my life",
+          "I enjoy spontaneous trips",
+          "I enjoy cooking at home",
+          "I like getting up early in the morning",
+          "I like taking risks and trying new things",
+          "Summer is the best season",
+          "I prefer relaxing at home over going to parties",
+          "I prefer movies over theater"
+        ],
+        "Percentage": 100
+      }
+    ]
+  },
+  {
+    "RoomCode": "7729",
+    "PlayedDate": "2025-10-12T22:15:18.8063069+03:00",
+    "TotalPlayers": 2,
+    "BestMatchPlayer": "labas",
+    "BestMatchPercentage": 100,
+    "AllResults": [
+      {
+        "Player1": "emilija7",
+        "Player2": "labas",
+        "MatchingSwipes": 10,
+        "TotalStatements": 10,
+        "MatchedStatements": [
+          "Sports are part of my daily routine",
+          "Summer is the best season",
+          "I enjoy spontaneous trips",
+          "I like getting up early in the morning",
+          "I prefer relaxing at home over going to parties",
+          "I enjoy cooking at home",
+          "I prefer movies over theater",
+          "Meaningful conversations are more important than having fun",
+          "I like taking risks and trying new things",
+          "Animals are an important part of my life"
+        ],
+        "Percentage": 100
+      }
+    ]
   }
 ]

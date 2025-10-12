@@ -5,58 +5,57 @@
 <div class="results-container">
     @if (isCalculating)
     {
-        <div class="text-center my-5">
+        <div class="loading-section">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Calculating compatibility...</span>
             </div>
-            <p class="mt-2">Analyzing your answers...</p>
+            <p class="mt-3">Analyzing your answers...</p>
         </div>
     }
     else if (compatibilityResults != null && compatibilityResults.Any())
     {
-        <div class="card shadow-lg">
-            <div class="card-header bg-primary text-white text-center">
-                <h3>Compatibility Results</h3>
-                <p class="mb-0">Room: @RoomCode</p>
+        <div class="results-card">
+            <div class="results-header">
+                <h2>Compatibility Results</h2>
+                <p class="room-code">Room: <span>@RoomCode</span></p>
             </div>
-            <div class="card-body">
-                <h5 class="mb-4">Top Matches:</h5>
+            
+            <div class="results-body">
+                <h4 class="section-title">🏆 Top Matches</h4>
                 
                 @for (int i = 0; i < compatibilityResults.Count; i++)
                 {
                     var result = compatibilityResults[i];
                     var medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "";
                     
-                    <div class="result-card mb-3 @(i == 0 ? "best-match" : "")">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="mb-0">
+                    <div class="result-item @(i == 0 ? "best-match" : "")">
+                        <div class="result-header-row">
+                            <h5 class="match-title">
                                 @medal @result.Player1 & @result.Player2
                             </h5>
-                            <span class="badge @GetBadgeColor(result.Percentage) fs-5">
+                            <span class="score-badge @GetBadgeClass(result.Percentage)">
                                 @result.Percentage%
                             </span>
                         </div>
                         
-                        <div class="progress mb-2" style="height: 30px;">
-                            <div class="progress-bar @GetProgressBarColor(result.Percentage)" 
-                                 role="progressbar" 
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-fill @GetProgressBarClass(result.Percentage)" 
                                  style="width: @result.Percentage%">
-                                @result.MatchingSwipes / @result.TotalStatements matches
+                                <span class="progress-text">@result.MatchingSwipes / @result.TotalStatements matches</span>
                             </div>
                         </div>
                         
                         @if (result.MatchedStatements.Any())
                         {
-                            <button class="btn btn-sm btn-outline-secondary" 
-                                    @onclick="() => ToggleDetails(i)">
+                            <button class="btn-toggle" @onclick="() => ToggleDetails(i)">
                                 @(expandedIndex == i ? "Hide" : "Show") matched statements
                             </button>
                             
                             @if (expandedIndex == i)
                             {
-                                <div class="matched-statements mt-2">
-                                    <small class="text-muted">You both agreed on:</small>
-                                    <ul class="mt-2">
+                                <div class="matched-statements">
+                                    <small class="statements-label">You both agreed on:</small>
+                                    <ul>
                                         @foreach (var statement in result.MatchedStatements)
                                         {
                                             <li>@statement</li>
@@ -68,7 +67,6 @@
                     </div>
                 }
                 
-                <!-- My Matches Section -->
                 @if (!string.IsNullOrEmpty(CurrentUsername))
                 {
                     var myMatches = compatibilityResults
@@ -78,23 +76,21 @@
                     
                     @if (myMatches.Any())
                     {
-                        <hr class="my-4" />
-                        <h5 class="mb-3">Your Personal Matches:</h5>
+                        <hr class="section-divider" />
+                        <h4 class="section-title">💖 Your Personal Matches</h4>
                         
                         @foreach (var match in myMatches)
                         {
                             var otherPlayer = match.Player1 == CurrentUsername ? match.Player2 : match.Player1;
                             
-                            <div class="my-match-card">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>You & @otherPlayer</strong>
-                                    </div>
-                                    <div>
-                                        <span class="badge @GetBadgeColor(match.Percentage)">
+                            <div class="personal-match">
+                                <div class="personal-match-content">
+                                    <strong>You & @otherPlayer</strong>
+                                    <div class="personal-match-score">
+                                        <span class="score-badge @GetBadgeClass(match.Percentage)">
                                             @match.Percentage%
                                         </span>
-                                        <small class="text-muted ms-2">
+                                        <small class="match-count">
                                             (@match.MatchingSwipes/@match.TotalStatements)
                                         </small>
                                     </div>
@@ -104,9 +100,9 @@
                     }
                 }
                 
-                <div class="text-center mt-4">
-                    <button class="btn btn-primary" @onclick="SaveToHistory">
-                        Save Results & Finish
+                <div class="action-section">
+                    <button class="btn-save" @onclick="SaveToHistory">
+                        💾 Save Results & Finish
                     </button>
                 </div>
             </div>
@@ -114,50 +110,309 @@
     }
     else
     {
-        <div class="alert alert-warning">
-            <i class="bi bi-exclamation-triangle"></i> No compatibility results available. 
-            Make sure all players have answered the questions.
+        <div class="no-results-card">
+            <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #f888e9;"></i>
+            <h4>No Results Available</h4>
+            <p>No compatibility results available. Make sure all players have answered the questions.</p>
         </div>
     }
 </div>
 
 <style>
     .results-container {
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 1rem;
     }
 
-    .result-card {
-        padding: 20px;
-        border: 2px solid #dee2e6;
-        border-radius: 10px;
-        background-color: #f8f9fa;
+    .loading-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .loading-section p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .results-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    .results-header {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .results-header h2 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .room-code {
+        margin: 0.5rem 0 0 0;
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .room-code span {
+        font-weight: bold;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+
+    .results-body {
+        padding: 2rem;
+    }
+
+    .section-title {
+        color: #f888e9;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+    }
+
+    .result-item {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .result-item:hover {
+        border-color: #f888e9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.2);
     }
 
     .best-match {
-        border-color: #ffd700;
         background: linear-gradient(135deg, #fffbea 0%, #fff9db 100%);
+        border-color: #ffd700;
+        border-width: 3px;
+    }
+
+    .result-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .match-title {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .score-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 1rem;
+        color: white;
+    }
+
+    .score-badge.high {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    }
+
+    .score-badge.medium {
+        background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    }
+
+    .score-badge.low {
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    }
+
+    .score-badge.verylow {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    }
+
+    .progress-bar-wrapper {
+        background: #e0e0e0;
+        border-radius: 10px;
+        height: 35px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: width 0.5s ease;
+        font-weight: 600;
+        color: white;
+    }
+
+    .progress-bar-fill.high {
+        background: linear-gradient(90deg, #4caf50 0%, #45a049 100%);
+    }
+
+    .progress-bar-fill.medium {
+        background: linear-gradient(90deg, #2196f3 0%, #1976d2 100%);
+    }
+
+    .progress-bar-fill.low {
+        background: linear-gradient(90deg, #ff9800 0%, #f57c00 100%);
+    }
+
+    .progress-bar-fill.verylow {
+        background: linear-gradient(90deg, #f44336 0%, #d32f2f 100%);
+    }
+
+    .progress-text {
+        font-size: 0.9rem;
+    }
+
+    .btn-toggle {
+        background: transparent;
+        border: 2px solid #bd87f8;
+        color: #bd87f8;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-toggle:hover {
+        background: #bd87f8;
+        color: white;
     }
 
     .matched-statements {
-        padding: 10px;
-        background-color: white;
-        border-radius: 5px;
-        border: 1px solid #dee2e6;
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .statements-label {
+        color: #666;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.5rem;
     }
 
     .matched-statements ul {
-        margin-bottom: 0;
-        padding-left: 20px;
+        margin: 0;
+        padding-left: 1.5rem;
     }
 
-    .my-match-card {
-        padding: 15px;
-        background-color: #e7f3ff;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        border-left: 4px solid #0d6efd;
+    .matched-statements li {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .section-divider {
+        border: none;
+        border-top: 2px solid #e0e0e0;
+        margin: 2rem 0;
+    }
+
+    .personal-match {
+        background: linear-gradient(135deg, #e7f3ff 0%, #f0e7ff 100%);
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #bd87f8;
+    }
+
+    .personal-match-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .personal-match-score {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .match-count {
+        color: #666;
+    }
+
+    .action-section {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e0e0e0;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        border: none;
+        padding: 1rem 3rem;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
+    }
+
+    .no-results-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .no-results-card h4 {
+        color: #333;
+        margin: 1rem 0;
+    }
+
+    .no-results-card p {
+        color: #666;
+    }
+
+    @@media (max-width: 768px) {
+        .results-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .results-body {
+            padding: 1rem;
+        }
+
+        .result-header-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .personal-match-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 </style>
 
@@ -216,20 +471,20 @@
         expandedIndex = expandedIndex == index ? -1 : index;
     }
     
-    private string GetProgressBarColor(double percentage)
+    private string GetProgressBarClass(double percentage)
     {
-        if (percentage >= 80) return "bg-success";
-        if (percentage >= 60) return "bg-info";
-        if (percentage >= 40) return "bg-warning";
-        return "bg-danger";
+        if (percentage >= 80) return "high";
+        if (percentage >= 60) return "medium";
+        if (percentage >= 40) return "low";
+        return "verylow";
     }
     
-    private string GetBadgeColor(double percentage)
+    private string GetBadgeClass(double percentage)
     {
-        if (percentage >= 80) return "bg-success";
-        if (percentage >= 60) return "bg-info";
-        if (percentage >= 40) return "bg-warning";
-        return "bg-danger";
+        if (percentage >= 80) return "high";
+        if (percentage >= 60) return "medium";
+        if (percentage >= 40) return "low";
+        return "verylow";
     }
     
     private async Task SaveToHistory()
