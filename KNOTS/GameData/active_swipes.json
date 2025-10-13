@@ -724,5 +724,147 @@
       "AgreeWithStatement": true,
       "SwipedAt": "2025-10-04T20:54:59.1217396+03:00"
     }
+  ],
+  "9731": [
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S2",
+      "StatementText": "I prefer relaxing at home over going to parties",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:40:49.7373961+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S4",
+      "StatementText": "Animals are an important part of my life",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:40:50.8003518+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S3",
+      "StatementText": "I enjoy spontaneous trips",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:40:52.3679451+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S6",
+      "StatementText": "Sports are part of my daily routine",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:40:53.8226631+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S8",
+      "StatementText": "Summer is the best season",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:40:55.2246073+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S7",
+      "StatementText": "I enjoy cooking at home",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:40:56.3209748+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S1",
+      "StatementText": "I like getting up early in the morning",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:40:57.5019819+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S9",
+      "StatementText": "Meaningful conversations are more important than having fun",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:40:58.6190225+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S10",
+      "StatementText": "I like taking risks and trying new things",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:40:59.5696104+03:00"
+    },
+    {
+      "PlayerUsername": "emilija7",
+      "StatementId": "S5",
+      "StatementText": "I prefer movies over theater",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:41:00.7777517+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S9",
+      "StatementText": "Meaningful conversations are more important than having fun",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:41:37.9028295+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S8",
+      "StatementText": "Summer is the best season",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:41:39.07732+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S1",
+      "StatementText": "I like getting up early in the morning",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:41:40.1540422+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S10",
+      "StatementText": "I like taking risks and trying new things",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:41:41.8588056+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S3",
+      "StatementText": "I enjoy spontaneous trips",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:41:43.5359089+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S2",
+      "StatementText": "I prefer relaxing at home over going to parties",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:41:44.5490462+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S7",
+      "StatementText": "I enjoy cooking at home",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:41:45.5554091+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S5",
+      "StatementText": "I prefer movies over theater",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:41:46.6542834+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S6",
+      "StatementText": "Sports are part of my daily routine",
+      "AgreeWithStatement": true,
+      "SwipedAt": "2025-10-07T15:41:47.8026024+03:00"
+    },
+    {
+      "PlayerUsername": "labas",
+      "StatementId": "S4",
+      "StatementText": "Animals are an important part of my life",
+      "AgreeWithStatement": false,
+      "SwipedAt": "2025-10-07T15:41:55.267433+03:00"
+    }
   ]
 }

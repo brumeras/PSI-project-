@@ -3,113 +3,418 @@
 @inject UserService UserService
 @rendermode InteractiveServer
 
-<PageTitle>Leaderboard</PageTitle>
+<PageTitle>Leaderboard - KNOTS</PageTitle>
 
-<div class="container mt-4">
-    <h2>Top Knotters</h2>
-    <p class="text-muted">Rankings based on best matches and compatibility scores</p>
+<div class="leaderboard-container">
+    <div class="leaderboard-header">
+        <h1>🏆 Top Knotters</h1>
+        <p>Rankings based on best matches and compatibility scores</p>
+    </div>
 
-    @if (leaderboard != null && leaderboard.Any())
+    @if (!UserService.IsAuthenticated)
     {
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Rank</th>
-                        <th>Username</th>
-                        <th>Games Played</th>
-                        <th>Best Matches</th>
-                        <th>Avg Compatibility</th>
-                        <th>Member Since</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @{
-                        int rank = 1;
-                    }
-                    @foreach (var user in leaderboard)
-                    {
-                        <tr class="@(user.Username == UserService.CurrentUser ? "table-primary" : "")">
-                            <td>
-                                @if (rank == 1)
-                                {
-                                    <span class="badge bg-warning text-dark">🥇 @rank</span>
-                                }
-                                else if (rank == 2)
-                                {
-                                    <span class="badge bg-secondary">🥈 @rank</span>
-                                }
-                                else if (rank == 3)
-                                {
-                                    <span class="badge" style="background-color: #cd7f32">🥉 @rank</span>
-                                }
-                                else
-                                {
-                                    <span>@rank</span>
-                                }
-                            </td>
-                            <td>
-                                <strong>@user.Username</strong>
-                                @if (user.Username == UserService.CurrentUser)
-                                {
-                                    <span class="badge bg-info ms-2">You</span>
-                                }
-                            </td>
-                            <td>@user.TotalGamesPlayed</td>
-                            <td>
-                                <span class="badge bg-success">@user.BestMatchesCount</span>
-                            </td>
-                            <td>@user.AverageCompatibilityScore.ToString("F1")%</td>
-                            <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
-                        </tr>
-                        rank++;
-                    }
-                </tbody>
-            </table>
+        <div class="auth-warning">
+            <i class="bi bi-lock-fill"></i>
+            <h3>Authentication Required</h3>
+            <p>Please login to view the leaderboard.</p>
+            <a href="/" class="btn-login-link">Go to Login</a>
         </div>
-
-        @if (UserService.IsAuthenticated && currentUserRank > 0)
-        {
-            <div class="alert alert-info mt-3">
-                <strong>Your Rank:</strong> #@currentUserRank out of @UserService.GetTotalUsersCount() players
+    }
+    else if (isLoading)
+    {
+        <div class="loading-card">
+            <div class="spinner-border" style="color: #f888e9;" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-        }
+            <p class="mt-3">Loading leaderboard...</p>
+        </div>
+    }
+    else if (leaderboard != null && leaderboard.Any())
+    {
+        <div class="leaderboard-card">
+            <div class="table-responsive">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Username</th>
+                            <th>Games Played</th>
+                            <th>Best Matches</th>
+                            <th>Avg Compatibility</th>
+                            <th>Member Since</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int rank = 1;
+                        }
+                        @foreach (var user in leaderboard)
+                        {
+                            <tr class="@(user.Username == UserService.CurrentUser ? "current-user-row" : "")">
+                                <td>
+                                    @if (rank == 1)
+                                    {
+                                        <span class="medal gold">🥇</span>
+                                    }
+                                    else if (rank == 2)
+                                    {
+                                        <span class="medal silver">🥈</span>
+                                    }
+                                    else if (rank == 3)
+                                    {
+                                        <span class="medal bronze">🥉</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="rank-number">@rank</span>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@user.Username</strong>
+                                    @if (user.Username == UserService.CurrentUser)
+                                    {
+                                        <span class="you-badge">You</span>
+                                    }
+                                </td>
+                                <td>@user.TotalGamesPlayed</td>
+                                <td>
+                                    <span class="match-badge">@user.BestMatchesCount</span>
+                                </td>
+                                <td>
+                                    <span class="compatibility-score">@user.AverageCompatibilityScore.ToString("F1")%</span>
+                                </td>
+                                <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                            rank++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (UserService.IsAuthenticated && currentUserRank > 0)
+            {
+                <div class="user-rank-info">
+                    <strong>Your Rank:</strong> #@currentUserRank out of @totalUsers players
+                </div>
+            }
+        </div>
     }
     else
     {
-        <div class="alert alert-warning">
+        <div class="no-data-card">
+            <i class="bi bi-trophy" style="font-size: 3rem; color: #f888e9;"></i>
+            <h3>No Rankings Yet</h3>
             <p>No players have completed games yet. Be the first to play!</p>
+            <a href="/game" class="btn-play">Start Playing</a>
         </div>
     }
-    
-    <div class="mt-3">
-        <a href="/home" class="btn btn-secondary">Back to Home</a>
-    </div>
 </div>
 
-@code {
-    private List<KNOTS.Services.User> leaderboard = new();  // Full namespace
-    private int currentUserRank = 0;
+<style>
+    .leaderboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
 
-    protected override void OnParametersSet()
+    .leaderboard-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .leaderboard-header h1 {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 0.5rem;
+    }
+
+    .leaderboard-header p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+    }
+
+    .auth-warning, .loading-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .auth-warning i {
+        font-size: 4rem;
+        color: #f888e9;
+        margin-bottom: 1rem;
+    }
+
+    .auth-warning h3 {
+        color: #333;
+        font-size: 2rem;
+        margin: 1rem 0;
+    }
+
+    .auth-warning p, .loading-card p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-login-link {
+        display: inline-block;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .btn-login-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
+        color: white;
+    }
+
+    .leaderboard-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+    .leaderboard-table thead tr {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+    }
+
+    .leaderboard-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .leaderboard-table th:first-child {
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .leaderboard-table th:last-child {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .leaderboard-table tbody tr {
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+    .leaderboard-table tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.2);
+    }
+
+    .leaderboard-table td {
+        padding: 1rem;
+        border-top: 1px solid #f0f0f0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .leaderboard-table tbody tr td:first-child {
+        border-left: 1px solid #f0f0f0;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .leaderboard-table tbody tr td:last-child {
+        border-right: 1px solid #f0f0f0;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .current-user-row {
+        background: linear-gradient(135deg, #e7f3ff 0%, #f0e7ff 100%) !important;
+        border: 2px solid #bd87f8 !important;
+    }
+
+    .current-user-row td {
+        border-color: #bd87f8 !important;
+    }
+
+    .medal {
+        font-size: 1.5rem;
+        display: inline-block;
+    }
+
+    .rank-number {
+        font-weight: bold;
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .you-badge {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .match-badge {
+        background-color: #4caf50;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .compatibility-score {
+        color: #f888e9;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .user-rank-info {
+        background: linear-gradient(135deg, #e7f3ff 0%, #f0e7ff 100%);
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        text-align: center;
+        border: 2px solid #bd87f8;
+        font-size: 1.1rem;
+        color: #333;
+    }
+
+    .no-data-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .no-data-card h3 {
+        color: #333;
+        margin: 1rem 0;
+        font-size: 1.8rem;
+    }
+
+    .no-data-card p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-play {
+        display: inline-block;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .btn-play:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
+        color: white;
+    }
+
+    @@media (max-width: 768px) {
+        .leaderboard-header h1 {
+            font-size: 2rem;
+        }
+
+        .leaderboard-card {
+            padding: 1rem;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .medal {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+@code {
+    private List<KNOTS.Services.User>? leaderboard = new List<KNOTS.Services.User>();
+    private int currentUserRank = 0;
+    private int totalUsers = 0;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine("=== LEADERBOARD PAGE LOADING ===");
+        await Task.Delay(300);
         LoadLeaderboard();
+        isLoading = false;
+        StateHasChanged(); // Force UI update
     }
 
     private void LoadLeaderboard()
     {
         try
         {
+            Console.WriteLine("=== LoadLeaderboard START ===");
+            
+            // Get all users count first
+            totalUsers = UserService.GetTotalUsersCount();
+            Console.WriteLine($"Total users count: {totalUsers}");
+            
+            // Get top 10 users for leaderboard
             leaderboard = UserService.GetLeaderboard(10);
+            Console.WriteLine($"Leaderboard returned: {leaderboard?.Count ?? 0} users");
+            
+            if (leaderboard != null && leaderboard.Any())
+            {
+                Console.WriteLine("=== USERS IN LEADERBOARD: ===");
+                foreach (var user in leaderboard)
+                {
+                    Console.WriteLine($"  - {user.Username}: Games={user.TotalGamesPlayed}, Avg={user.AverageCompatibilityScore:F2}, Best={user.BestMatchesCount}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("!!! LEADERBOARD IS EMPTY OR NULL !!!");
+            }
         
             if (UserService.IsAuthenticated && !string.IsNullOrEmpty(UserService.CurrentUser))
             {
                 currentUserRank = UserService.GetUserRank(UserService.CurrentUser);
+                Console.WriteLine($"Current user rank: {currentUserRank}");
             }
+            
+            Console.WriteLine("=== LoadLeaderboard END ===");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading leaderboard: {ex.Message}");
+            Console.WriteLine($"!!! ERROR loading leaderboard: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             leaderboard = new List<KNOTS.Services.User>();
         }
     }

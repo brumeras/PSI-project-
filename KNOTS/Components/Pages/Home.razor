@@ -6,33 +6,250 @@
 
 <PageTitle>Home</PageTitle>
 
-@if (UserService.IsAuthenticated)
-{
-    <h2>Welcome, @UserService.CurrentUser!</h2>
-    <button class="btn btn-secondary mb-3" @onclick="Logout">Logout</button>
+<div class="full-screen-container">
+    @if (UserService.IsAuthenticated)
+    {
+        <!-- Navigacija viršuje -->
+        <nav class="top-navigation">
+            <div class="nav-brand">KNOTS</div>
+            <div class="nav-links">
+                <a href="/Home" class="nav-link active">Home</a>
+                <a href="/activity" class="nav-link">My Activity</a>
+                <a href="/leaderboard" class="nav-link">View Top Knotters</a> <!-- 🔧 Pataisyta -->
+            </div>
+            <button class="btn-logout" @onclick="Logout">Logout</button>
+        </nav>
 
-   
+        <!-- Pagrindinis turinys -->
+        <div class="content-wrapper">
+            <div class="welcome-section">
+                <h1 class="welcome-title">Welcome, @UserService.CurrentUser!</h1>
 
-    
-    <p>@friendMessage</p>
+                @if (!string.IsNullOrEmpty(friendMessage))
+                {
+                    <div class="message-box">@friendMessage</div>
+                }
+            </div>
 
-    <hr />
+            <div class="game-section">
+                <h2 class="section-title">Join a new game now!</h2>
+                <p class="section-description">
+                    You will be connected to an interactive server, where you can find your match based on your answers!
+                </p>
 
-    <h3>Join a new game now!</h3>
-    <p>You will be connected to an interactive server, where you can find your match based on your answers!</p>
-    
-    <!-- Pridėta nuoroda į žaidimo puslapį -->
-    <div class="d-flex gap-2 mb-3">
-        <a href="/game" class="btn btn-success">Connect to game</a>
-    </div>
-    
-    <p>@statusMessage</p>
-}
-else
-{
-    <h3>You are not logged in.</h3>
-    <p><a href="/">Go to login page</a></p>
-}
+                <a href="/game" class="btn-connect">Connect to game</a>
+
+                @if (!string.IsNullOrEmpty(statusMessage))
+                {
+                    <p class="status-message">@statusMessage</p>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="not-logged-in">
+            <h3>You are not logged in.</h3>
+            <p><a href="/" class="link-login">Go to login page</a></p>
+        </div>
+    }
+</div>
+
+<style>
+    .full-screen-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #b4d0ec 0%, #a8c5e8 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .top-navigation {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #f888e9;
+        letter-spacing: 2px;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 2rem;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .nav-link {
+        color: #333;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+        background-color: #f888e9;
+        color: white;
+    }
+
+    .nav-link.active {
+        background-color: #bd87f8;
+        color: white;
+    }
+
+    .btn-logout {
+        background-color: #666;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-logout:hover {
+        background-color: #555;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .content-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .welcome-section {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .welcome-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .message-box {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        color: #333;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .game-section {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        color: #f888e9;
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .section-description {
+        color: #555;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .btn-connect {
+        display: inline-block;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 1rem 3rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .btn-connect:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
+    }
+
+    .status-message {
+        margin-top: 1.5rem;
+        color: #666;
+        font-weight: 600;
+    }
+
+    .not-logged-in {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        color: white;
+        text-align: center;
+    }
+
+    .not-logged-in h3 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .link-login {
+        color: #f888e9;
+        font-weight: bold;
+        text-decoration: none;
+        font-size: 1.2rem;
+    }
+
+    .link-login:hover {
+        color: #bd87f8;
+        text-decoration: underline;
+    }
+
+    @@media (max-width: 768px) {
+        .top-navigation {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-links {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .game-section {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
 
 @code {
     private string statusMessage = "";
