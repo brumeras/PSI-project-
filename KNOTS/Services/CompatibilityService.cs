@@ -3,6 +3,7 @@ using System.Text.Json;
 
 namespace KNOTS.Services
 {
+ 
     public struct GameStatement
     {
         public string Id { get; set; }
@@ -65,83 +66,103 @@ namespace KNOTS.Services
         public List<CompatibilityScore> AllResults { get; set; } = new();
     }
 
-    public class CompatibilityService
+    public class RoomStatistics
     {
-        private static readonly ConcurrentDictionary<string, List<PlayerSwipe>> _roomSwipes = new();
-        
-        private readonly string _dataDirectory = "GameData";
-        private readonly string _statementsDirectory = "GameStatements";
-        private readonly string _defaultStatementsFile = "statements.json";
-        private readonly string _swipesFile = "active_swipes.json";
-        private readonly string _historyFile = "game_history.json";
-        
-        private List<GameStatement> _statements = new();
-        private readonly UserService _userService;
-        public CompatibilityService(UserService userService) 
-        {
-            _userService = userService;
-            Directory.CreateDirectory(_dataDirectory);
-            Directory.CreateDirectory(_statementsDirectory);
+        public int TotalSwipes { get; set; }
+        public int UniquePlayers { get; set; }
+        public int UniqueStatements { get; set; }
+        public int RightSwipes { get; set; }
+        public int LeftSwipes { get; set; }
+    }
+
+    // ===== FILE REPOSITORY  =====
     
-            LoadStatementsFromFile();
-            LoadActiveSwipesFromFile();
+    public class JsonFileRepository<T> where T : new()
+    {
+        private readonly string _filePath;
+
+        public JsonFileRepository(string directory, string fileName)
+        {
+            Directory.CreateDirectory(directory);
+            _filePath = Path.Combine(directory, fileName);
         }
-        
-        
-        private void LoadStatementsFromFile()
+
+        public T Load()
         {
             try
             {
-                string filePath = Path.Combine(_statementsDirectory, _defaultStatementsFile);
-
-                if (File.Exists(filePath))
+                if (File.Exists(_filePath))
                 {
-                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    using (StreamReader reader = new StreamReader(fs))
-                    {
-                        string jsonString = reader.ReadToEnd();
-                        _statements = JsonSerializer.Deserialize<List<GameStatement>>(jsonString) ?? new List<GameStatement>();
-                    }
-                }
-                else
-                {
-                    CreateDefaultStatements();
-                    SaveStatementsToFile();
+                    using var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read);
+                    using var reader = new StreamReader(fs);
+                    string json = reader.ReadToEnd();
+                    return JsonSerializer.Deserialize<T>(json) ?? new T();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Klaida skaitant teiginius: {ex.Message}");
-                CreateDefaultStatements();
+                Console.WriteLine($"Error loading from {_filePath}: {ex.Message}");
             }
+
+            return new T();
         }
 
-
-        private void SaveStatementsToFile()
+        public void Save(T data)
         {
             try
             {
-                string filePath = Path.Combine(_statementsDirectory, _defaultStatementsFile);
-                string jsonString = JsonSerializer.Serialize(_statements, new JsonSerializerOptions
+                string json = JsonSerializer.Serialize(data, new JsonSerializerOptions
                 {
                     WriteIndented = true
                 });
 
-                using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                using (StreamWriter writer = new StreamWriter(fs))
-                {
-                    writer.Write(jsonString);
-                }
+                using var fs = new FileStream(_filePath, FileMode.Create, FileAccess.Write);
+                using var writer = new StreamWriter(fs);
+                writer.Write(json);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Klaida saugant teiginius: {ex.Message}");
+                Console.WriteLine($"Error saving to {_filePath}: {ex.Message}");
+            }
+        }
+    }
+
+    // ===== STATEMENT REPOSITORY  =====
+    
+    public class StatementRepository
+    {
+        private readonly JsonFileRepository<List<GameStatement>> _fileRepository;
+        private List<GameStatement> _statements;
+
+        public StatementRepository(JsonFileRepository<List<GameStatement>> fileRepository)
+        {
+            _fileRepository = fileRepository;
+            _statements = _fileRepository.Load();
+            
+            if (!_statements.Any())
+            {
+                _statements = CreateDefaultStatements();
+                _fileRepository.Save(_statements);
             }
         }
 
-        private void CreateDefaultStatements()
+        public List<GameStatement> GetAll() => _statements;
+
+        public List<GameStatement> GetRandom(int count)
         {
-            _statements = new List<GameStatement>
+            var random = new Random();
+            return _statements.OrderBy(x => random.Next()).Take(Math.Min(count, _statements.Count)).ToList();
+        }
+
+        public GameStatement? GetById(string id)
+        {
+            var statement = _statements.FirstOrDefault(s => s.Id == id);
+            return statement.Id != null ? statement : null;
+        }
+
+        private List<GameStatement> CreateDefaultStatements()
+        {
+            return new List<GameStatement>
             {
                 new GameStatement("S1", "I like getting up early in the morning"),
                 new GameStatement("S2", "I prefer relaxing at home over going to parties"),
@@ -163,131 +184,159 @@ namespace KNOTS.Services
                 new GameStatement("S18", "Books are better than movies"),
                 new GameStatement("S19", "I enjoy nature and hiking"),
                 new GameStatement("S20", "Financial stability is a priority"),
-
             };
         }
-        
-        public List<GameStatement> GetRandomStatements(int count)
+    }
+
+    // ===== SWIPE REPOSITORY  =====
+    
+    public class SwipeRepository
+    {
+        private readonly ConcurrentDictionary<string, List<PlayerSwipe>> _roomSwipes = new();
+        private readonly JsonFileRepository<Dictionary<string, List<PlayerSwipe>>> _fileRepository;
+        private readonly object _lockObject = new object();
+
+        public SwipeRepository(JsonFileRepository<Dictionary<string, List<PlayerSwipe>>> fileRepository)
         {
-            var random = new Random();
-            return _statements.OrderBy(x => random.Next()).Take(Math.Min(count, _statements.Count)).ToList();
+            _fileRepository = fileRepository;
+            LoadSwipes();
         }
-        
 
-        private void LoadActiveSwipesFromFile()
+        private void LoadSwipes()
         {
-            try
+            lock (_lockObject)
             {
-                string filePath = Path.Combine(_dataDirectory, _swipesFile);
-                if (File.Exists(filePath))
+                var data = _fileRepository.Load();
+                _roomSwipes.Clear();
+                foreach (var kvp in data)
                 {
-                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    using (StreamReader reader = new StreamReader(fs))
-                    {
-                        string json = reader.ReadToEnd();
-                        var data = JsonSerializer.Deserialize<Dictionary<string, List<PlayerSwipe>>>(json);
-
-                        if (data != null)
-                        {
-                            foreach (var kvp in data)
-                            {
-                                _roomSwipes[kvp.Key] = kvp.Value;
-                            }
-                        }
-                    }
+                    _roomSwipes[kvp.Key] = kvp.Value;
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Klaida skaitant swipes: {ex.Message}");
-            }
         }
 
-        private void SaveActiveSwipesToFile()
+        public bool SaveSwipe(string roomCode, PlayerSwipe swipe)
         {
-            try
+            lock (_lockObject)
             {
-                string filePath = Path.Combine(_dataDirectory, _swipesFile);
-                var data = _roomSwipes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                string json = JsonSerializer.Serialize(data, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
+                
+                LoadSwipesInternal();
 
-                using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                using (StreamWriter writer = new StreamWriter(fs))
+                if (!_roomSwipes.ContainsKey(roomCode))
                 {
-                    writer.Write(json);
+                    _roomSwipes[roomCode] = new List<PlayerSwipe>();
                 }
+
+                _roomSwipes[roomCode].RemoveAll(s => 
+                    s.PlayerUsername == swipe.PlayerUsername && s.StatementId == swipe.StatementId);
+
+                _roomSwipes[roomCode].Add(swipe);
+                
+                PersistSwipes();
+                
+                Console.WriteLine($"[SwipeRepository] Saved swipe for {swipe.PlayerUsername} in room {roomCode}. Total swipes in room: {_roomSwipes[roomCode].Count}");
+                return true;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Klaida saugant swipes: {ex.Message}");
-            }
-        }
-
-        public bool SaveSwipe(string roomCode, string playerUsername, string statementId, bool swipeRight)
-        {
-            var statement = _statements.FirstOrDefault(s => s.Id == statementId);
-            if (statement.Id == null)
-            {
-                return false;
-            }
-
-            var playerSwipe = new PlayerSwipe(
-                playerUsername,
-                statementId,
-                statement.Text,
-                swipeRight
-            );
-
-            if (!_roomSwipes.ContainsKey(roomCode))
-            {
-                _roomSwipes[roomCode] = new List<PlayerSwipe>();
-            }
-
-            _roomSwipes[roomCode].RemoveAll(s => 
-                s.PlayerUsername == playerUsername && s.StatementId == statementId);
-
-            _roomSwipes[roomCode].Add(playerSwipe);
-            
-            SaveActiveSwipesToFile();
-            
-            // BOXING/UNBOXING USAGE - Log statistics kada išsaugomas swipe
-            LogRoomStatistics(roomCode);
-            
-            return true;
         }
 
         public List<PlayerSwipe> GetRoomSwipes(string roomCode)
         {
-            _roomSwipes.TryGetValue(roomCode, out var swipes);
-            return swipes ?? new List<PlayerSwipe>();
+            lock (_lockObject)
+            {
+                // Reload to get fresh data
+                LoadSwipesInternal();
+                
+                _roomSwipes.TryGetValue(roomCode, out var swipes);
+                var result = swipes ?? new List<PlayerSwipe>();
+                
+                Console.WriteLine($"[SwipeRepository] GetRoomSwipes for {roomCode}: Found {result.Count} swipes");
+                return result;
+            }
         }
 
         public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername)
         {
             var roomSwipes = GetRoomSwipes(roomCode);
-            return roomSwipes.Where(s => s.PlayerUsername == playerUsername).ToList();
+            var playerSwipes = roomSwipes.Where(s => s.PlayerUsername == playerUsername).ToList();
+            
+            Console.WriteLine($"[SwipeRepository] GetPlayerSwipes for {playerUsername} in room {roomCode}: Found {playerSwipes.Count} swipes");
+            return playerSwipes;
         }
 
-        public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements)
+        public void ClearRoomData(string roomCode)
         {
-            var roomSwipes = GetRoomSwipes(roomCode);
-            
-            // BOXING/UNBOXING USAGE - Naudojame statistiką patikrinti progress
-            var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
-            var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
-            
-            Console.WriteLine($"[HaveAllPlayersFinished] Room {roomCode}: {uniquePlayers} players, {totalSwipes} total swipes");
-
-            return playerUsernames
-                .All(player => roomSwipes.Count(s => s.PlayerUsername == player) >= totalStatements);
+            lock (_lockObject)
+            {
+                _roomSwipes.TryRemove(roomCode, out _);
+                PersistSwipes();
+            }
         }
-        public CompatibilityScore CalculateCompatibility(string roomCode, string player1, string player2)
+
+        private void LoadSwipesInternal()
         {
-            var player1Swipes = GetPlayerSwipes(roomCode, player1);
-            var player2Swipes = GetPlayerSwipes(roomCode, player2);
+            var data = _fileRepository.Load();
+            _roomSwipes.Clear();
+            foreach (var kvp in data)
+            {
+                _roomSwipes[kvp.Key] = kvp.Value;
+            }
+        }
+
+        private void PersistSwipes()
+        {
+            var data = _roomSwipes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            _fileRepository.Save(data);
+        }
+    }
+
+    // ===== GAME HISTORY REPOSITORY  =====
+    
+    public class GameHistoryRepository
+    {
+        private readonly JsonFileRepository<List<GameHistoryEntry>> _fileRepository;
+
+        public GameHistoryRepository(JsonFileRepository<List<GameHistoryEntry>> fileRepository)
+        {
+            _fileRepository = fileRepository;
+        }
+
+        public void Save(GameHistoryEntry entry)
+        {
+            var history = _fileRepository.Load();
+            history.Add(entry);
+            _fileRepository.Save(history);
+        }
+
+        public List<GameHistoryEntry> GetPlayerHistory(string playerUsername)
+        {
+            var allHistory = _fileRepository.Load();
+            return allHistory
+                .Where(h => h.AllResults.Any(r => r.Player1 == playerUsername || r.Player2 == playerUsername))
+                .OrderByDescending(h => h.PlayedDate)
+                .ToList();
+        }
+
+        public List<GameHistoryEntry> GetAll()
+        {
+            return _fileRepository.Load().OrderByDescending(h => h.PlayedDate).ToList();
+        }
+    }
+
+    // ===== COMPATIBILITY CALCULATOR  =====
+    
+    public class CompatibilityCalculator
+    {
+        private readonly SwipeRepository _swipeRepository;
+
+        public CompatibilityCalculator(SwipeRepository swipeRepository)
+        {
+            _swipeRepository = swipeRepository;
+        }
+
+        public CompatibilityScore Calculate(string roomCode, string player1, string player2)
+        {
+            var player1Swipes = _swipeRepository.GetPlayerSwipes(roomCode, player1);
+            var player2Swipes = _swipeRepository.GetPlayerSwipes(roomCode, player2);
 
             var matchedStatements = player1Swipes
                 .Join(player2Swipes,
@@ -310,19 +359,15 @@ namespace KNOTS.Services
             );
         }
 
-        public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames)
+        public List<CompatibilityScore> CalculateAll(string roomCode, List<string> playerUsernames)
         {
             var results = new List<CompatibilityScore>();
-
-            // BOXING/UNBOXING USAGE - Log prieš skaičiuojant
-            Console.WriteLine($"[CalculateAllCompatibilities] Starting calculation for room {roomCode}");
-            LogRoomStatistics(roomCode);
 
             for (int i = 0; i < playerUsernames.Count; i++)
             {
                 for (int j = i + 1; j < playerUsernames.Count; j++)
                 {
-                    var score = CalculateCompatibility(roomCode, playerUsernames[i], playerUsernames[j]);
+                    var score = Calculate(roomCode, playerUsernames[i], playerUsernames[j]);
                     results.Add(score);
                 }
             }
@@ -332,20 +377,114 @@ namespace KNOTS.Services
 
         public CompatibilityScore? GetBestMatch(string roomCode, List<string> playerUsernames)
         {
-            var allScores = CalculateAllCompatibilities(roomCode, playerUsernames);
+            var allScores = CalculateAll(roomCode, playerUsernames);
             return allScores.FirstOrDefault();
         }
-        
-        
-        public void SaveGameToHistory(string roomCode, List<string> playerUsernames)
+    }
+
+    // ===== STATISTICS SERVICE =====
+    
+    public class StatisticsService
+    {
+        private readonly SwipeRepository _swipeRepository;
+
+        public StatisticsService(SwipeRepository swipeRepository)
+        {
+            _swipeRepository = swipeRepository;
+        }
+
+        public RoomStatistics GetRoomStatistics(string roomCode)
+        {
+            var roomSwipes = _swipeRepository.GetRoomSwipes(roomCode);
+            
+            return new RoomStatistics
+            {
+                TotalSwipes = roomSwipes.Count,
+                UniquePlayers = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),
+                UniqueStatements = roomSwipes.Select(s => s.StatementId).Distinct().Count(),
+                RightSwipes = roomSwipes.Count(s => s.AgreeWithStatement),
+                LeftSwipes = roomSwipes.Count(s => !s.AgreeWithStatement)
+            };
+        }
+
+        public void LogStatistics(string roomCode)
+        {
+            var stats = GetRoomStatistics(roomCode);
+            Console.WriteLine($"[Room {roomCode}] Total: {stats.TotalSwipes}, Players: {stats.UniquePlayers}, Right: {stats.RightSwipes}, Left: {stats.LeftSwipes}");
+        }
+    }
+
+    // ===== GAME PROGRESS CHECKER  =====
+    
+    public class GameProgressChecker
+    {
+        private readonly SwipeRepository _swipeRepository;
+        private readonly StatisticsService _statisticsService;
+
+        public GameProgressChecker(SwipeRepository swipeRepository, StatisticsService statisticsService)
+        {
+            _swipeRepository = swipeRepository;
+            _statisticsService = statisticsService;
+        }
+
+        public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements)
+        {
+            if (playerUsernames == null || !playerUsernames.Any())
+            {
+                Console.WriteLine($"[HaveAllPlayersFinished] Room {roomCode}: No players provided");
+                return false;
+            }
+
+            var roomSwipes = _swipeRepository.GetRoomSwipes(roomCode);
+            var stats = _statisticsService.GetRoomStatistics(roomCode);
+            
+            Console.WriteLine($"[HaveAllPlayersFinished] Room {roomCode}: {stats.UniquePlayers} players, {stats.TotalSwipes} total swipes, Expected: {totalStatements} statements per player");
+
+            foreach (var player in playerUsernames)
+            {
+                var playerSwipeCount = roomSwipes.Count(s => s.PlayerUsername == player);
+                Console.WriteLine($"[HaveAllPlayersFinished] Player {player}: {playerSwipeCount}/{totalStatements} swipes");
+                
+                if (playerSwipeCount < totalStatements)
+                {
+                    return false;
+                }
+            }
+
+            Console.WriteLine($"[HaveAllPlayersFinished] Room {roomCode}: All players finished!");
+            return true;
+        }
+    }
+
+    // ===== GAME HISTORY SERVICE  =====
+    
+    public class GameHistoryService
+    {
+        private readonly GameHistoryRepository _historyRepository;
+        private readonly CompatibilityCalculator _compatibilityCalculator;
+        private readonly StatisticsService _statisticsService;
+        private readonly UserService _userService;
+
+        public GameHistoryService(
+            GameHistoryRepository historyRepository,
+            CompatibilityCalculator compatibilityCalculator,
+            StatisticsService statisticsService,
+            UserService userService)
+        {
+            _historyRepository = historyRepository;
+            _compatibilityCalculator = compatibilityCalculator;
+            _statisticsService = statisticsService;
+            _userService = userService;
+        }
+
+        public void SaveGame(string roomCode, List<string> playerUsernames)
         {
             try
             {
-                // BOXING/UNBOXING USAGE - Log statistiką prieš išsaugant
                 Console.WriteLine($"[SaveGameToHistory] Saving game for room {roomCode}");
-                LogRoomStatistics(roomCode);
+                _statisticsService.LogStatistics(roomCode);
                 
-                var allResults = CalculateAllCompatibilities(roomCode, playerUsernames);
+                var allResults = _compatibilityCalculator.CalculateAll(roomCode, playerUsernames);
                 if (!allResults.Any()) return;
 
                 var bestMatch = allResults.First();
@@ -360,45 +499,8 @@ namespace KNOTS.Services
                     AllResults = allResults
                 };
 
-                var history = LoadGameHistory();
-                history.Add(historyEntry);
-                
-                string filePath = Path.Combine(_dataDirectory, _historyFile);
-                string json = JsonSerializer.Serialize(history, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
-                // Stream naudojimas saugojimui į JSON failą
-                   using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                        using (StreamWriter writer = new StreamWriter(fs))
-                        {
-                            writer.Write(json);
-                        }
-                
-                foreach (var result in allResults)
-                {
-                    // Check if player1 was best match for player2
-                    var bestForPlayer2 = allResults
-                        .Where(r => r.Player1 == result.Player2 || r.Player2 == result.Player2)
-                        .OrderByDescending(r => r.Percentage)
-                        .FirstOrDefault();
-                    
-                    bool player1WasBestMatch = bestForPlayer2.Player1 == result.Player1 || bestForPlayer2.Player2 == result.Player1;
-                    
-                    // Update player1 stats
-                    _userService.UpdateUserStatistics(result.Player1, result.Percentage, player1WasBestMatch);
-            
-                    // Check if player2 was best match for player1
-                    var bestForPlayer1 = allResults
-                        .Where(r => r.Player1 == result.Player1 || r.Player2 == result.Player1)
-                        .OrderByDescending(r => r.Percentage)
-                        .FirstOrDefault();
-                    
-                    bool player2WasBestMatch = bestForPlayer1.Player1 == result.Player2 || bestForPlayer1.Player2 == result.Player2;
-            
-                    // Update player2 stats
-                    _userService.UpdateUserStatistics(result.Player2, result.Percentage, player2WasBestMatch);
-                }
+                _historyRepository.Save(historyEntry);
+                UpdatePlayerStatistics(allResults);
 
                 Console.WriteLine($"Game history saved for room {roomCode}");
             }
@@ -408,91 +510,125 @@ namespace KNOTS.Services
             }
         }
 
-        private List<GameHistoryEntry> LoadGameHistory()
+        private void UpdatePlayerStatistics(List<CompatibilityScore> allResults)
         {
-            try
+            foreach (var result in allResults)
             {
-                string filePath = Path.Combine(_dataDirectory, _historyFile);
-                if (File.Exists(filePath))
-                {
-                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    using (StreamReader reader = new StreamReader(fs))
-                    {
-                        string json = reader.ReadToEnd();
-                        return JsonSerializer.Deserialize<List<GameHistoryEntry>>(json) ?? new List<GameHistoryEntry>();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading game history: {ex.Message}");
-            }
-
-            return new List<GameHistoryEntry>();
-        }
-
-        public List<GameHistoryEntry> GetPlayerHistory(string playerUsername)
-        {
-            var allHistory = LoadGameHistory();
-            return allHistory
-                .Where(h => h.AllResults.Any(r => r.Player1 == playerUsername || r.Player2 == playerUsername))
-                .OrderByDescending(h => h.PlayedDate)
-                .ToList();
-        }
-
-        public List<GameHistoryEntry> GetAllHistory()
-        {
-            return LoadGameHistory().OrderByDescending(h => h.PlayedDate).ToList();
-        }
-
-        public void ClearRoomData(string roomCode)
-        {
-            _roomSwipes.TryRemove(roomCode, out _);
-            SaveActiveSwipesToFile();
-        }
+                var bestForPlayer2 = allResults
+                    .Where(r => r.Player1 == result.Player2 || r.Player2 == result.Player2)
+                    .OrderByDescending(r => r.Percentage)
+                    .FirstOrDefault();
+                
+                bool player1WasBestMatch = bestForPlayer2.Player1 == result.Player1 || bestForPlayer2.Player2 == result.Player1;
+                _userService.UpdateUserStatistics(result.Player1, result.Percentage, player1WasBestMatch);
         
-        // === BOXING/UNBOXING METHODS ===
-
-        public Dictionary<string, object> GetRoomStatistics(string roomCode)
-        {
-            var roomSwipes = GetRoomSwipes(roomCode);
-            
-            var stats = new Dictionary<string, object>
-            {
-                ["TotalSwipes"] = roomSwipes.Count,  
-                ["UniquePlayers"] = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),  
-                ["UniqueStatements"] = roomSwipes.Select(s => s.StatementId).Distinct().Count(),  
-                ["RightSwipes"] = roomSwipes.Count(s => s.AgreeWithStatement),  
-                ["LeftSwipes"] = roomSwipes.Count(s => !s.AgreeWithStatement)  
-            };
-
-            return stats;
-        }
-
-        
-        public int GetStatisticValue(string roomCode, string statKey)
-        {
-            var stats = GetRoomStatistics(roomCode);
-            
-            if (stats.ContainsKey(statKey))
-            {
-                return (int)stats[statKey];  
+                var bestForPlayer1 = allResults
+                    .Where(r => r.Player1 == result.Player1 || r.Player2 == result.Player1)
+                    .OrderByDescending(r => r.Percentage)
+                    .FirstOrDefault();
+                
+                bool player2WasBestMatch = bestForPlayer1.Player1 == result.Player2 || bestForPlayer1.Player2 == result.Player2;
+                _userService.UpdateUserStatistics(result.Player2, result.Percentage, player2WasBestMatch);
             }
-            
-            return 0;
         }
-        
-        // Helper metodas, kuris naudoja boxing/unboxing
-        private void LogRoomStatistics(string roomCode)
-        {
-            // UNBOXING vyksta čia - gauname int iš Dictionary<string, object>
-            var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
-            var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
-            var rightSwipes = GetStatisticValue(roomCode, "RightSwipes");
-            var leftSwipes = GetStatisticValue(roomCode, "LeftSwipes");
-            
-            Console.WriteLine($"[Room {roomCode}] Total: {totalSwipes}, Players: {uniquePlayers}, Right: {rightSwipes}, Left: {leftSwipes}");
-        }
+
+        public List<GameHistoryEntry> GetPlayerHistory(string playerUsername) 
+            => _historyRepository.GetPlayerHistory(playerUsername);
+
+        public List<GameHistoryEntry> GetAllHistory() 
+            => _historyRepository.GetAll();
     }
-    
+
+    // ===== MAIN SERVICE (Facade Pattern - Unified API) =====
+
+    public class CompatibilityService
+    {
+        private readonly StatementRepository _statementRepository;
+        private readonly SwipeRepository _swipeRepository;
+        private readonly CompatibilityCalculator _compatibilityCalculator;
+        private readonly StatisticsService _statisticsService;
+        private readonly GameProgressChecker _progressChecker;
+        private readonly GameHistoryService _historyService;
+
+        public CompatibilityService(UserService userService) 
+            : this(userService, "GameData", "GameStatements")
+        {
+        }
+
+        public CompatibilityService(UserService userService, string dataDirectory, string statementsDirectory)
+        {
+            // Initialize file repositories
+            var statementFileRepo = new JsonFileRepository<List<GameStatement>>(statementsDirectory, "statements.json");
+            var swipeFileRepo = new JsonFileRepository<Dictionary<string, List<PlayerSwipe>>>(dataDirectory, "active_swipes.json");
+            var historyFileRepo = new JsonFileRepository<List<GameHistoryEntry>>(dataDirectory, "game_history.json");
+
+            // Initialize domain repositories
+            _statementRepository = new StatementRepository(statementFileRepo);
+            _swipeRepository = new SwipeRepository(swipeFileRepo);
+            var historyRepository = new GameHistoryRepository(historyFileRepo);
+
+            // Initialize services
+            _compatibilityCalculator = new CompatibilityCalculator(_swipeRepository);
+            _statisticsService = new StatisticsService(_swipeRepository);
+            _progressChecker = new GameProgressChecker(_swipeRepository, _statisticsService);
+            _historyService = new GameHistoryService(historyRepository, _compatibilityCalculator, _statisticsService, userService);
+        }
+
+        // Public API methods
+        public List<GameStatement> GetRandomStatements(int count) 
+            => _statementRepository.GetRandom(count);
+
+        public bool SaveSwipe(string roomCode, string playerUsername, string statementId, bool swipeRight)
+        {
+            var statement = _statementRepository.GetById(statementId);
+            if (statement == null) return false;
+
+            var playerSwipe = new PlayerSwipe(playerUsername, statementId, statement.Value.Text, swipeRight);
+            var result = _swipeRepository.SaveSwipe(roomCode, playerSwipe);
+            
+            if (result)
+            {
+                _statisticsService.LogStatistics(roomCode);
+            }
+            
+            return result;
+        }
+
+        public List<PlayerSwipe> GetRoomSwipes(string roomCode) 
+            => _swipeRepository.GetRoomSwipes(roomCode);
+
+        public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername) 
+            => _swipeRepository.GetPlayerSwipes(roomCode, playerUsername);
+
+        public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements) 
+            => _progressChecker.HaveAllPlayersFinished(roomCode, playerUsernames, totalStatements);
+
+        public CompatibilityScore CalculateCompatibility(string roomCode, string player1, string player2) 
+            => _compatibilityCalculator.Calculate(roomCode, player1, player2);
+
+        public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames)
+        {
+            Console.WriteLine($"[CalculateAllCompatibilities] Starting calculation for room {roomCode}");
+            _statisticsService.LogStatistics(roomCode);
+            return _compatibilityCalculator.CalculateAll(roomCode, playerUsernames);
+        }
+
+        public CompatibilityScore? GetBestMatch(string roomCode, List<string> playerUsernames) 
+            => _compatibilityCalculator.GetBestMatch(roomCode, playerUsernames);
+
+        public void SaveGameToHistory(string roomCode, List<string> playerUsernames) 
+            => _historyService.SaveGame(roomCode, playerUsernames);
+
+        public List<GameHistoryEntry> GetPlayerHistory(string playerUsername) 
+            => _historyService.GetPlayerHistory(playerUsername);
+
+        public List<GameHistoryEntry> GetAllHistory() 
+            => _historyService.GetAllHistory();
+
+        public void ClearRoomData(string roomCode) 
+            => _swipeRepository.ClearRoomData(roomCode);
+
+        public RoomStatistics GetRoomStatistics(string roomCode) 
+            => _statisticsService.GetRoomStatistics(roomCode);
+    }
 }
