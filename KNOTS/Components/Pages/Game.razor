@@ -6,6 +6,7 @@
 @inject UserService UserService
 @inject CompatibilityService CompatibilityService
 @inject GameRoomService GameRoomService
+@inject NavigationManager NavigationManager
 @implements IAsyncDisposable
 @rendermode InteractiveServer
 
@@ -13,6 +14,12 @@
 <script src="/js/gameclient.js"></script>
 
 <PageTitle>Game - KNOTS</PageTitle>
+
+<!-- Home Button -->
+<button class="btn-home" @onclick="GoToHome">
+    <i class="bi bi-house-door-fill"></i>
+    <span class="home-text">Home</span>
+</button>
 
 <div class="game-container">
     @if (!UserService.IsAuthenticated)
@@ -149,6 +156,46 @@
 </div>
 
 <style>
+    /* Home Button Styles */
+    .btn-home {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(248, 136, 233, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 1000;
+    }
+
+    .btn-home i {
+        font-size: 1.2rem;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
+    }
+
+    .btn-home:active {
+        transform: translateY(-1px) scale(1.02);
+    }
+
+    .home-text {
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    /* Existing styles */
     .game-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -504,6 +551,21 @@
     }
 
     @@media (max-width: 768px) {
+        .btn-home {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+            top: 15px;
+            left: 15px;
+        }
+
+        .btn-home i {
+            font-size: 1rem;
+        }
+
+        .home-text {
+            display: none;
+        }
+
         .section-title {
             font-size: 2rem;
         }
@@ -612,6 +674,11 @@
                 StateHasChanged();
             }
         }
+    }
+
+    private void GoToHome()
+    {
+        NavigationManager.NavigateTo("/home");
     }
 
     private async Task CreateRoom()
