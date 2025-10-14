@@ -1,35 +1,47 @@
 using KNOTS.Components;
 using KNOTS.Services;
-using KNOTS.Hubs;
+using KNOTS.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Registruojam servisus
-builder.Services.AddScoped<UserService>();
-builder.Services.AddSingleton<GameRoomService>();
-builder.Services.AddScoped<CompatibilityService>(); // Perkelta į teisingą vietą
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// SQLite duomenų bazės konfigūracija - SINGLETON!
+builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite("Data Source=knots.db"), 
+    ServiceLifetime.Singleton); // <-- SVARBU!
+
+// UserService kaip Singleton
+builder.Services.AddSingleton<UserService>();
+
+// Kitus servisus palikite kaip Scoped
+builder.Services.AddScoped<CompatibilityService>();
+builder.Services.AddScoped<GameRoomService>();
+
+// SignalR
 builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+// Sukuriame DB
+var dbContext = app.Services.GetRequiredService<AppDbContext>();
+dbContext.Database.EnsureCreated();
+Console.WriteLine("✅ Database created/verified successfully");
+
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
 
-//app.UseHttpsRedirection();
-
-app.UseAntiforgery();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.MapStaticAssets();
+app.UseAntiforgery();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-app.MapHub<GameHub>("/gamehub");
 
 app.Run();

@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace KNOTS.Services
 {
-    public struct GameStatement
+    public class GameStatement
     {
         public string Id { get; set; }
         public string Text { get; set; }
@@ -15,7 +15,7 @@ namespace KNOTS.Services
         }
     }
     
-    public struct PlayerSwipe
+    public class PlayerSwipe
     {
         public string PlayerUsername { get; set; }
         public string StatementId { get; set; }

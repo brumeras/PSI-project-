@@ -12,34 +12,27 @@ namespace KNOTS.Hubs
         {
             _gameRoomService = gameRoomService;
         }
-
-        // Vartotojas prisijungia prie žaidimo
+        
         public async Task JoinGame(string username)
         {
             var connectionId = Context.ConnectionId;
             _gameRoomService.AddPlayer(connectionId, username);
             
-            // Pranešame visiem apie naują žaidėją
             await Clients.All.SendAsync("PlayerJoined", username);
             
-            // Siunčiame žaidėjui jo unikalų ID
             await Clients.Caller.SendAsync("AssignPlayerId", connectionId);
         }
-
-        // Sukurti naują kambarį
+        
         public async Task CreateRoom(string username)
         {
             var connectionId = Context.ConnectionId;
             var roomCode = _gameRoomService.CreateRoom(connectionId, username);
             
-            // Prisijungiam prie šio kambario grupės (BE "Room_" prefix!)
             await Groups.AddToGroupAsync(connectionId, roomCode);
             
-            // Pranešame žaidėjui apie sėkmingą kambario sukūrimą
             await Clients.Caller.SendAsync("RoomCreated", roomCode);
         }
-
-        // Prisijungti prie kambario
+        
         public async Task JoinRoom(string roomCode, string username)
         {
             var connectionId = Context.ConnectionId;
