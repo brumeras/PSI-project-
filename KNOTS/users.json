@@ -30,5 +30,13 @@
     "TotalGamesPlayed": 1,
     "AverageCompatibilityScore": 0,
     "BestMatchesCount": 1
+  },
+  {
+    "Username": "camilalol",
+    "CreatedAt": "2025-10-15T19:47:31.518013+03:00",
+    "PasswordHash": "$2a$13$Nqe5Pc9l.s6P2RvrMGpyZ.SdFL3kdQWTln4yHTre8yqxIhunMTKaO",
+    "TotalGamesPlayed": 0,
+    "AverageCompatibilityScore": 0,
+    "BestMatchesCount": 0
   }
 ]
