@@ -1,20 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.Text.Json;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using KNOTS.Data;
+using KNOTS.Models;
 
 namespace KNOTS.Services
 {
-    public class GameStatement
-    {
-        public string Id { get; set; }
-        public string Text { get; set; }
-
-        public GameStatement(string id, string text)
-        {
-            Id = id;
-            Text = text;
-        }
-    }
-    
+    // DTOs (Data Transfer Objects - not database models)
     public class PlayerSwipe
     {
         public string PlayerUsername { get; set; }
@@ -67,223 +58,161 @@ namespace KNOTS.Services
 
     public class CompatibilityService
     {
-        private static readonly ConcurrentDictionary<string, List<PlayerSwipe>> _roomSwipes = new();
-        
-        private readonly string _dataDirectory = "GameData";
-        private readonly string _statementsDirectory = "GameStatements";
-        private readonly string _defaultStatementsFile = "statements.json";
-        private readonly string _swipesFile = "active_swipes.json";
-        private readonly string _historyFile = "game_history.json";
-        
-        private List<GameStatement> _statements = new();
+        private readonly AppDbContext _context;
         private readonly UserService _userService;
-        public CompatibilityService(UserService userService) 
+        
+        public CompatibilityService(AppDbContext context, UserService userService) 
         {
+            _context = context;
             _userService = userService;
-            Directory.CreateDirectory(_dataDirectory);
-            Directory.CreateDirectory(_statementsDirectory);
-    
-            LoadStatementsFromFile();
-            LoadActiveSwipesFromFile();
+            
+            Console.WriteLine("🔧 CompatibilityService created with DB context");
+            EnsureDefaultStatements();
         }
         
-        
-        private void LoadStatementsFromFile()
+        private void EnsureDefaultStatements()
         {
-            try
+            if (!_context.Statements.Any())
             {
-                string filePath = Path.Combine(_statementsDirectory, _defaultStatementsFile);
-
-                if (File.Exists(filePath))
+                Console.WriteLine("📝 Creating default statements in database...");
+                
+                var defaultStatements = new List<GameStatement>
                 {
-                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    using (StreamReader reader = new StreamReader(fs))
-                    {
-                        string jsonString = reader.ReadToEnd();
-                        _statements = JsonSerializer.Deserialize<List<GameStatement>>(jsonString) ?? new List<GameStatement>();
-                    }
-                }
-                else
-                {
-                    CreateDefaultStatements();
-                    SaveStatementsToFile();
-                }
+                    new GameStatement { Id = "S1", Text = "I like getting up early in the morning" },
+                    new GameStatement { Id = "S2", Text = "I prefer relaxing at home over going to parties" },
+                    new GameStatement { Id = "S3", Text = "I enjoy spontaneous trips" },
+                    new GameStatement { Id = "S4", Text = "Animals are an important part of my life" },
+                    new GameStatement { Id = "S5", Text = "I prefer movies over theater" },
+                    new GameStatement { Id = "S6", Text = "Sports are part of my daily routine" },
+                    new GameStatement { Id = "S7", Text = "I enjoy cooking at home" },
+                    new GameStatement { Id = "S8", Text = "Summer is the best season" },
+                    new GameStatement { Id = "S9", Text = "Meaningful conversations matter more to me than having fun" },
+                    new GameStatement { Id = "S10", Text = "I like taking risks and trying new things" },
+                    new GameStatement { Id = "S11", Text = "Music is an important part of my life" },
+                    new GameStatement { Id = "S12", Text = "I value personal space in relationships" },
+                    new GameStatement { Id = "S13", Text = "I like to plan everything in advance" },
+                    new GameStatement { Id = "S14", Text = "I feel good at large parties" },
+                    new GameStatement { Id = "S15", Text = "I live in the moment and don't worry about the future" },
+                    new GameStatement { Id = "S16", Text = "Romantic relationships are important to me" },
+                    new GameStatement { Id = "S17", Text = "I like video games" },
+                    new GameStatement { Id = "S18", Text = "Books are better than movies" },
+                    new GameStatement { Id = "S19", Text = "I enjoy nature and hiking" },
+                    new GameStatement { Id = "S20", Text = "Financial stability is a priority" }
+                };
+
+                _context.Statements.AddRange(defaultStatements);
+                _context.SaveChanges();
+                Console.WriteLine($"✅ Created {defaultStatements.Count} statements in database");
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"Klaida skaitant teiginius: {ex.Message}");
-                CreateDefaultStatements();
+                Console.WriteLine($"✅ Statements already exist in database ({_context.Statements.Count()} total)");
             }
-        }
-
-
-        private void SaveStatementsToFile()
-        {
-            try
-            {
-                string filePath = Path.Combine(_statementsDirectory, _defaultStatementsFile);
-                string jsonString = JsonSerializer.Serialize(_statements, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
-
-                using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                using (StreamWriter writer = new StreamWriter(fs))
-                {
-                    writer.Write(jsonString);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Klaida saugant teiginius: {ex.Message}");
-            }
-        }
-
-        private void CreateDefaultStatements()
-        {
-            _statements = new List<GameStatement>
-            {
-                new GameStatement("S1", "I like getting up early in the morning"),
-                new GameStatement("S2", "I prefer relaxing at home over going to parties"),
-                new GameStatement("S3", "I enjoy spontaneous trips"),
-                new GameStatement("S4", "Animals are an important part of my life"),
-                new GameStatement("S5", "I prefer movies over theater"),
-                new GameStatement("S6", "Sports are part of my daily routine"),
-                new GameStatement("S7", "I enjoy cooking at home"),
-                new GameStatement("S8", "Summer is the best season"),
-                new GameStatement("S9", "Meaningful conversations matter more to me than having fun"),
-                new GameStatement("S10", "I like taking risks and trying new things"),
-                new GameStatement("S11", "Music is an important part of my life"),
-                new GameStatement("S12", "I value personal space in relationships"),
-                new GameStatement("S13", "I like to plan everything in advance"),
-                new GameStatement("S14", "I feel good at large parties"),
-                new GameStatement("S15", "I live in the moment and don't worry about the future"),
-                new GameStatement("S16", "Romantic relationships are important to me"),
-                new GameStatement("S17", "I like video games"),
-                new GameStatement("S18", "Books are better than movies"),
-                new GameStatement("S19", "I enjoy nature and hiking"),
-                new GameStatement("S20", "Financial stability is a priority"),
-
-            };
         }
         
         public List<GameStatement> GetRandomStatements(int count)
         {
             var random = new Random();
-            return _statements.OrderBy(x => random.Next()).Take(Math.Min(count, _statements.Count)).ToList();
-        }
-        
-
-        private void LoadActiveSwipesFromFile()
-        {
-            try
-            {
-                string filePath = Path.Combine(_dataDirectory, _swipesFile);
-                if (File.Exists(filePath))
-                {
-                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    using (StreamReader reader = new StreamReader(fs))
-                    {
-                        string json = reader.ReadToEnd();
-                        var data = JsonSerializer.Deserialize<Dictionary<string, List<PlayerSwipe>>>(json);
-
-                        if (data != null)
-                        {
-                            foreach (var kvp in data)
-                            {
-                                _roomSwipes[kvp.Key] = kvp.Value;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Klaida skaitant swipes: {ex.Message}");
-            }
-        }
-
-        private void SaveActiveSwipesToFile()
-        {
-            try
-            {
-                string filePath = Path.Combine(_dataDirectory, _swipesFile);
-                var data = _roomSwipes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                string json = JsonSerializer.Serialize(data, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
-
-                using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                using (StreamWriter writer = new StreamWriter(fs))
-                {
-                    writer.Write(json);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Klaida saugant swipes: {ex.Message}");
-            }
+            return _context.Statements
+                .AsEnumerable()
+                .OrderBy(x => random.Next())
+                .Take(Math.Min(count, _context.Statements.Count()))
+                .ToList();
         }
 
         public bool SaveSwipe(string roomCode, string playerUsername, string statementId, bool swipeRight)
         {
-            var statement = _statements.FirstOrDefault(s => s.Id == statementId);
-            if (statement.Id == null)
+            try
             {
+                var statement = _context.Statements.FirstOrDefault(s => s.Id == statementId);
+                if (statement == null)
+                {
+                    Console.WriteLine($"❌ Statement {statementId} not found");
+                    return false;
+                }
+
+                var existing = _context.PlayerSwipes
+                    .FirstOrDefault(s => s.RoomCode == roomCode && 
+                                       s.PlayerUsername == playerUsername && 
+                                       s.StatementId == statementId);
+                
+                if (existing != null)
+                {
+                    _context.PlayerSwipes.Remove(existing);
+                }
+
+                var swipeRecord = new PlayerSwipeRecord
+                {
+                    RoomCode = roomCode,
+                    PlayerUsername = playerUsername,
+                    StatementId = statementId,
+                    StatementText = statement.Text,
+                    AgreeWithStatement = swipeRight,
+                    SwipedAt = DateTime.Now
+                };
+
+                _context.PlayerSwipes.Add(swipeRecord);
+                _context.SaveChanges();
+                
+                Console.WriteLine($"✅ Saved swipe: {playerUsername} {(swipeRight ? "agreed" : "disagreed")} with {statementId}");
+                LogRoomStatistics(roomCode);
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error saving swipe: {ex.Message}");
                 return false;
             }
-
-            var playerSwipe = new PlayerSwipe(
-                playerUsername,
-                statementId,
-                statement.Text,
-                swipeRight
-            );
-
-            if (!_roomSwipes.ContainsKey(roomCode))
-            {
-                _roomSwipes[roomCode] = new List<PlayerSwipe>();
-            }
-
-            _roomSwipes[roomCode].RemoveAll(s => 
-                s.PlayerUsername == playerUsername && s.StatementId == statementId);
-
-            _roomSwipes[roomCode].Add(playerSwipe);
-            
-            SaveActiveSwipesToFile();
-            
-            // BOXING/UNBOXING USAGE - Log statistics kada išsaugomas swipe
-            LogRoomStatistics(roomCode);
-            
-            return true;
         }
 
         public List<PlayerSwipe> GetRoomSwipes(string roomCode)
         {
-            _roomSwipes.TryGetValue(roomCode, out var swipes);
-            return swipes ?? new List<PlayerSwipe>();
+            return _context.PlayerSwipes
+                .Where(s => s.RoomCode == roomCode)
+                .Select(s => new PlayerSwipe(
+                    s.PlayerUsername,
+                    s.StatementId,
+                    s.StatementText,
+                    s.AgreeWithStatement
+                ) { SwipedAt = s.SwipedAt })
+                .ToList();
         }
 
         public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername)
         {
-            var roomSwipes = GetRoomSwipes(roomCode);
-            return roomSwipes.Where(s => s.PlayerUsername == playerUsername).ToList();
+            return _context.PlayerSwipes
+                .Where(s => s.RoomCode == roomCode && s.PlayerUsername == playerUsername)
+                .Select(s => new PlayerSwipe(
+                    s.PlayerUsername,
+                    s.StatementId,
+                    s.StatementText,
+                    s.AgreeWithStatement
+                ) { SwipedAt = s.SwipedAt })
+                .ToList();
         }
 
         public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements)
         {
-            var roomSwipes = GetRoomSwipes(roomCode);
-            
-            // BOXING/UNBOXING USAGE - Naudojame statistiką patikrinti progress
             var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
             var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
             
             Console.WriteLine($"[HaveAllPlayersFinished] Room {roomCode}: {uniquePlayers} players, {totalSwipes} total swipes");
 
-            return playerUsernames
-                .All(player => roomSwipes.Count(s => s.PlayerUsername == player) >= totalStatements);
+            foreach (var player in playerUsernames)
+            {
+                var swipeCount = _context.PlayerSwipes
+                    .Count(s => s.RoomCode == roomCode && s.PlayerUsername == player);
+                
+                if (swipeCount < totalStatements)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
+
         public CompatibilityScore CalculateCompatibility(string roomCode, string player1, string player2)
         {
             var player1Swipes = GetPlayerSwipes(roomCode, player1);
@@ -314,7 +243,6 @@ namespace KNOTS.Services
         {
             var results = new List<CompatibilityScore>();
 
-            // BOXING/UNBOXING USAGE - Log prieš skaičiuojant
             Console.WriteLine($"[CalculateAllCompatibilities] Starting calculation for room {roomCode}");
             LogRoomStatistics(roomCode);
 
@@ -336,12 +264,10 @@ namespace KNOTS.Services
             return allScores.FirstOrDefault();
         }
         
-        
         public void SaveGameToHistory(string roomCode, List<string> playerUsernames)
         {
             try
             {
-                // BOXING/UNBOXING USAGE - Log statistiką prieš išsaugant
                 Console.WriteLine($"[SaveGameToHistory] Saving game for room {roomCode}");
                 LogRoomStatistics(roomCode);
                 
@@ -350,142 +276,127 @@ namespace KNOTS.Services
 
                 var bestMatch = allResults.First();
                 
-                var historyEntry = new GameHistoryEntry
+                var historyRecord = new GameHistoryRecord
                 {
                     RoomCode = roomCode,
                     PlayedDate = DateTime.Now,
                     TotalPlayers = playerUsernames.Count,
+                    PlayerUsernames = JsonSerializer.Serialize(playerUsernames),
                     BestMatchPlayer = bestMatch.Player2,
                     BestMatchPercentage = bestMatch.Percentage,
-                    AllResults = allResults
+                    ResultsJson = JsonSerializer.Serialize(allResults)
                 };
 
-                var history = LoadGameHistory();
-                history.Add(historyEntry);
-                
-                string filePath = Path.Combine(_dataDirectory, _historyFile);
-                string json = JsonSerializer.Serialize(history, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
-                // Stream naudojimas saugojimui į JSON failą
-                   using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                        using (StreamWriter writer = new StreamWriter(fs))
-                        {
-                            writer.Write(json);
-                        }
+                _context.GameHistory.Add(historyRecord);
+                _context.SaveChanges();
                 
                 foreach (var result in allResults)
                 {
-                    // Check if player1 was best match for player2
                     var bestForPlayer2 = allResults
                         .Where(r => r.Player1 == result.Player2 || r.Player2 == result.Player2)
                         .OrderByDescending(r => r.Percentage)
                         .FirstOrDefault();
                     
                     bool player1WasBestMatch = bestForPlayer2.Player1 == result.Player1 || bestForPlayer2.Player2 == result.Player1;
-                    
-                    // Update player1 stats
                     _userService.UpdateUserStatistics(result.Player1, result.Percentage, player1WasBestMatch);
             
-                    // Check if player2 was best match for player1
                     var bestForPlayer1 = allResults
                         .Where(r => r.Player1 == result.Player1 || r.Player2 == result.Player1)
                         .OrderByDescending(r => r.Percentage)
                         .FirstOrDefault();
                     
                     bool player2WasBestMatch = bestForPlayer1.Player1 == result.Player2 || bestForPlayer1.Player2 == result.Player2;
-            
-                    // Update player2 stats
                     _userService.UpdateUserStatistics(result.Player2, result.Percentage, player2WasBestMatch);
                 }
 
-                Console.WriteLine($"Game history saved for room {roomCode}");
+                Console.WriteLine($"✅ Game history saved for room {roomCode}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving game history: {ex.Message}");
+                Console.WriteLine($"❌ Error saving game history: {ex.Message}");
             }
-        }
-
-        private List<GameHistoryEntry> LoadGameHistory()
-        {
-            try
-            {
-                string filePath = Path.Combine(_dataDirectory, _historyFile);
-                if (File.Exists(filePath))
-                {
-                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    using (StreamReader reader = new StreamReader(fs))
-                    {
-                        string json = reader.ReadToEnd();
-                        return JsonSerializer.Deserialize<List<GameHistoryEntry>>(json) ?? new List<GameHistoryEntry>();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading game history: {ex.Message}");
-            }
-
-            return new List<GameHistoryEntry>();
         }
 
         public List<GameHistoryEntry> GetPlayerHistory(string playerUsername)
         {
-            var allHistory = LoadGameHistory();
-            return allHistory
-                .Where(h => h.AllResults.Any(r => r.Player1 == playerUsername || r.Player2 == playerUsername))
+            // Get all history first, then filter in memory
+            var allHistory = _context.GameHistory
                 .OrderByDescending(h => h.PlayedDate)
+                .ToList();
+            
+            return allHistory
+                .Where(h => 
+                {
+                    var players = JsonSerializer.Deserialize<List<string>>(h.PlayerUsernames) ?? new List<string>();
+                    return players.Contains(playerUsername);
+                })
+                .Select(h => new GameHistoryEntry
+                {
+                    RoomCode = h.RoomCode,
+                    PlayedDate = h.PlayedDate,
+                    TotalPlayers = h.TotalPlayers,
+                    BestMatchPlayer = h.BestMatchPlayer,
+                    BestMatchPercentage = h.BestMatchPercentage,
+                    AllResults = JsonSerializer.Deserialize<List<CompatibilityScore>>(h.ResultsJson) ?? new List<CompatibilityScore>()
+                })
                 .ToList();
         }
 
         public List<GameHistoryEntry> GetAllHistory()
         {
-            return LoadGameHistory().OrderByDescending(h => h.PlayedDate).ToList();
+            return _context.GameHistory
+                .OrderByDescending(h => h.PlayedDate)
+                .Select(h => new GameHistoryEntry
+                {
+                    RoomCode = h.RoomCode,
+                    PlayedDate = h.PlayedDate,
+                    TotalPlayers = h.TotalPlayers,
+                    BestMatchPlayer = h.BestMatchPlayer,
+                    BestMatchPercentage = h.BestMatchPercentage,
+                    //AllResults = JsonSerializer.Deserialize<List<CompatibilityScore>>(h.ResultsJson) ?? new List<CompatibilityScore>()
+                })
+                .ToList();
         }
 
         public void ClearRoomData(string roomCode)
         {
-            _roomSwipes.TryRemove(roomCode, out _);
-            SaveActiveSwipesToFile();
+            var swipesToRemove = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
+            _context.PlayerSwipes.RemoveRange(swipesToRemove);
+            _context.SaveChanges();
+            Console.WriteLine($"✅ Cleared data for room {roomCode}");
         }
         
         // === BOXING/UNBOXING METHODS ===
-
         public Dictionary<string, object> GetRoomStatistics(string roomCode)
         {
-            var roomSwipes = GetRoomSwipes(roomCode);
+            var roomSwipes = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
             
             var stats = new Dictionary<string, object>
             {
-                ["TotalSwipes"] = roomSwipes.Count,  
-                ["UniquePlayers"] = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),  
-                ["UniqueStatements"] = roomSwipes.Select(s => s.StatementId).Distinct().Count(),  
-                ["RightSwipes"] = roomSwipes.Count(s => s.AgreeWithStatement),  
-                ["LeftSwipes"] = roomSwipes.Count(s => !s.AgreeWithStatement)  
+                ["TotalSwipes"] = roomSwipes.Count(),
+                ["UniquePlayers"] = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),
+                ["UniqueStatements"] = roomSwipes.Select(s => s.StatementId).Distinct().Count(),
+                ["RightSwipes"] = roomSwipes.Count(s => s.AgreeWithStatement),
+                ["LeftSwipes"] = roomSwipes.Count(s => !s.AgreeWithStatement)
             };
 
             return stats;
         }
 
-        
         public int GetStatisticValue(string roomCode, string statKey)
         {
             var stats = GetRoomStatistics(roomCode);
             
             if (stats.ContainsKey(statKey))
             {
-                return (int)stats[statKey];  
+                return (int)stats[statKey];
             }
             
             return 0;
         }
         
-        // Helper metodas, kuris naudoja boxing/unboxing
         private void LogRoomStatistics(string roomCode)
         {
-            // UNBOXING vyksta čia - gauname int iš Dictionary<string, object>
             var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
             var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
             var rightSwipes = GetStatisticValue(roomCode, "RightSwipes");
@@ -494,5 +405,4 @@ namespace KNOTS.Services
             Console.WriteLine($"[Room {roomCode}] Total: {totalSwipes}, Players: {uniquePlayers}, Right: {rightSwipes}, Left: {leftSwipes}");
         }
     }
-    
 }
