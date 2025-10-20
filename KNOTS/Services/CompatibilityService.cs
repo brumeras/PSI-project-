@@ -538,9 +538,7 @@ namespace KNOTS.Services
         public List<GameHistoryEntry> GetAllHistory() 
             => _historyRepository.GetAll();
     }
-
-    // ===== MAIN SERVICE (Facade Pattern - Unified API) =====
-
+    
     public class CompatibilityService
     {
         private readonly StatementRepository _statementRepository;
@@ -602,9 +600,7 @@ namespace KNOTS.Services
 
         public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements) 
             => _progressChecker.HaveAllPlayersFinished(roomCode, playerUsernames, totalStatements);
-
-        public CompatibilityScore CalculateCompatibility(string roomCode, string player1, string player2) 
-            => _compatibilityCalculator.Calculate(roomCode, player1, player2);
+        
 
         public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames)
         {
@@ -627,8 +623,6 @@ namespace KNOTS.Services
 
         public void ClearRoomData(string roomCode) 
             => _swipeRepository.ClearRoomData(roomCode);
-
-        public RoomStatistics GetRoomStatistics(string roomCode) 
-            => _statisticsService.GetRoomStatistics(roomCode);
+        
     }
 }
