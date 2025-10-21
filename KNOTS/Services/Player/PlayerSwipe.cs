@@ -15,3 +15,13 @@ public struct PlayerSwipe {
         SwipedAt = DateTime.Now;
     }
 }
+
+/*
+
+// DTOs (Data Transfer Objects - not database models)
+public class PlayerSwipe
+{
+    public string PlayerUsername { get; set; }
+    public string StatementId { get; set; }
+
+}*/

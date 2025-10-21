@@ -1,97 +1,62 @@
-﻿using System.Collections.Concurrent;
-using System.Text.Json;
+﻿
 using KNOTS.Compability;
+using KNOTS.Data;
+using KNOTS.Models;
+using KNOTS.Services;
 using KNOTS.Services.Compability;
 
-namespace KNOTS.Services {
-    public class CompatibilityService
+public class CompatibilityService
+{
+    private readonly StatementRepository _statements;
+    private readonly SwipeRepository _swipes;
+    private readonly CompatibilityCalculator _calculator;
+    private readonly GameHistoryService _history;
+    private readonly StatisticsService _stats;
+    private readonly GameProgressChecker _gameProgressChecker;
+    private readonly GameHistoryRepository _gameHistoryRepository;
+    public CompatibilityService(AppDbContext context, UserService userService, GameHistoryRepository gameHistoryRepository, GameProgressChecker gameProgressChecker )
     {
-        private readonly StatementRepository _statementRepository;
-        private readonly SwipeRepository _swipeRepository;
-        private readonly CompatibilityCalculator _compatibilityCalculator;
-        private readonly StatisticsService _statisticsService;
-        private readonly GameProgressChecker _progressChecker;
-        private readonly GameHistoryService _historyService;
-
-        public CompatibilityService(UserService userService) 
-            : this(userService, "GameData", "GameStatements")
-        {
-        }
-
-        public CompatibilityService(UserService userService, string dataDirectory, string statementsDirectory)
-        {
-            // Initialize file repositories
-            var statementFileRepo = new JsonFileRepository<List<GameStatement>>(statementsDirectory, "statements.json");
-            var swipeFileRepo = new JsonFileRepository<Dictionary<string, List<PlayerSwipe>>>(dataDirectory, "active_swipes.json");
-            var historyFileRepo = new JsonFileRepository<List<GameHistoryEntry>>(dataDirectory, "game_history.json");
-
-            // Initialize domain repositories
-            _statementRepository = new StatementRepository(statementFileRepo);
-            _swipeRepository = new SwipeRepository(swipeFileRepo);
-            var historyRepository = new GameHistoryRepository(historyFileRepo);
-
-            // Initialize services
-            _compatibilityCalculator = new CompatibilityCalculator(_swipeRepository);
-            _statisticsService = new StatisticsService(_swipeRepository);
-            _progressChecker = new GameProgressChecker(_swipeRepository, _statisticsService);
-            _historyService = new GameHistoryService(historyRepository, _compatibilityCalculator, _statisticsService, userService);
-        }
-
-        // Public API methods
-        public List<GameStatement> GetRandomStatements(int count) 
-            => _statementRepository.GetRandom(count);
-
-        public bool SaveSwipe(string roomCode, string playerUsername, string statementId, bool swipeRight)
-        {
-            var statement = _statementRepository.GetById(statementId);
-            if (statement == null) return false;
-
-            var playerSwipe = new PlayerSwipe(playerUsername, statementId, statement.Value.Text, swipeRight);
-            var result = _swipeRepository.SaveSwipe(roomCode, playerSwipe);
-            
-            if (result)
-            {
-                _statisticsService.LogStatistics(roomCode);
-            }
-            
-            return result;
-        }
-
-        public List<PlayerSwipe> GetRoomSwipes(string roomCode) 
-            => _swipeRepository.GetRoomSwipes(roomCode);
-
-        public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername) 
-            => _swipeRepository.GetPlayerSwipes(roomCode, playerUsername);
-
-        public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements) 
-            => _progressChecker.HaveAllPlayersFinished(roomCode, playerUsernames, totalStatements);
-
-        public CompatibilityScore CalculateCompatibility(string roomCode, string player1, string player2) 
-            => _compatibilityCalculator.Calculate(roomCode, player1, player2);
-
-        public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames)
-        {
-            Console.WriteLine($"[CalculateAllCompatibilities] Starting calculation for room {roomCode}");
-            _statisticsService.LogStatistics(roomCode);
-            return _compatibilityCalculator.CalculateAll(roomCode, playerUsernames);
-        }
-
-        public CompatibilityScore? GetBestMatch(string roomCode, List<string> playerUsernames) 
-            => _compatibilityCalculator.GetBestMatch(roomCode, playerUsernames);
-
-        public void SaveGameToHistory(string roomCode, List<string> playerUsernames) 
-            => _historyService.SaveGame(roomCode, playerUsernames);
-
-        public List<GameHistoryEntry> GetPlayerHistory(string playerUsername) 
-            => _historyService.GetPlayerHistory(playerUsername);
-
-        public List<GameHistoryEntry> GetAllHistory() 
-            => _historyService.GetAllHistory();
-
-        public void ClearRoomData(string roomCode) 
-            => _swipeRepository.ClearRoomData(roomCode);
-
-        public RoomStatistics GetRoomStatistics(string roomCode) 
-            => _statisticsService.GetRoomStatistics(roomCode);
+        _statements = new StatementRepository(context);
+        _swipes = new SwipeRepository(context);
+        _calculator = new CompatibilityCalculator(_swipes);
+        _history = new GameHistoryService(context, userService, _calculator);
+        _stats = new StatisticsService(context);
+        _gameHistoryRepository = gameHistoryRepository;
+        _gameProgressChecker = gameProgressChecker;
+        _statements.EnsureDefaultStatements();
     }
+
+    public List<GameStatement> GetRandomStatements(int count) =>
+        _statements.GetAllStatements().OrderBy(_ => Guid.NewGuid()).Take(count).ToList();
+
+    public bool SaveSwipe(string room, string player, string statementId, bool agree) =>
+        _swipes.SaveSwipe(room, player, statementId, agree);
+
+    public CompatibilityScore CalculateCompatibility(string room, string p1, string p2) =>
+        _calculator.Calculate(room, p1, p2);
+
+    public void SaveGameToHistory(string room, List<string> players) =>
+        _history.SaveGame(room, players);
+
+    public RoomStatistics GetRoomStats(string room) =>
+        _stats.GetRoomStatistics(room);
+
+    public void ClearRoomData(string roomCode) { _swipes.ClearRoomData(roomCode); }
+    public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> players) {
+        var results = new List<CompatibilityScore>();
+
+        for (int i = 0; i < players.Count; i++) {
+            for (int j = i + 1; j < players.Count; j++) {
+                var score = CalculateCompatibility(roomCode, players[i], players[j]);
+                results.Add(score);
+            }
+        }
+        return results.OrderByDescending(r => r.Percentage).ToList();
+    }
+    public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername) { return _swipes.GetPlayerSwipes(roomCode, playerUsername); }
+    public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements) { return _gameProgressChecker.HaveAllPlayersFinished(roomCode, playerUsernames, totalStatements); }
+    public List<GameHistoryEntry> GetPlayerHistory(string playerUsername) { return _gameHistoryRepository.GetPlayerHistory(playerUsername); }
 }
+
+
+

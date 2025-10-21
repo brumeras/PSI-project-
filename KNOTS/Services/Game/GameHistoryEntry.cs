@@ -8,4 +8,5 @@ public class GameHistoryEntry {
     public string BestMatchPlayer { get; set; } = "";
     public double BestMatchPercentage { get; set; }
     public List<CompatibilityScore> AllResults { get; set; } = new();
+    
 }

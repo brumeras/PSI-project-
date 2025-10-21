@@ -1,20 +1,26 @@
+using KNOTS.Data;
+
 namespace KNOTS.Services;
 
-public class StatisticsService {
-    private readonly SwipeRepository _swipeRepository;
-    public StatisticsService(SwipeRepository swipeRepository) { _swipeRepository = swipeRepository; }
-    public RoomStatistics GetRoomStatistics(string roomCode) {
-        var roomSwipes = _swipeRepository.GetRoomSwipes(roomCode);
-        return new RoomStatistics {
-            TotalSwipes = roomSwipes.Count,
-            UniquePlayers = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),
-            UniqueStatements = roomSwipes.Select(s => s.StatementId).Distinct().Count(),
-            RightSwipes = roomSwipes.Count(s => s.AgreeWithStatement),
-            LeftSwipes = roomSwipes.Count(s => !s.AgreeWithStatement)
-        };
+public class StatisticsService
+{
+    private readonly AppDbContext _context;
+
+    public StatisticsService(AppDbContext context)
+    {
+        _context = context;
     }
-    public void LogStatistics(string roomCode) {
-        var stats = GetRoomStatistics(roomCode);
-        Console.WriteLine($"[Room {roomCode}] Total: {stats.TotalSwipes}, Players: {stats.UniquePlayers}, Right: {stats.RightSwipes}, Left: {stats.LeftSwipes}");
+
+    public RoomStatistics GetRoomStatistics(string roomCode)
+    {
+        var swipes = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
+        return new RoomStatistics
+        {
+            TotalSwipes = swipes.Count(),
+            UniquePlayers = swipes.Select(s => s.PlayerUsername).Distinct().Count(),
+            UniqueStatements = swipes.Select(s => s.StatementId).Distinct().Count(),
+            RightSwipes = swipes.Count(s => s.AgreeWithStatement),
+            LeftSwipes = swipes.Count(s => !s.AgreeWithStatement)
+        };
     }
 }
