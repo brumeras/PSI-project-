@@ -2,10 +2,19 @@ using KNOTS.Compability;
 
 namespace KNOTS.Services.Compability;
 
+/// <summary>
+/// Calculates compatibility scores between players based on their swipes.
+/// </summary>
+/// <remarks>
+/// Compatibility is determined by comparing how players respond to the same statements.
+/// </remarks>
 public class CompatibilityCalculator {
         private readonly SwipeRepository _swipeRepository;
-
+        
         public CompatibilityCalculator(SwipeRepository swipeRepository) { _swipeRepository = swipeRepository; }
+        /// <summary>
+        /// Calculates compatibility between two players in a specific room.
+        /// </summary>
         public CompatibilityScore Calculate(string roomCode, string player1, string player2) {
             var player1Swipes = _swipeRepository.GetPlayerSwipes(roomCode, player1);
             var player2Swipes = _swipeRepository.GetPlayerSwipes(roomCode, player2);
