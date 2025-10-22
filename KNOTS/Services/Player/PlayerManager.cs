@@ -15,8 +15,7 @@ public class PlayerManager {
             _roomManager = roomManager;
         }
 
-        public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username)
-        {
+        public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username) {
             if (!_roomRepository.TryGetRoom(roomCode, out var room) || room == null) return new JoinRoomResult(false, "Room not found", GameState.Finished);
 
             var canJoinResult = room.CanJoin(username);

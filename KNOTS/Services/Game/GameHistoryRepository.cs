@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace KNOTS.Services;
 
 public class GameHistoryRepository {

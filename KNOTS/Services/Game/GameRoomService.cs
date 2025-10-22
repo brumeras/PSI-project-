@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KNOTS.Services
-{
+namespace KNOTS.Services;
+
     public class GameRoomService {
         private readonly RoomRepository _roomRepository;
         private readonly PlayerMappingRepository _playerMappingRepository;
@@ -48,4 +48,3 @@ namespace KNOTS.Services
         public bool IsPlayerHost(string connectionId) { return _queryService.IsPlayerHost(connectionId); }
         public List<GameRoom> GetAllRooms() { return _queryService.GetAllRooms(); }
     }
-}

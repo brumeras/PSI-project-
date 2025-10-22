@@ -1,7 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace KNOTS.Services;
 
-    public class GameRoom
-    {
+    public class GameRoom {
         public string RoomCode { get; set; } = string.Empty;
         public string Host { get; set; } = string.Empty;
         public List<GamePlayer> Players { get; set; } = new();
@@ -11,20 +14,14 @@ namespace KNOTS.Services;
         public List<string> ActiveStatementIds { get; set; } = new();
 
         // Domain logic methods 
-        public JoinRoomResult CanJoin(string username)
-        {
+        public JoinRoomResult CanJoin(string username) {
             if (State != GameState.WaitingForPlayers) return new JoinRoomResult(false, "Game already in progress", State);
-
             if (Players.Count >= MaxPlayers) return new JoinRoomResult(false, "Room is full", State);
-
             if (Players.Any(p => p.Username == username)) return new JoinRoomResult(false, "Username already taken in this room", State);
-
             return new JoinRoomResult(true, "Can join", State);
         }
-
         public void AddPlayer(GamePlayer player) {
             Players.Add(player);
-            
             if (Players.Count >= MaxPlayers) State = GameState.InProgress;
         }
 
@@ -46,12 +43,10 @@ namespace KNOTS.Services;
         }
         public bool AreAllPlayersReady() {
             if (Players.Count < 2) return false;
-
             return Players.All(p => p.IsReady);
         }
         public bool StartGame(List<string> statementIds) {
             if (State == GameState.InProgress) return false;
-
             State = GameState.InProgress;
             ActiveStatementIds = statementIds;
             return true;

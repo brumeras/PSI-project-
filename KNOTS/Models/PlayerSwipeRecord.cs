@@ -1,9 +1,9 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace KNOTS.Models;
 
-public class PlayerSwipeRecord
-{
+public class PlayerSwipeRecord {
     [Key]
     public int Id { get; set; }
     public string RoomCode { get; set; } = string.Empty;

@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace KNOTS.Services;
 
 public class RoomQueryService {
@@ -7,7 +10,6 @@ public class RoomQueryService {
         _roomRepository = roomRepository;
         _playerMappingRepository = playerMappingRepository;
     }
-
     public GameRoom? GetRoomInfo(string roomCode) { return _roomRepository.GetRoom(roomCode); }
     public List<string> GetRoomPlayerUsernames(string roomCode) {
         var room = _roomRepository.GetRoom(roomCode);
