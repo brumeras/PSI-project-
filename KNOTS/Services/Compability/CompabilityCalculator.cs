@@ -39,7 +39,9 @@ public class CompatibilityCalculator {
                 matchedStatements
             );
         }
-
+        /// <summary>
+        /// Calculates compatibility for all unique pairs of players in a room.
+        /// </summary>
         public List<CompatibilityScore> CalculateAll(string roomCode, List<string> playerUsernames) {
             var results = new List<CompatibilityScore>();
 
@@ -51,7 +53,9 @@ public class CompatibilityCalculator {
             }
             return results.OrderByDescending(r => r.Percentage).ToList();
         }
-
+        /// <summary>
+        /// Finds the best match (highest compatibility) among all players.
+        /// </summary>
         public CompatibilityScore? GetBestMatch(string roomCode, List<string> playerUsernames) {
             var allScores = CalculateAll(roomCode, playerUsernames);
             return allScores.FirstOrDefault();

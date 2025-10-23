@@ -1,9 +1,18 @@
 namespace KNOTS.Services;
 
+/// <summary>
+/// Repository for managing game statements. Handles loading, saving, and providing default statements.
+/// </summary>
 public class StatementRepository {
         private readonly JsonFileRepository<List<GameStatement>> _fileRepository;
         private List<GameStatement> _statements;
 
+        
+        /// <summary>
+        /// Initializes a new instance of <see cref="StatementRepository"/> and loads statements from storage.
+        /// If no statements are found, default statements are created and saved.
+        /// </summary>
+        /// <param name="fileRepository">The JSON file repository to load and save statements.</param>
         public StatementRepository(JsonFileRepository<List<GameStatement>> fileRepository) {
             _fileRepository = fileRepository;
             _statements = _fileRepository.Load();
@@ -14,17 +23,39 @@ public class StatementRepository {
             }
         }
 
+        
+        /// <summary>
+        /// Returns all loaded statements.
+        /// </summary>
+        /// <returns>List of all <see cref="GameStatement"/> objects.</returns>
         public List<GameStatement> GetAll() => _statements;
+        
+        
+        /// <summary>
+        /// Returns a randomized subset of statements.
+        /// </summary>
+        /// <param name="count">The number of statements to retrieve.</param>
+        /// <returns>Random list of <see cref="GameStatement"/> objects.</returns>
         public List<GameStatement> GetRandom(int count) {
             var random = new Random();
             return _statements.OrderBy(x => random.Next()).Take(Math.Min(count, _statements.Count)).ToList();
         }
 
+        /// <summary>
+        /// Retrieves a statement by its unique ID.
+        /// </summary>
+        /// <param name="id">The ID of the statement.</param>
+        /// <returns>The <see cref="GameStatement"/> if found; otherwise, null.</returns>
         public GameStatement? GetById(string id) {
             var statement = _statements.FirstOrDefault(s => s.Id == id);
             return statement.Id != null ? statement : null;
         }
 
+        
+        /// <summary>
+        /// Creates a default list of statements to use if none exist in storage.
+        /// </summary>
+        /// <returns>List of default <see cref="GameStatement"/> objects.</returns>
         private List<GameStatement> CreateDefaultStatements() {
             return new List<GameStatement>
             {
