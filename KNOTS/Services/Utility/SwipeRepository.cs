@@ -1,69 +1,54 @@
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using KNOTS.Data;
+using KNOTS.Models;
 
 namespace KNOTS.Services;
 
 public class SwipeRepository {
-        private readonly ConcurrentDictionary<string, List<PlayerSwipe>> _roomSwipes = new();
-        private readonly JsonFileRepository<Dictionary<string, List<PlayerSwipe>>> _fileRepository;
-        private readonly object _lockObject = new object();
-        public SwipeRepository(JsonFileRepository<Dictionary<string, List<PlayerSwipe>>> fileRepository) {
-            _fileRepository = fileRepository;
-            LoadSwipes();
-        }
-        private void LoadSwipes() {
-            lock (_lockObject) {
-                var data = _fileRepository.Load();
-                _roomSwipes.Clear();
-                foreach (var kvp in data) { _roomSwipes[kvp.Key] = kvp.Value; }
-            }
-        }
-        public bool SaveSwipe(string roomCode, PlayerSwipe swipe) {
-            lock (_lockObject) {
-                LoadSwipesInternal();
-                if (!_roomSwipes.ContainsKey(roomCode)) { _roomSwipes[roomCode] = new List<PlayerSwipe>(); }
+    private readonly AppDbContext _context;
+    public SwipeRepository(AppDbContext context) { _context = context; }
+    public bool SaveSwipe(string roomCode, string playerUsername, string statementId, bool agree) {
+        var statement = _context.Statements.FirstOrDefault(s => s.Id == statementId);
+        if (statement == null) return false;
 
-                _roomSwipes[roomCode].RemoveAll(s => 
-                    s.PlayerUsername == swipe.PlayerUsername && s.StatementId == swipe.StatementId);
+        var existing = _context.PlayerSwipes
+            .FirstOrDefault(s => s.RoomCode == roomCode && s.PlayerUsername == playerUsername && s.StatementId == statementId);
 
-                _roomSwipes[roomCode].Add(swipe);
-                
-                PersistSwipes();
-                
-                Console.WriteLine($"[SwipeRepository] Saved swipe for {swipe.PlayerUsername} in room {roomCode}. Total swipes in room: {_roomSwipes[roomCode].Count}");
-                return true;
-            }
-        }
-        public List<PlayerSwipe> GetRoomSwipes(string roomCode) {
-            lock (_lockObject) {
-                // Reload to get fresh data
-                LoadSwipesInternal();
-                
-                _roomSwipes.TryGetValue(roomCode, out var swipes);
-                var result = swipes ?? new List<PlayerSwipe>();
-                
-                Console.WriteLine($"[SwipeRepository] GetRoomSwipes for {roomCode}: Found {result.Count} swipes");
-                return result;
-            }
-        }
-        public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername) {
-            var roomSwipes = GetRoomSwipes(roomCode);
-            var playerSwipes = roomSwipes.Where(s => s.PlayerUsername == playerUsername).ToList();
-            Console.WriteLine($"[SwipeRepository] GetPlayerSwipes for {playerUsername} in room {roomCode}: Found {playerSwipes.Count} swipes");
-            return playerSwipes;
-        }
-        public void ClearRoomData(string roomCode) {
-            lock (_lockObject) {
-                _roomSwipes.TryRemove(roomCode, out _);
-                PersistSwipes();
-            }
-        }
-        private void LoadSwipesInternal() {
-            var data = _fileRepository.Load();
-            _roomSwipes.Clear();
-            foreach (var kvp in data) { _roomSwipes[kvp.Key] = kvp.Value; }
-        }
-        private void PersistSwipes() {
-            var data = _roomSwipes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            _fileRepository.Save(data);
-        }
+        if (existing != null)
+            _context.PlayerSwipes.Remove(existing);
+
+        _context.PlayerSwipes.Add(new PlayerSwipeRecord {
+            RoomCode = roomCode,
+            PlayerUsername = playerUsername,
+            StatementId = statementId,
+            StatementText = statement.Text,
+            AgreeWithStatement = agree,
+            SwipedAt = DateTime.Now
+        });
+
+        _context.SaveChanges();
+        return true;
     }
+    public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername) {
+        return _context.PlayerSwipes
+            .Where(s => s.RoomCode == roomCode && s.PlayerUsername == playerUsername)
+            .Select(s => new PlayerSwipe(s.PlayerUsername, s.StatementId, s.StatementText, s.AgreeWithStatement)
+                { SwipedAt = s.SwipedAt })
+            .ToList();
+    }
+    public List<PlayerSwipe> GetRoomSwipes(string roomCode) {
+        return _context.PlayerSwipes
+            .Where(s => s.RoomCode == roomCode)
+            .Select(s => new PlayerSwipe(s.PlayerUsername, s.StatementId, s.StatementText, s.AgreeWithStatement)
+                { SwipedAt = s.SwipedAt })
+            .ToList();
+    }
+    public void ClearRoomData(string roomCode) {
+        var swipes = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
+        _context.PlayerSwipes.RemoveRange(swipes);
+        _context.SaveChanges();
+    }
+}

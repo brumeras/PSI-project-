@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+
 namespace KNOTS.Services;
 
-public class RoomManager
-{
+public class RoomManager {
     private readonly RoomRepository _roomRepository;
     private readonly RoomCodeGenerator _codeGenerator;
     public RoomManager(RoomRepository roomRepository, RoomCodeGenerator codeGenerator) {

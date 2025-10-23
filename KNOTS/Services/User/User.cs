@@ -1,3 +1,5 @@
+using System;
+
 namespace KNOTS.Services;
 
 public class User : IComparable<User>, IEquatable<User> {

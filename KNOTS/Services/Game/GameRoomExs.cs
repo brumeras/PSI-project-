@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace KNOTS.Services;
 
 //joingameroom funkcijos extensionas, skirtas papildyti funkcionaluma funkcijos skirtos prisijungti i kambari

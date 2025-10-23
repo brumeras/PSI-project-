@@ -1,3 +1,5 @@
+using System;
+
 namespace KNOTS.Services;
 
 public struct PlayerSwipe {
@@ -6,7 +8,6 @@ public struct PlayerSwipe {
     public string StatementText { get; set; }
     public bool AgreeWithStatement { get; set; }
     public DateTime SwipedAt { get; set; }
-
     public PlayerSwipe(string playerUsername, string statementId, string statementText, bool agreeWithStatement) {
         PlayerUsername = playerUsername;
         StatementId = statementId;

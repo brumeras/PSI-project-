@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace KNOTS.Compability;
 
 public struct CompatibilityScore {
@@ -14,7 +17,6 @@ public struct CompatibilityScore {
         TotalStatements = totalStatements;
         MatchedStatements = matchedStatements;
     }
-
     public double Percentage => TotalStatements > 0 
         ? Math.Round((double)MatchingSwipes / TotalStatements * 100, 2)
         : 0;

@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Text.Json;
 
 namespace KNOTS.Services;
@@ -20,7 +22,6 @@ public class JsonFileRepository<T> where T : new() {
         catch (Exception ex) { Console.WriteLine($"Error loading from {_filePath}: {ex.Message}"); }
         return new T();
     }
-
     public void Save(T data) {
         try {
             string json = JsonSerializer.Serialize(data, new JsonSerializerOptions {
