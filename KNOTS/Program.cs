@@ -33,12 +33,7 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        // Development mode: ištrinti seną DB ir sukurti naują
-        if (app.Environment.IsDevelopment())
-        {
-            Console.WriteLine("🗑️  Deleting old database...");
-            dbContext.Database.EnsureDeleted();
-        }
+        
         
         Console.WriteLine("📦 Creating database...");
         dbContext.Database.EnsureCreated();
