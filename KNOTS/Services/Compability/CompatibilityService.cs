@@ -183,20 +183,11 @@ public class CompatibilityService {
         return true;
     }
     
-    public CompatibilityScore CalculateCompatibility(string roomCode, string player1, string player2) {
-        return _calculator.Calculate(roomCode, player1, player2);
-    }
-    
     public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames) {
         Console.WriteLine($"[CalculateAllCompatibilities] Starting calculation for room {roomCode}");
         LogRoomStatistics(roomCode);
         
         return _calculator.CalculateAllCompatibilities(roomCode, playerUsernames);
-    }
-    
-    public CompatibilityScore? GetBestMatch(string roomCode, List<string> playerUsernames) {
-        var allScores = CalculateAllCompatibilities(roomCode, playerUsernames);
-        return allScores.FirstOrDefault();
     }
     
     /// <summary>

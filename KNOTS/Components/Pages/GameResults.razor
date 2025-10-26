@@ -26,6 +26,8 @@
                 
                 @for (int i = 0; i < compatibilityResults.Count; i++)
                 {
+                    // SPRENDIMAS 2: Sukuriamas lokalus kintamasis, kad išvengti for ciklo kintamojo srities problemos
+                    var currentIndex = i; 
                     var result = compatibilityResults[i];
                     var medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "";
                     
@@ -48,11 +50,13 @@
                         
                         @if (result.MatchedStatements.Any())
                         {
-                            <button class="btn-toggle" @onclick="() => ToggleDetails(i)">
-                                @(expandedIndex == i ? "Hide" : "Show") matched statements
+                            // Naudojamas currentIndex
+                            <button class="btn-toggle" @onclick="() => ToggleDetails(currentIndex)">
+                                @(expandedIndex == currentIndex ? "Hide" : "Show") matched statements
                             </button>
                             
-                            @if (expandedIndex == i)
+                            // Naudojamas currentIndex
+                            @if (expandedIndex == currentIndex)
                             {
                                 <div class="matched-statements">
                                     <small class="statements-label">You both agreed on:</small>
@@ -470,6 +474,8 @@
     private void ToggleDetails(int index)
     {
         expandedIndex = expandedIndex == index ? -1 : index;
+        // SPRENDIMAS 1: Būtina kviesti StateHasChanged, kad atnaujintų UI
+        StateHasChanged(); 
     }
     
     private string GetProgressBarClass(double percentage)
