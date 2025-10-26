@@ -1,6 +1,7 @@
 using KNOTS.Components;
 using KNOTS.Services;
 using KNOTS.Data;
+using KNOTS.Hubs;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,29 +9,52 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// SQLite duomenų bazės konfigūracija - SINGLETON!
+// SQLite duomenų bazė - SCOPED (saugus būdas)
 builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite("Data Source=knots.db"), 
-    ServiceLifetime.Singleton); // <-- SVARBU!
+    options.UseSqlite("Data Source=knots.db"));
 
-// UserService kaip Singleton
-builder.Services.AddSingleton<UserService>();
-
-// Kitus servisus palikite kaip Scoped
+// Servisai - visi Scoped (nes naudoja DbContext)
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CompatibilityService>();
-builder.Services.AddScoped<GameRoomService>();
+
+// GameRoomService - Singleton (neturi DB priklausomybių)
+builder.Services.AddSingleton<GameRoomService>();
 
 // SignalR
 builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-// Sukuriame DB
-var dbContext = app.Services.GetRequiredService<AppDbContext>();
-dbContext.Database.EnsureCreated();
-Console.WriteLine("✅ Database created/verified successfully");
+// Sukuriame ir inicializuojame duomenų bazę
+Console.WriteLine("🔧 Initializing database...");
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    
+    try
+    {
+        
+        
+        Console.WriteLine("📦 Creating database...");
+        dbContext.Database.EnsureCreated();
+        Console.WriteLine("✅ Database created successfully");
+        
+        // Verify tables exist
+        var tableCount = dbContext.Model.GetEntityTypes().Count();
+        Console.WriteLine($"✅ Database has {tableCount} entity types configured");
+        
+        // Initialize CompatibilityService to create default statements
+        var compatService = scope.ServiceProvider.GetRequiredService<CompatibilityService>();
+        Console.WriteLine("✅ CompatibilityService initialized");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Database initialization failed: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        throw;
+    }
+}
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -43,5 +67,12 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// ⚠️ SVARBU: SignalR Hub mapping - BE ŠIO SignalR NEVEIKS!
+app.MapHub<GameHub>("/gamehub");
+Console.WriteLine("✅ SignalR Hub mapped to /gamehub");
+
+Console.WriteLine("🚀 Application started successfully!");
+Console.WriteLine("📍 Navigate to the application in your browser");
 
 app.Run();
