@@ -445,7 +445,16 @@
 
     protected override void OnInitialized()
     {
-        if (UserService.IsAuthenticated)
+        if (UserService.IsAuthenticated && !string.IsNullOrEmpty(RoomCode))
+        {
+            LoadStatements();
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        // Užkrauti klausimus, kai RoomCode pasikeičia
+        if (UserService.IsAuthenticated && !string.IsNullOrEmpty(RoomCode) && !statements.Any())
         {
             LoadStatements();
         }
@@ -453,8 +462,28 @@
 
     private void LoadStatements()
     {
-        statements = CompatibilityService.GetRandomStatements(10);
-        statusMessage = $"Loaded {statements.Count} statements. Let's begin!";
+        if (string.IsNullOrEmpty(RoomCode))
+        {
+            statusMessage = "Error: No room code provided";
+            Console.WriteLine("❌ [NewGame] Cannot load statements - RoomCode is empty");
+            return;
+        }
+
+        try
+        {
+            // SVARBU: Naudoti GetRoomStatements vietoj GetRandomStatements
+            statements = CompatibilityService.GetRoomStatements(RoomCode, 10);
+            statusMessage = $"Loaded {statements.Count} statements. Let's begin!";
+            Console.WriteLine($"✅ [NewGame] Loaded {statements.Count} statements for room {RoomCode}");
+            
+            // Parodyti klausimų ID debug tikslais
+            Console.WriteLine($"📋 [NewGame] Statement IDs: {string.Join(", ", statements.Select(s => s.Id))}");
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error loading statements: {ex.Message}";
+            Console.WriteLine($"❌ [NewGame] Error loading statements: {ex.Message}");
+        }
     }
 
     private async Task SwipeRight()
@@ -479,7 +508,7 @@
             var statement = statements[currentStatementIndex];
             string playerUsername = Username ?? UserService.CurrentUser ?? "";
             
-            Console.WriteLine($"[SwipeGame] Saving swipe for player: '{playerUsername}' in room: {RoomCode}");
+            Console.WriteLine($"[NewGame] Saving swipe - Player: '{playerUsername}', Room: {RoomCode}, Statement: {statement.Id}, Agree: {agreeWithStatement}");
             
             bool saved = CompatibilityService.SaveSwipe(
                 RoomCode,
@@ -491,7 +520,16 @@
             if (!saved)
             {
                 statusMessage = "Error saving your answer. Please try again.";
+                Console.WriteLine($"❌ [NewGame] Failed to save swipe for statement {statement.Id}");
             }
+            else
+            {
+                Console.WriteLine($"✅ [NewGame] Successfully saved swipe {currentStatementIndex + 1}/{statements.Count}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("❌ [NewGame] Cannot save swipe - RoomCode is empty");
         }
 
         await Task.Delay(500);
@@ -507,6 +545,7 @@
         {
             currentStatementIndex++;
             statusMessage = "Statement skipped.";
+            Console.WriteLine($"⏭️ [NewGame] Skipped to statement {currentStatementIndex + 1}");
         }
     }
 
@@ -516,6 +555,7 @@
         {
             currentStatementIndex--;
             statusMessage = "";
+            Console.WriteLine($"⏮️ [NewGame] Went back to statement {currentStatementIndex + 1}");
         }
     }
 
@@ -523,6 +563,7 @@
     {
         currentStatementIndex = 0;
         statusMessage = "Reviewing your answers...";
+        Console.WriteLine($"🔄 [NewGame] Reset to beginning");
     }
 
     private double GetProgressPercentage()
@@ -533,11 +574,11 @@
 
     public bool IsComplete()
     {
-        return currentStatementIndex >= statements.Count;
-    }
-
-    public int GetCompletedCount()
-    {
-        return Math.Min(currentStatementIndex, statements.Count);
+        bool isComplete = currentStatementIndex >= statements.Count;
+        if (isComplete)
+        {
+            Console.WriteLine($"✅ [NewGame] Player completed all {statements.Count} statements");
+        }
+        return isComplete;
     }
 }
