@@ -5,6 +5,12 @@ using KNOTS.Compability;
 
 namespace KNOTS.Services.Compability;
 
+/// <summary>
+/// Calculates compatibility scores between players based on their swipes.
+/// </summary>
+/// <remarks>
+/// Compatibility is determined by comparing how players respond to the same statements.
+/// </remarks>
 public class CompatibilityCalculator {
     private readonly SwipeRepository _swipeRepo;
     
@@ -12,6 +18,9 @@ public class CompatibilityCalculator {
         _swipeRepo = swipeRepo; 
     }
     
+    /// <summary>
+    /// Calculates compatibility between two players in a specific room.
+    /// </summary>
     public CompatibilityScore Calculate(string roomCode, string player1, string player2) {
         var p1 = _swipeRepo.GetPlayerSwipes(roomCode, player1);
         var p2 = _swipeRepo.GetPlayerSwipes(roomCode, player2);
@@ -42,6 +51,9 @@ public class CompatibilityCalculator {
         );
     }
     
+    /// <summary>
+    /// Calculates compatibility for all unique pairs of players in a room.
+    /// </summary>
     public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames) {
         var results = new List<CompatibilityScore>();
 
@@ -59,7 +71,7 @@ public class CompatibilityCalculator {
     }
     
     /// <summary>
-    /// Apskaičiuoja kiekvieno žaidėjo geriausią match'ą ir ar jis buvo geriausias
+    /// Finds the best match (highest compatibility) among all players.
     /// </summary>
     public Dictionary<string, PlayerMatchInfo> GetBestMatchesForPlayers(List<CompatibilityScore> allResults) {
         var playerMatches = new Dictionary<string, PlayerMatchInfo>();
@@ -106,8 +118,14 @@ public class CompatibilityCalculator {
     }
     
     /// <summary>
-    /// Gauna statistiką iš visų compatibility rezultatų žaidėjui
+    /// Retrieves overall game statistics for a specific player based on all compatibility results.
     /// </summary>
+    /// <param name="playerUsername">The username of the player whose statistics are being calculated.</param>
+    /// <param name="allResults">A list of all <see cref="CompatibilityScore"/> results from the game session.</param>
+    /// <returns>
+    /// A <see cref="PlayerGameStatistics"/> instance containing the player’s performance data,
+    /// including average compatibility, best match percentage, and match status.
+    /// </returns>
     public PlayerGameStatistics GetPlayerStatistics(string playerUsername, List<CompatibilityScore> allResults) {
         var playerResults = allResults
             .Where(r => r.Player1 == playerUsername || r.Player2 == playerUsername)
@@ -137,22 +155,57 @@ public class CompatibilityCalculator {
 }
 
 /// <summary>
-/// Informacija apie žaidėjo geriausią match'ą
+/// Represents detailed information about a player’s best match in a game session.
 /// </summary>
+/// <remarks>
+/// This class contains metadata about the player’s top compatibility partner,
+/// including the percentage score and whether the relationship was mutual.
+/// </remarks>
 public class PlayerMatchInfo {
+    /// <summary>
+    /// Gets or sets the username of the player’s best match partner.
+    /// </summary>
     public string BestMatchPartner { get; set; } = "";
+    /// <summary>
+    /// Gets or sets the compatibility percentage with the best match partner.
+    /// </summary>
     public double BestMatchPercentage { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether this player was also the partner’s best match.
+    /// </summary>
     public bool WasBestMatchForPartner { get; set; }
+    /// <summary>
+    /// Gets or sets all compatibility results associated with the player.
+    /// </summary>
     public List<CompatibilityScore> AllMatches { get; set; } = new();
 }
 
 /// <summary>
-/// Žaidėjo statistika iš vieno game session
+/// Represents summarized game statistics for a single player during one game session.
 /// </summary>
+/// <remarks>
+/// This model stores general performance metrics such as average compatibility,
+/// best match data, and participation count.
+/// </remarks>
 public class PlayerGameStatistics {
+    /// <summary>
+    /// Gets or sets the username of the player.
+    /// </summary>
     public string PlayerUsername { get; set; } = "";
+    /// <summary>
+    /// Gets or sets the number of games played by the player.
+    /// </summary>
     public int GamesPlayed { get; set; }
+    /// <summary>
+    /// Gets or sets the player’s average compatibility percentage across all matches.
+    /// </summary>
     public double AverageCompatibility { get; set; }
+    /// <summary>
+    /// Gets or sets the player’s best match percentage achieved in the session.
+    /// </summary>
     public double BestMatchPercentage { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the player was the best match for another participant.
+    /// </summary>
     public bool WasBestMatch { get; set; }
 }

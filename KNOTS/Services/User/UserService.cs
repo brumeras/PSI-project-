@@ -12,15 +12,53 @@ using KNOTS.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace KNOTS.Services;
+
+/// <summary>
+/// Provides user management services such as registration, authentication, 
+/// statistics tracking, and leaderboard generation.
+/// </summary>
 public class UserService {
     private readonly AppDbContext _context;
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserService"/> class.
+    /// </summary>
+    /// <param name="context">The application database context used to access user data.</param>
     public UserService(AppDbContext context) {
         _context = context;
         Console.WriteLine("🔧 UserService created");
     }
+    
+    /// <summary>
+    /// Occurs when the authentication state changes (e.g., user logs in or out).
+    /// </summary>
     public event Action? OnAuthenticationChanged;
+    
+    /// <summary>
+    /// Gets the username of the currently authenticated user, or <c>null</c> if no user is logged in.
+    /// </summary>
     public string? CurrentUser { get; private set; }
+    
+    /// <summary>
+    /// Gets a value indicating whether a user is currently authenticated.
+    /// </summary>
     public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUser);
+    
+    /// <summary>
+    /// Registers a new user in the system.
+    /// </summary>
+    /// <param name="username">The desired username of the new user.</param>
+    /// <param name="password">The password for the new account.</param>
+    /// <returns>
+    /// A tuple containing:
+    /// <list type="bullet">
+    /// <item><term>Success</term><description><c>true</c> if registration succeeded; otherwise <c>false</c>.</description></item>
+    /// <item><term>Message</term><description>A human-readable message describing the result.</description></item>
+    /// </list>
+    /// </returns>
+    /// <remarks>
+    /// This method performs validation, hashes the password using BCrypt, and saves the user in the database.
+    /// </remarks>
     public (bool Success, string Message) RegisterUser(string username, string password) {
         Console.WriteLine("\n=== REGISTRATION ATTEMPT ===");
         Console.WriteLine($"Username: '{username}'");
@@ -81,6 +119,22 @@ public class UserService {
             return (false, $"Registration error: {ex.Message}");
         }
     }
+    
+    /// <summary>
+    /// Attempts to authenticate a user with the specified credentials.
+    /// </summary>
+    /// <param name="username">The username of the account.</param>
+    /// <param name="password">The password to verify.</param>
+    /// <returns>
+    /// A tuple containing:
+    /// <list type="bullet">
+    /// <item><term>Success</term><description><c>true</c> if login was successful; otherwise <c>false</c>.</description></item>
+    /// <item><term>Message</term><description>A description of the login result.</description></item>
+    /// </list>
+    /// </returns>
+    /// <remarks>
+    /// If login succeeds, the <see cref="CurrentUser"/> property is set and the <see cref="OnAuthenticationChanged"/> event is triggered.
+    /// </remarks>
     public (bool Success, string Message) LoginUser(string username, string password) {
         Console.WriteLine("\n=== LOGIN ATTEMPT ===");
         Console.WriteLine($"Username: '{username}'");
@@ -146,6 +200,13 @@ public class UserService {
                 return (false, $"Login error: {ex.Message}");
         }
     }
+    
+    /// <summary>
+    /// Logs out the currently authenticated user.
+    /// </summary>
+    /// <remarks>
+    /// Clears <see cref="CurrentUser"/> and triggers the <see cref="OnAuthenticationChanged"/> event.
+    /// </remarks>
     public void LogoutUser() {
         Console.WriteLine($"\n=== LOGOUT ===");
         Console.WriteLine($"Logging out user: {CurrentUser}");
@@ -153,11 +214,27 @@ public class UserService {
         OnAuthenticationChanged?.Invoke();
         Console.WriteLine("✅ Logout successful");
     }
+    
+    /// <summary>
+    /// Retrieves the total number of registered users in the system.
+    /// </summary>
+    /// <returns>The number of users stored in the database.</returns>
     public int GetTotalUsersCount() {
         var count = _context.Users.Count();
         Console.WriteLine($"GetTotalUsersCount: {count}");
         return count;
     }
+    
+    /// <summary>
+    /// Updates the statistical data of a specified user after a game.
+    /// </summary>
+    /// <param name="username">The username of the user to update.</param>
+    /// <param name="compatibilityScore">The compatibility score obtained in the game.</param>
+    /// <param name="wasBestMatch">Indicates whether the user was part of the best-matching pair.</param>
+    /// <remarks>
+    /// This method updates the user's total games played, recalculates their average compatibility score, 
+    /// and increments their best match count if applicable.
+    /// </remarks>
     public void UpdateUserStatistics(string username, double compatibilityScore, bool wasBestMatch) {
         Console.WriteLine($"\n=== UPDATE USER STATISTICS ===");
         Console.WriteLine($"Username: {username}, Score: {compatibilityScore}, BestMatch: {wasBestMatch}");
@@ -185,6 +262,15 @@ public class UserService {
             Console.WriteLine($"   Best Matches: {user.BestMatchesCount}");
         }else { Console.WriteLine($"❌ User '{username}' not found for statistics update"); }
     }
+    
+    /// <summary>
+    /// Retrieves a sorted list of top users for the leaderboard.
+    /// </summary>
+    /// <param name="topCount">The number of top users to include in the leaderboard. Defaults to 10.</param>
+    /// <returns>A list of users ordered by their ranking score.</returns>
+    /// <remarks>
+    /// The sorting logic relies on the <see cref="User"/> model's <c>IComparable</c> implementation.
+    /// </remarks>
     public List<User> GetLeaderboard(int topCount = 10) {
         Console.WriteLine($"\n=== GET LEADERBOARD (top {topCount}) ===");
         var totalUsers = _context.Users.Count();
@@ -200,6 +286,12 @@ public class UserService {
         }
         return sortedUsers.Take(topCount).ToList();
     }
+    
+    /// <summary>
+    /// Retrieves the rank position of a specific user within the leaderboard.
+    /// </summary>
+    /// <param name="username">The username whose rank should be retrieved.</param>
+    /// <returns>The user's rank position (1-based index), or 0 if the user is not found.</returns>
     public int GetUserRank(string username) {
         Console.WriteLine($"\n=== GET USER RANK for '{username}' ===");
         var sortedUsers = _context.Users.AsEnumerable().OrderBy(u => u).ToList();
@@ -208,6 +300,14 @@ public class UserService {
         Console.WriteLine($"Rank for {username}: {rank} out of {sortedUsers.Count}");
         return rank;
     }
+    
+    /// <summary>
+    /// Retrieves a user record by username.
+    /// </summary>
+    /// <param name="username">The username of the user to find.</param>
+    /// <returns>
+    /// The matching <see cref="User"/> object if found; otherwise <c>null</c>.
+    /// </returns>
     public User? GetUserByUsername(string username) {
         Console.WriteLine($"GetUserByUsername: '{username}'");
         // PATAISYTA: naudojame ToLower()

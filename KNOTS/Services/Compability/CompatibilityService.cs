@@ -7,6 +7,15 @@ using KNOTS.Services.Compability;
 
 namespace KNOTS.Services;
 
+/// <summary>
+/// Provides operations for managing player swipes, calculating compatibility scores,
+/// tracking game progress, and storing completed game sessions.
+/// </summary>
+/// <remarks>
+/// Acts as the main coordination layer between repositories and domain services,
+/// such as <see cref="CompatibilityCalculator"/>, <see cref="StatisticsService"/>, 
+/// and <see cref="GameHistoryService"/>.
+/// </remarks>
 public class CompatibilityService {
     private readonly AppDbContext _context;
     private readonly UserService _userService;
@@ -15,6 +24,10 @@ public class CompatibilityService {
     // Saugoti kambario klausimus atmintinėje
     private static Dictionary<string, List<GameStatement>> _roomStatements = new();
     
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompatibilityService"/> class
+    /// and ensures default statements exist in the database.
+    /// </summary>
     public CompatibilityService(AppDbContext context, UserService userService) {
         _context = context;
         _userService = userService;
@@ -24,6 +37,10 @@ public class CompatibilityService {
         EnsureDefaultStatements();
     }
     
+    /// <summary>
+    /// Ensures that the database contains the default set of statements.
+    /// If no statements exist, they are created and saved.
+    /// </summary>
     private void EnsureDefaultStatements()
     {
         if (!_context.Statements.Any())
@@ -64,7 +81,8 @@ public class CompatibilityService {
     }
     
     /// <summary>
-    /// Gauna arba sukuria kambario klausimus (visiems žaidėjams kambaryje tie patys klausimai)
+    /// Retrieves or generates the list of statements for a specific room.
+    /// Ensures all players in the same room receive identical questions.
     /// </summary>
     public List<GameStatement> GetRoomStatements(string roomCode, int count = 10)
     {
@@ -88,6 +106,13 @@ public class CompatibilityService {
         return statements;
     }
     
+    /// <summary>
+    /// Returns a random list of statements.
+    /// </summary>
+    /// <remarks>
+    /// This method is obsolete — use <see cref="GetRoomStatements"/> instead
+    /// to ensure all players in the same room receive identical questions.
+    /// </remarks>
     [Obsolete("Use GetRoomStatements(roomCode) instead to ensure all players get same questions")]
     public List<GameStatement> GetRandomStatements(int count)
     {
@@ -99,9 +124,11 @@ public class CompatibilityService {
             .ToList();
     }
     
+    
     /// <summary>
-    /// Išsaugo žaidėjo atsakymą į duombazę
+    /// Saves a player's swipe (response) to the database.
     /// </summary>
+    /// <returns>True if the swipe was successfully saved; otherwise, false.</returns>
     public bool SaveSwipe(string roomCode, string playerUsername, string statementId, bool swipeRight) {
         try {
             var statement = _context.Statements.FirstOrDefault(s => s.Id == statementId);
@@ -142,6 +169,9 @@ public class CompatibilityService {
         }
     }
     
+    /// <summary>
+    /// Retrieves all swipes made in the specified room.
+    /// </summary>
     public List<PlayerSwipe> GetRoomSwipes(string roomCode) {
         return _context.PlayerSwipes
             .Where(s => s.RoomCode == roomCode)
@@ -154,6 +184,9 @@ public class CompatibilityService {
             .ToList();
     }
     
+    /// <summary>
+    /// Retrieves all swipes made by a specific player in a given room.
+    /// </summary>
     public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername) {
         return _context.PlayerSwipes
             .Where(s => s.RoomCode == roomCode && s.PlayerUsername == playerUsername)
@@ -166,6 +199,9 @@ public class CompatibilityService {
             .ToList();
     }
     
+    /// <summary>
+    /// Checks if all players in the room have completed their swipes.
+    /// </summary>
     public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements) {
         var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
         var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
@@ -183,6 +219,9 @@ public class CompatibilityService {
         return true;
     }
     
+    /// <summary>
+    /// Calculates compatibility scores for all players in the specified room.
+    /// </summary>
     public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames) {
         Console.WriteLine($"[CalculateAllCompatibilities] Starting calculation for room {roomCode}");
         LogRoomStatistics(roomCode);
@@ -191,7 +230,7 @@ public class CompatibilityService {
     }
     
     /// <summary>
-    /// Išsaugo game session į istoriją ir atnaujina žaidėjų statistiką
+    /// Saves the current game session to history and updates player statistics.
     /// </summary>
     public void SaveGameToHistory(string roomCode, List<string> playerUsernames) {
         try {
@@ -238,6 +277,9 @@ public class CompatibilityService {
         }
     }
     
+    /// <summary>
+    /// Retrieves all past games in which the specified player participated.
+    /// </summary>
     public List<GameHistoryEntry> GetPlayerHistory(string playerUsername) {
         var allHistory = _context.GameHistory
             .OrderByDescending(h => h.PlayedDate)
@@ -261,6 +303,9 @@ public class CompatibilityService {
             .ToList();
     }
     
+    /// <summary>
+    /// Retrieves the entire game history for all rooms.
+    /// </summary>
     public List<GameHistoryEntry> GetAllHistory() {
         return _context.GameHistory
             .OrderByDescending(h => h.PlayedDate)
@@ -276,9 +321,11 @@ public class CompatibilityService {
     }
     
     /// <summary>
-    /// Išvalo kambario duomenis iš duombazės ir cache
-    /// SVARBU: Neišsaugo į istoriją - tai daroma atskirai per SaveGameToHistory
+    /// Clears all data related to the specified room from both the database and cache.
     /// </summary>
+    /// <remarks>
+    /// Does not save the session to history — use <see cref="SaveGameToHistory"/> for that.
+    /// </remarks>
     public void ClearRoomData(string roomCode) {
         var swipesToRemove = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
         _context.PlayerSwipes.RemoveRange(swipesToRemove);
@@ -294,6 +341,9 @@ public class CompatibilityService {
         Console.WriteLine($"✅ Cleared swipe data for room {roomCode}");
     }
 
+    /// <summary>
+    /// Retrieves statistical data about a specific room, including swipe counts and unique players.
+    /// </summary>
     public Dictionary<string, object> GetRoomStatistics(string roomCode) {
         var roomSwipes = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
         
@@ -307,6 +357,9 @@ public class CompatibilityService {
         return stats;
     }
     
+    /// <summary>
+    /// Retrieves a specific numerical statistic value for a given room.
+    /// </summary>
     public int GetStatisticValue(string roomCode, string statKey) {
         var stats = GetRoomStatistics(roomCode);
         if (stats.ContainsKey(statKey)) { 
@@ -315,6 +368,9 @@ public class CompatibilityService {
         return 0;
     }
     
+    /// <summary>
+    /// Logs room statistics to the console for debugging and monitoring.
+    /// </summary>
     private void LogRoomStatistics(string roomCode) {
         var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
         var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
