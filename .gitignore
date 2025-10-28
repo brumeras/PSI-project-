@@ -483,3 +483,8 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
+# Local EF Core SQLite database
+knots.db
+knots.db-shm
+knots.db-wal
+
