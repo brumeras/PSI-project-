@@ -52,6 +52,17 @@
                             <button class="btn-create" @onclick="CreateRoom" disabled="@isConnecting">
                                 <i class="bi bi-plus-lg"></i> Create Room
                             </button>
+                            <div class="topic-selection">
+                                <strong>Select Topic(s):</strong>
+                                @foreach (var topic in availableTopics)
+                                {
+                                    <div class="topic-checkbox">
+                                        <input type="checkbox" @bind="topicSelections[topic]" />
+                                        <label>@topic</label>
+                                    </div>
+                                }
+                            </div>
+
                         </div>
 
                         <div class="option-card">
@@ -588,6 +599,21 @@
             justify-content: center;
         }
     }
+    /* Topic checkboxes styling */
+    .topic-selection {
+        margin-top: 1rem;
+    }
+
+    .topic-checkbox {
+        display: flex;
+        align-items: center;
+        margin: 0.25rem 0;
+    }
+
+    .topic-checkbox input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
+
 </style>
 
 @code {
@@ -603,18 +629,26 @@
     private List<string> gameMessages = new();
     private NewGame? newGameFormRef;
     private System.Threading.Timer? statusCheckTimer;
+    private Dictionary<string, bool> topicSelections = new();
+    private List<string> availableTopics = new() { "Science", "History", "Movies", "Sports" };
+    private HashSet<string> selectedTopics = new();
 
     [Parameter]
     public string? Username { get; set; }
     
-    protected override void OnInitialized()
-    {
+    protected override void OnInitialized() {
+        topicSelections = new Dictionary<string, bool>();
+        foreach (var topic in availableTopics)
+        {
+            topicSelections[topic] = selectedTopics.Contains(topic);
+        }
+
         if (UserService.IsAuthenticated)
         {
             isConnecting = true;
             statusMessage = "Connecting to server...";
         }
-        
+    
         statusCheckTimer = new System.Threading.Timer(async _ => 
         {
             if (!string.IsNullOrEmpty(currentRoomCode) && !showResults)
@@ -627,6 +661,7 @@
             }
         }, null, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
     }
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -680,16 +715,34 @@
     {
         NavigationManager.NavigateTo("/home");
     }
-
+    
     private async Task CreateRoom()
     {
+        ToggleTopicSelectionFromDict();
+
+        if (!selectedTopics.Any())
+        {
+            statusMessage = "Please select at least one topic before creating a room.";
+            return;
+        }
+
         isConnecting = true;
-        statusMessage = "Creating room...";
+        statusMessage = $"Creating room with topics: {string.Join(", ", selectedTopics)}...";
         StateHasChanged();
-        
-        await JSRuntime.InvokeVoidAsync("createRoom", UserService.CurrentUser);
+
+        await JSRuntime.InvokeVoidAsync("createRoom", UserService.CurrentUser, selectedTopics.ToArray());
     }
 
+    private void ToggleTopicSelectionFromDict()
+    {
+        selectedTopics.Clear();
+        foreach (var kvp in topicSelections)
+        {
+            if (kvp.Value)
+                selectedTopics.Add(kvp.Key);
+        }
+    }
+    
     private async Task JoinRoom()
     {
         isConnecting = true;
