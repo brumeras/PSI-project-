@@ -84,7 +84,7 @@ public class CompatibilityService {
     /// Retrieves or generates the list of statements for a specific room.
     /// Ensures all players in the same room receive identical questions.
     /// </summary>
-    public List<GameStatement> GetRoomStatements(string roomCode, int count = 10)
+    public List<GameStatement> GetRoomStatements(string roomCode, List<string>? selectedTopics = null, int count = 10)
     {
         if (_roomStatements.ContainsKey(roomCode))
         {
@@ -93,12 +93,26 @@ public class CompatibilityService {
         }
         
         var random = new Random();
-        var statements = _context.Statements
-            .AsEnumerable()
-            .OrderBy(x => random.Next())
-            .Take(Math.Min(count, _context.Statements.Count()))
-            .ToList();
+        List<GameStatement> statements;
         
+        if (selectedTopics != null && selectedTopics.Any())
+        {
+            // Filter statements by selected topics
+            statements = _context.Statements
+                .Where(s => selectedTopics.Contains(s.Topic))
+                .AsEnumerable()
+                .OrderBy(x => random.Next())
+                .Take(Math.Min(count, _context.Statements.Count()))
+                .ToList();
+        }
+        else {
+            statements = _context.Statements
+                .AsEnumerable()
+                .OrderBy(x => random.Next())
+                .Take(Math.Min(count, _context.Statements.Count()))
+                .ToList();
+        }
+
         _roomStatements[roomCode] = statements;
         Console.WriteLine($"✅ Created new {statements.Count} statements for room {roomCode}");
         Console.WriteLine($"📋 Statement IDs: {string.Join(", ", statements.Select(s => s.Id))}");

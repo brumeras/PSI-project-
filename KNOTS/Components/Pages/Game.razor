@@ -150,7 +150,8 @@
                     <div class="game-form-section">
                         <NewGame @ref="newGameFormRef" 
                                  RoomCode="@currentRoomCode" 
-                                 Username="@UserService.CurrentUser" />
+                                 Username="@UserService.CurrentUser"
+                                 SelectedTopics="@selectedTopics.ToList()" />
                     </div>
                 </div>
             }
@@ -719,12 +720,6 @@
     private async Task CreateRoom()
     {
         ToggleTopicSelectionFromDict();
-
-        if (!selectedTopics.Any())
-        {
-            statusMessage = "Please select at least one topic before creating a room.";
-            return;
-        }
 
         isConnecting = true;
         statusMessage = $"Creating room with topics: {string.Join(", ", selectedTopics)}...";
