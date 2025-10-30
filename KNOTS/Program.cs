@@ -33,17 +33,13 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        
-        
         Console.WriteLine("📦 Creating database...");
         dbContext.Database.EnsureCreated();
         Console.WriteLine("✅ Database created successfully");
         
-        // Verify tables exist
         var tableCount = dbContext.Model.GetEntityTypes().Count();
         Console.WriteLine($"✅ Database has {tableCount} entity types configured");
         
-        // Initialize CompatibilityService to create default statements
         var compatService = scope.ServiceProvider.GetRequiredService<CompatibilityService>();
         Console.WriteLine("✅ CompatibilityService initialized");
     }
@@ -55,8 +51,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-if (!app.Environment.IsDevelopment())
-{
+if (!app.Environment.IsDevelopment()) {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
@@ -68,7 +63,6 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// ⚠️ SVARBU: SignalR Hub mapping - BE ŠIO SignalR NEVEIKS!
 app.MapHub<GameHub>("/gamehub");
 Console.WriteLine("✅ SignalR Hub mapped to /gamehub");
 

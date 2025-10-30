@@ -30,6 +30,7 @@ public class AppDbContext : DbContext {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).IsRequired().HasMaxLength(10);
             entity.Property(e => e.Text).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Topic).IsRequired().HasMaxLength(50);
         });
         // PlayerSwipeRecord configuration
         modelBuilder.Entity<PlayerSwipeRecord>(entity =>

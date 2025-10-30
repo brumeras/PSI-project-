@@ -1,42 +1,42 @@
 [
   {
-    "Id": "S1",
+    "Id": "G1",
     "Text": "I like getting up early in the morning"
   },
   {
-    "Id": "S2",
+    "Id": "G2",
     "Text": "I prefer relaxing at home over going to parties"
   },
   {
-    "Id": "S3",
+    "Id": "G3",
     "Text": "I enjoy spontaneous trips"
   },
   {
-    "Id": "S4",
+    "Id": "G4",
     "Text": "Animals are an important part of my life"
   },
   {
-    "Id": "S5",
+    "Id": "G5",
     "Text": "I prefer movies over theater"
   },
   {
-    "Id": "S6",
+    "Id": "G6",
     "Text": "Sports are part of my daily routine"
   },
   {
-    "Id": "S7",
+    "Id": "G7",
     "Text": "I enjoy cooking at home"
   },
   {
-    "Id": "S8",
+    "Id": "G8",
     "Text": "Summer is the best season"
   },
   {
-    "Id": "S9",
+    "Id": "G9",
     "Text": "Meaningful conversations are more important than having fun"
   },
   {
-    "Id": "S10",
+    "Id": "G10",
     "Text": "I like taking risks and trying new things"
   }
 ]

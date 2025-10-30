@@ -6,5 +6,5 @@ public class GameStatement {
     [Key]
     public string Id { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
-    public string Topic { get; set; } = "General";
+    public string Topic { get; set; }
 }

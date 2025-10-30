@@ -36,89 +36,189 @@ public class CompatibilityService {
         Console.WriteLine("🔧 CompatibilityService created with DB context");
         EnsureDefaultStatements();
     }
-    
+
     /// <summary>
     /// Ensures that the database contains the default set of statements.
     /// If no statements exist, they are created and saved.
     /// </summary>
     private void EnsureDefaultStatements()
     {
-        if (!_context.Statements.Any())
+        var allStatements = new List<GameStatement>
         {
-            Console.WriteLine("📝 Creating default statements in database...");
+            new GameStatement { Id = "D1", Text = "I like getting up early in the morning", Topic = "General" },
+            new GameStatement { Id = "D2", Text = "I prefer relaxing at home over going to parties", Topic = "General" },
+            new GameStatement { Id = "D3", Text = "I enjoy spontaneous trips", Topic = "General" },
+            new GameStatement { Id = "D4", Text = "Animals are an important part of my life", Topic = "General" },
+            new GameStatement { Id = "D5", Text = "I prefer movies over theater", Topic = "General" },
+            new GameStatement { Id = "D6", Text = "Sports are part of my daily routine", Topic = "General" },
+            new GameStatement { Id = "D7", Text = "I enjoy cooking at home", Topic = "General" },
+            new GameStatement { Id = "D8", Text = "Summer is the best season", Topic = "General" },
+            new GameStatement { Id = "D9", Text = "Meaningful conversations matter more to me than having fun", Topic = "General" },
+            new GameStatement { Id = "D10", Text = "I like taking risks and trying new things", Topic = "General" },
+            new GameStatement { Id = "D11", Text = "Music is an important part of my life", Topic = "General" },
+            new GameStatement { Id = "D12", Text = "I value personal space in relationships", Topic = "General" },
+            new GameStatement { Id = "D13", Text = "I like to plan everything in advance", Topic = "General" },
+            new GameStatement { Id = "D14", Text = "I feel good at large parties", Topic = "General" },
+            new GameStatement { Id = "D15", Text = "I live in the moment and don't worry about the future", Topic = "General" },
+            new GameStatement { Id = "D16", Text = "Romantic relationships are important to me", Topic = "General" },
+            new GameStatement { Id = "D18", Text = "Books are better than movies", Topic = "General" },
+            new GameStatement { Id = "D19", Text = "I enjoy nature and hiking", Topic = "General" },
+            new GameStatement { Id = "D20", Text = "Financial stability is a priority", Topic = "General" },
 
-            var defaultStatements = new List<GameStatement>
-            {
-                new GameStatement { Id = "S1", Text = "I like getting up early in the morning" },
-                new GameStatement { Id = "S2", Text = "I prefer relaxing at home over going to parties" },
-                new GameStatement { Id = "S3", Text = "I enjoy spontaneous trips" },
-                new GameStatement { Id = "S4", Text = "Animals are an important part of my life" },
-                new GameStatement { Id = "S5", Text = "I prefer movies over theater" },
-                new GameStatement { Id = "S6", Text = "Sports are part of my daily routine" },
-                new GameStatement { Id = "S7", Text = "I enjoy cooking at home" },
-                new GameStatement { Id = "S8", Text = "Summer is the best season" },
-                new GameStatement { Id = "S9", Text = "Meaningful conversations matter more to me than having fun" },
-                new GameStatement { Id = "S10", Text = "I like taking risks and trying new things" },
-                new GameStatement { Id = "S11", Text = "Music is an important part of my life" },
-                new GameStatement { Id = "S12", Text = "I value personal space in relationships" },
-                new GameStatement { Id = "S13", Text = "I like to plan everything in advance" },
-                new GameStatement { Id = "S14", Text = "I feel good at large parties" },
-                new GameStatement { Id = "S15", Text = "I live in the moment and don't worry about the future" },
-                new GameStatement { Id = "S16", Text = "Romantic relationships are important to me" },
-                new GameStatement { Id = "S17", Text = "I like video games" },
-                new GameStatement { Id = "S18", Text = "Books are better than movies" },
-                new GameStatement { Id = "S19", Text = "I enjoy nature and hiking" },
-                new GameStatement { Id = "S20", Text = "Financial stability is a priority" }
-            };
+            // Topic: Science
+            new GameStatement { Id = "F1", Text = "I like exploring new scientific concepts", Topic = "Science" },
+            new GameStatement { Id = "F2", Text = "I enjoy reading about space and astronomy", Topic = "Science" },
+            new GameStatement { Id = "F3", Text = "I like conducting experiments", Topic = "Science" },
+            new GameStatement { Id = "F4", Text = "I follow the latest technology trends", Topic = "Science" },
+            new GameStatement { Id = "F5", Text = "I am fascinated by physics", Topic = "Science" },
+            new GameStatement { Id = "F6", Text = "I enjoy learning about biology", Topic = "Science" },
+            new GameStatement { Id = "F7", Text = "I am interested in chemistry", Topic = "Science" },
+            new GameStatement { Id = "F8", Text = "I like reading scientific journals", Topic = "Science" },
+            new GameStatement { Id = "F9", Text = "I enjoy solving scientific puzzles", Topic = "Science" },
+            new GameStatement { Id = "F10", Text = "I like watching science documentaries", Topic = "Science" },
+            new GameStatement { Id = "F11", Text = "I enjoy attending science fairs", Topic = "Science" },
+            new GameStatement { Id = "F12", Text = "I like solving complex math problems", Topic = "Science" },
+            new GameStatement { Id = "F13", Text = "I enjoy learning about chemistry reactions", Topic = "Science" },
+            new GameStatement { Id = "F14", Text = "I like reading about medical discoveries", Topic = "Science" },
+            new GameStatement { Id = "S15", Text = "I enjoy studying the environment", Topic = "Science" },
+            new GameStatement { Id = "F16", Text = "I like programming and computer science topics", Topic = "Science" },
+            new GameStatement { Id = "F17", Text = "I enjoy discussing scientific theories", Topic = "Science" },
+            new GameStatement { Id = "F18", Text = "I like attending lectures about space exploration", Topic = "Science" },
+            new GameStatement { Id = "F19", Text = "I enjoy experimenting with physics concepts", Topic = "Science" },
+            new GameStatement { Id = "F20", Text = "I like reading journals on technology advancements", Topic = "Science" },
 
-            _context.Statements.AddRange(defaultStatements);
+            // Topic: Movies
+            new GameStatement { Id = "M1", Text = "I prefer watching movies over reading books", Topic = "Movies" },
+            new GameStatement { Id = "M2", Text = "I enjoy classic films", Topic = "Movies" },
+            new GameStatement { Id = "M3", Text = "I love action movies", Topic = "Movies" },
+            new GameStatement { Id = "M4", Text = "I enjoy watching comedies", Topic = "Movies" },
+            new GameStatement { Id = "M5", Text = "I like indie films", Topic = "Movies" },
+            new GameStatement { Id = "M6", Text = "I often watch documentaries", Topic = "Movies" },
+            new GameStatement { Id = "M7", Text = "I enjoy animated movies", Topic = "Movies" },
+            new GameStatement { Id = "M8", Text = "I like going to the cinema", Topic = "Movies" },
+            new GameStatement { Id = "M9", Text = "I enjoy movie soundtracks", Topic = "Movies" },
+            new GameStatement { Id = "M10", Text = "I like discussing movie plots with friends", Topic = "Movies" },
+            new GameStatement { Id = "M11", Text = "I enjoy watching foreign films", Topic = "Movies" },
+            new GameStatement { Id = "M12", Text = "I like binge-watching movie series", Topic = "Movies" },
+            new GameStatement { Id = "M13", Text = "I enjoy film festivals", Topic = "Movies" },
+            new GameStatement { Id = "M14", Text = "I like analyzing movie cinematography", Topic = "Movies" },
+            new GameStatement { Id = "M15", Text = "I enjoy attending movie premieres", Topic = "Movies" },
+            new GameStatement { Id = "M16", Text = "I like reading movie reviews", Topic = "Movies" },
+            new GameStatement { Id = "M17", Text = "I enjoy discussing actors and directors", Topic = "Movies" },
+            new GameStatement { Id = "M18", Text = "I like creating lists of my favorite movies", Topic = "Movies" },
+            new GameStatement { Id = "M19", Text = "I enjoy watching film adaptations of books", Topic = "Movies" },
+            new GameStatement { Id = "M20", Text = "I like exploring different movie genres", Topic = "Movies" },
+
+            // Topic: Travel
+            new GameStatement { Id = "T1", Text = "I love exploring new cities", Topic = "Travel" },
+            new GameStatement { Id = "T2", Text = "I enjoy trying local cuisines while traveling", Topic = "Travel" },
+            new GameStatement { Id = "T3", Text = "I like planning my trips in advance", Topic = "Travel" },
+            new GameStatement { Id = "T4", Text = "I enjoy outdoor adventures", Topic = "Travel" },
+            new GameStatement { Id = "T5", Text = "I like learning about other cultures", Topic = "Travel" },
+            new GameStatement { Id = "T6", Text = "I enjoy road trips", Topic = "Travel" },
+            new GameStatement { Id = "T7", Text = "I like visiting historical sites", Topic = "Travel" },
+            new GameStatement { Id = "T8", Text = "I enjoy beach vacations", Topic = "Travel" },
+            new GameStatement { Id = "T9", Text = "I like backpacking", Topic = "Travel" },
+            new GameStatement { Id = "T10", Text = "I enjoy photographing landscapes", Topic = "Travel" },
+            new GameStatement { Id = "T11", Text = "I enjoy traveling to off-the-beaten-path locations", Topic = "Travel" },
+            new GameStatement { Id = "T12", Text = "I like learning local languages while traveling", Topic = "Travel" },
+            new GameStatement { Id = "T13", Text = "I enjoy visiting museums abroad", Topic = "Travel" },
+            new GameStatement { Id = "T14", Text = "I like planning weekend getaways", Topic = "Travel" },
+            new GameStatement { Id = "T15", Text = "I enjoy trying adventure sports while traveling", Topic = "Travel" },
+            new GameStatement { Id = "T16", Text = "I like taking scenic train journeys", Topic = "Travel" },
+            new GameStatement { Id = "T17", Text = "I enjoy discovering hidden cafes and restaurants abroad", Topic = "Travel" },
+            new GameStatement { Id = "T18", Text = "I like collecting souvenirs from trips", Topic = "Travel" },
+            new GameStatement { Id = "T19", Text = "I enjoy traveling with friends or family", Topic = "Travel" },
+            new GameStatement { Id = "T20", Text = "I like documenting my travels through photography or writing", Topic = "Travel" },
+
+            //Topic: Hobbies
+            new GameStatement { Id = "H1", Text = "I enjoy painting or drawing", Topic = "Hobbies" },
+            new GameStatement { Id = "H2", Text = "I like playing musical instruments", Topic = "Hobbies" },
+            new GameStatement { Id = "H3", Text = "I enjoy gardening", Topic = "Hobbies" },
+            new GameStatement { Id = "H4", Text = "I like cooking or baking", Topic = "Hobbies" },
+            new GameStatement { Id = "H5", Text = "I enjoy playing video games", Topic = "Hobbies" },
+            new GameStatement { Id = "H6", Text = "I like knitting or crafting", Topic = "Hobbies" },
+            new GameStatement { Id = "H7", Text = "I enjoy photography", Topic = "Hobbies" },
+            new GameStatement { Id = "H8", Text = "I like reading novels", Topic = "Hobbies" },
+            new GameStatement { Id = "H9", Text = "I enjoy exercising or sports", Topic = "Hobbies" },
+            new GameStatement { Id = "H10", Text = "I like learning new skills in my free time", Topic = "Hobbies" },
+            new GameStatement { Id = "H11", Text = "I enjoy woodworking or DIY projects", Topic = "Hobbies" },
+            new GameStatement { Id = "H12", Text = "I like playing board games with friends", Topic = "Hobbies" },
+            new GameStatement { Id = "H13", Text = "I enjoy knitting or sewing", Topic = "Hobbies" },
+            new GameStatement { Id = "H14", Text = "I like practicing yoga or meditation", Topic = "Hobbies" },
+            new GameStatement { Id = "H15", Text = "I enjoy learning a new language", Topic = "Hobbies" },
+            new GameStatement { Id = "H16", Text = "I like baking new recipes", Topic = "Hobbies" },
+            new GameStatement { Id = "H17", Text = "I enjoy writing short stories or poems", Topic = "Hobbies" },
+            new GameStatement { Id = "H18", Text = "I like building models or puzzles", Topic = "Hobbies" },
+            new GameStatement { Id = "H19", Text = "I enjoy playing card games", Topic = "Hobbies" },
+            new GameStatement { Id = "H20", Text = "I like experimenting with photography techniques", Topic = "Hobbies" },
+        };
+        
+        var existingIds = _context.Statements.Select(s => s.Id).ToHashSet();
+        var newStatements = allStatements
+            .Where(s => !existingIds.Contains(s.Id))
+            .ToList();
+
+        if (newStatements.Any())
+        {
+            _context.Statements.AddRange(newStatements);
             _context.SaveChanges();
-            Console.WriteLine($"✅ Created {defaultStatements.Count} statements in database");
+            Console.WriteLine($"✅ Created {newStatements.Count} new statements in database.");
         }
-        else { 
-            Console.WriteLine($"✅ Statements already exist in database ({_context.Statements.Count()} total)"); 
-        }
+        else
+        {
+            Console.WriteLine($"✅ All statements already exist ({existingIds.Count} total).");
+        } ;
     }
-    
+
     /// <summary>
     /// Retrieves or generates the list of statements for a specific room.
     /// Ensures all players in the same room receive identical questions.
     /// </summary>
-    public List<GameStatement> GetRoomStatements(string roomCode, List<string>? selectedTopics = null, int count = 10)
-    {
-        if (_roomStatements.ContainsKey(roomCode))
-        {
+    public List<GameStatement> GetRoomStatements(string roomCode, List<string>? selectedTopics = null, int count = 10) {
+        Console.WriteLine("Selected topics: " + string.Join(", ", selectedTopics));
+        var allDbTopics = _context.Statements.Select(s => s.Topic).Distinct().ToList();
+        Console.WriteLine("DB Topics: " + string.Join(", ", allDbTopics));
+
+        if (_roomStatements.ContainsKey(roomCode)) {
             Console.WriteLine($"✅ Returning existing {_roomStatements[roomCode].Count} statements for room {roomCode}");
             return _roomStatements[roomCode];
         }
-        
+
+        if (_roomStatements.ContainsKey(roomCode)) {
+            Console.WriteLine($"✅ Returning existing {_roomStatements[roomCode].Count} statements for room {roomCode}");
+            return _roomStatements[roomCode];
+        }
+
         var random = new Random();
         List<GameStatement> statements;
-        
-        if (selectedTopics != null && selectedTopics.Any())
-        {
-            // Filter statements by selected topics
-            statements = _context.Statements
+
+        if (selectedTopics != null && selectedTopics.Any()) {
+
+            var filteredStatements = _context.Statements
                 .Where(s => selectedTopics.Contains(s.Topic))
-                .AsEnumerable()
+                .ToList();
+            
+            statements = filteredStatements
                 .OrderBy(x => random.Next())
-                .Take(Math.Min(count, _context.Statements.Count()))
+                .Take(Math.Min(count, filteredStatements.Count))
                 .ToList();
         }
         else {
-            statements = _context.Statements
-                .AsEnumerable()
+            var allStatements = _context.Statements.ToList();
+            statements = allStatements
                 .OrderBy(x => random.Next())
-                .Take(Math.Min(count, _context.Statements.Count()))
+                .Take(Math.Min(count, allStatements.Count))
                 .ToList();
         }
 
         _roomStatements[roomCode] = statements;
         Console.WriteLine($"✅ Created new {statements.Count} statements for room {roomCode}");
         Console.WriteLine($"📋 Statement IDs: {string.Join(", ", statements.Select(s => s.Id))}");
-        
+
         return statements;
     }
+
     
     /// <summary>
     /// Returns a random list of statements.

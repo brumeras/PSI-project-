@@ -631,7 +631,7 @@
     private NewGame? newGameFormRef;
     private System.Threading.Timer? statusCheckTimer;
     private Dictionary<string, bool> topicSelections = new();
-    private List<string> availableTopics = new() { "Science", "History", "Movies", "Sports" };
+    private List<string> availableTopics = new() { "Science", "Movies", "Travel", "Hobbies" };
     private HashSet<string> selectedTopics = new();
 
     [Parameter]
@@ -639,11 +639,9 @@
     
     protected override void OnInitialized() {
         topicSelections = new Dictionary<string, bool>();
-        foreach (var topic in availableTopics)
-        {
+        foreach (var topic in availableTopics) {
             topicSelections[topic] = selectedTopics.Contains(topic);
         }
-
         if (UserService.IsAuthenticated)
         {
             isConnecting = true;
@@ -832,6 +830,7 @@
         playersInRoom.Clear();
         playersInRoom.Add(UserService.CurrentUser ?? "");
         isConnecting = false;
+        Console.WriteLine($"✅ Room {roomCode} created with topics: {string.Join(", ", selectedTopics)}");
         await InvokeAsync(StateHasChanged);
     }
 
