@@ -436,6 +436,9 @@
     [Parameter]
     public string? Username { get; set; }
     
+    [Parameter]
+    public List<string>? SelectedTopics { get; set; }
+    
     private List<GameStatement> statements = new();
     private int currentStatementIndex = 0;
     private string statusMessage = "";
@@ -472,7 +475,7 @@
         try
         {
             // SVARBU: Naudoti GetRoomStatements vietoj GetRandomStatements
-            statements = CompatibilityService.GetRoomStatements(RoomCode, 10);
+            statements = CompatibilityService.GetRoomStatements(RoomCode, SelectedTopics, 10);
             statusMessage = $"Loaded {statements.Count} statements. Let's begin!";
             Console.WriteLine($"✅ [NewGame] Loaded {statements.Count} statements for room {RoomCode}");
             
