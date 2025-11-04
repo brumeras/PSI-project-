@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using KNOTS.Data;
+﻿using KNOTS.Data;
 using KNOTS.Models;
 using Microsoft.EntityFrameworkCore;
+using KNOTS.Exceptions;
 
 namespace KNOTS.Services;
 
@@ -19,13 +11,15 @@ namespace KNOTS.Services;
 /// </summary>
 public class UserService {
     private readonly AppDbContext _context;
+    private readonly LoggingService _logger;
     
     /// <summary>
     /// Initializes a new instance of the <see cref="UserService"/> class.
     /// </summary>
     /// <param name="context">The application database context used to access user data.</param>
-    public UserService(AppDbContext context) {
+    public UserService(AppDbContext context, LoggingService logger) {
         _context = context;
+        _logger = logger;
         Console.WriteLine("🔧 UserService created");
     }
     
@@ -59,66 +53,88 @@ public class UserService {
     /// <remarks>
     /// This method performs validation, hashes the password using BCrypt, and saves the user in the database.
     /// </remarks>
-    public (bool Success, string Message) RegisterUser(string username, string password) {
-        Console.WriteLine("\n=== REGISTRATION ATTEMPT ===");
-        Console.WriteLine($"Username: '{username}'");
-        Console.WriteLine($"Password length: {password?.Length ?? 0}");
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) {
-            Console.WriteLine("❌ Empty username or password");
-            return (false, "Username and password cannot be empty.");
-        }
-        if (username.Length < 3) {
-            Console.WriteLine("❌ Username too short");
-            return (false, "Username must be at least 3 characters long.");
-        }
-        if (password.Length < 4) {
-            Console.WriteLine("❌ Password too short");
-            return (false, "Password must be at least 4 characters long.");
-        }
-        try {
-            Console.WriteLine("Checking if username exists...");
-            // PATAISYTA: naudojame ToLower() vietoj StringComparison
-            var usernameLower = username.ToLower();
-            var existingUser = _context.Users
-                .Where(u => u.Username.ToLower() == usernameLower)
-                .FirstOrDefault();
-            if (existingUser != null) {
-                Console.WriteLine($"❌ Username '{username}' already exists");
-                return (false, "This username is already taken.");
-            }
-
-            Console.WriteLine("Creating password hash...");
-            var passwordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(password, 13);
-            Console.WriteLine($"Hash created, starts with: {passwordHash.Substring(0, Math.Min(20, passwordHash.Length))}...");
-
-            var newUser = new User {
-                Username = username,
-                PasswordHash = passwordHash,
-                CreatedAt = DateTime.Now,
-                TotalGamesPlayed = 0,
-                BestMatchesCount = 0,
-                AverageCompatibilityScore = 0.0
-            };
-
-            Console.WriteLine("Adding user to database...");
-            _context.Users.Add(newUser);
-
-            Console.WriteLine("Saving changes to database...");
-            var saveResult = _context.SaveChanges();
-            Console.WriteLine($"SaveChanges returned: {saveResult}");
-
-            var totalUsers = _context.Users.Count();
-            Console.WriteLine($"✅ User '{username}' registered successfully");
-            Console.WriteLine($"📊 Total users in DB now: {totalUsers}");
-
-            return (true, "Registration successful! You can now log in.");
-        }
-        catch (Exception ex) {
-            Console.WriteLine($"❌ ERROR during registration: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            return (false, $"Registration error: {ex.Message}");
-        }
+   public (bool Success, string Message) RegisterUser(string username, string password) {
+    Console.WriteLine("\n=== REGISTRATION ATTEMPT ===");
+    Console.WriteLine($"Username: '{username}'");
+    Console.WriteLine($"Password length: {password?.Length ?? 0}");
+    
+    // Input validation
+    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) {
+        Console.WriteLine("❌ Empty username or password");
+        return (false, "Username and password cannot be empty.");
     }
+    if (username.Length < 3) {
+        Console.WriteLine("❌ Username too short");
+        return (false, "Username must be at least 3 characters long.");
+    }
+    if (password.Length < 4) {
+        Console.WriteLine("❌ Password too short");
+        return (false, "Password must be at least 4 characters long.");
+    }
+    
+    try {
+        Console.WriteLine("Checking if username exists...");
+        var usernameLower = username.ToLower();
+        var existingUser = _context.Users
+            .Where(u => u.Username.ToLower() == usernameLower)
+            .FirstOrDefault();
+            
+        if (existingUser != null) {
+            throw new UserAlreadyExistsException(username);
+        }
+
+        Console.WriteLine("Creating password hash...");
+        var passwordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(password, 13);
+        Console.WriteLine($"Hash created, starts with: {passwordHash.Substring(0, Math.Min(20, passwordHash.Length))}...");
+
+        var newUser = new User {
+            Username = username,
+            PasswordHash = passwordHash,
+            CreatedAt = DateTime.Now,
+            TotalGamesPlayed = 0,
+            BestMatchesCount = 0,
+            AverageCompatibilityScore = 0.0
+        };
+
+        Console.WriteLine("Adding user to database...");
+        _context.Users.Add(newUser);
+
+        Console.WriteLine("Saving changes to database...");
+        var saveResult = _context.SaveChanges();
+        Console.WriteLine($"SaveChanges returned: {saveResult}");
+
+        var totalUsers = _context.Users.Count();
+        Console.WriteLine($"✅ User '{username}' registered successfully");
+        Console.WriteLine($"📊 Total users in DB now: {totalUsers}");
+
+        return (true, "Registration successful! You can now log in.");
+    }
+    catch (UserAlreadyExistsException ex) {
+        // Handle duplicate username - this is expected and user-friendly
+        _logger.LogException(ex, $"Registration failed - Duplicate username: {username}");
+        Console.WriteLine($"❌ {ex.Message}");
+        return (false, "This username is already taken. Please choose a different one.");
+    }
+    catch (DbUpdateException ex) {
+        // Handle database-specific errors (connection issues, constraint violations, etc.)
+        _logger.LogException(ex, $"Database error during registration - Username: {username}");
+        Console.WriteLine($"❌ Database error during registration: {ex.Message}");
+        return (false, "Unable to complete registration due to a database error. Please try again later.");
+    }
+    catch (InvalidOperationException ex) {
+        // Handle BCrypt or other operational errors
+        _logger.LogException(ex, $"Operation error during registration - Username: {username}");
+        Console.WriteLine($"❌ Operation error: {ex.Message}");
+        return (false, "Registration failed due to a system error. Please try again.");
+    }
+    catch (Exception ex) {
+        // Catch-all for unexpected errors
+        _logger.LogException(ex, $"Unexpected error during registration - Username: {username}");
+        Console.WriteLine($"❌ UNEXPECTED ERROR during registration: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        return (false, "An unexpected error occurred during registration. Please contact support if this persists.");
+    }
+}
     
     /// <summary>
     /// Attempts to authenticate a user with the specified credentials.
