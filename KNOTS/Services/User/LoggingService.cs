@@ -13,7 +13,6 @@ public class LoggingService
         _logDirectory = logDirectory;
         _errorLogPath = Path.Combine(_logDirectory, "errors.log");
         
-        // Ensure log directory exists
         Directory.CreateDirectory(_logDirectory);
     }
     
