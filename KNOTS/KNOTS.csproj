@@ -20,6 +20,7 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\js\bootstrap.min.js" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\js\bootstrap.min.js.map" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\js\GameClient.js" />
+      <_ContentIncludedByDefault Remove="GameStatements\statements.json" />
     </ItemGroup>
 
     <ItemGroup>
@@ -35,6 +36,10 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
       </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Tests\" />
     </ItemGroup>
 
 </Project>
