@@ -24,8 +24,7 @@
 - Simple matching algorithm.  
 - Results displayed in a basic table.  
 
-### 🔹 Beta version
-- Simple user profiles (name, photo).    
+### 🔹 Beta version  
 - Ability to choose questions topics (sports, movies, etc.).
 - Polished UI with animations.  
  
