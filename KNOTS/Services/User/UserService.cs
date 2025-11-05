@@ -5,88 +5,28 @@ using KNOTS.Exceptions;
 
 namespace KNOTS.Services;
 
-/// <summary>
-/// Provides user management services such as registration, authentication, 
-/// statistics tracking, and leaderboard generation.
-/// </summary>
 public class UserService {
     private readonly AppDbContext _context;
     private readonly LoggingService _logger;
+    public string? CurrentUser { get; private set; }
+    public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUser);
+    public event Action? OnAuthenticationChanged;
     
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UserService"/> class.
-    /// </summary>
-    /// <param name="context">The application database context used to access user data.</param>
     public UserService(AppDbContext context, LoggingService logger) {
         _context = context;
         _logger = logger;
-        Console.WriteLine("🔧 UserService created");
     }
     
-    /// <summary>
-    /// Occurs when the authentication state changes (e.g., user logs in or out).
-    /// </summary>
-    public event Action? OnAuthenticationChanged;
-    
-    /// <summary>
-    /// Gets the username of the currently authenticated user, or <c>null</c> if no user is logged in.
-    /// </summary>
-    public string? CurrentUser { get; private set; }
-    
-    /// <summary>
-    /// Gets a value indicating whether a user is currently authenticated.
-    /// </summary>
-    public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentUser);
-    
-    /// <summary>
-    /// Registers a new user in the system.
-    /// </summary>
-    /// <param name="username">The desired username of the new user.</param>
-    /// <param name="password">The password for the new account.</param>
-    /// <returns>
-    /// A tuple containing:
-    /// <list type="bullet">
-    /// <item><term>Success</term><description><c>true</c> if registration succeeded; otherwise <c>false</c>.</description></item>
-    /// <item><term>Message</term><description>A human-readable message describing the result.</description></item>
-    /// </list>
-    /// </returns>
-    /// <remarks>
-    /// This method performs validation, hashes the password using BCrypt, and saves the user in the database.
-    /// </remarks>
    public (bool Success, string Message) RegisterUser(string username, string password) {
-    Console.WriteLine("\n=== REGISTRATION ATTEMPT ===");
-    Console.WriteLine($"Username: '{username}'");
-    Console.WriteLine($"Password length: {password?.Length ?? 0}");
-    
-    // Input validation
-    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) {
-        Console.WriteLine("❌ Empty username or password");
-        return (false, "Username and password cannot be empty.");
-    }
-    if (username.Length < 3) {
-        Console.WriteLine("❌ Username too short");
-        return (false, "Username must be at least 3 characters long.");
-    }
-    if (password.Length < 4) {
-        Console.WriteLine("❌ Password too short");
-        return (false, "Password must be at least 4 characters long.");
-    }
+    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) {return (false, "Username and password cannot be empty."); }
+    if (username.Length < 3) {return (false, "Username must be at least 3 characters long."); }
+    if (password.Length < 4) {return (false, "Password must be at least 4 characters long."); }
     
     try {
-        Console.WriteLine("Checking if username exists...");
         var usernameLower = username.ToLower();
-        var existingUser = _context.Users
-            .Where(u => u.Username.ToLower() == usernameLower)
-            .FirstOrDefault();
-            
-        if (existingUser != null) {
-            throw new UserAlreadyExistsException(username);
-        }
-
-        Console.WriteLine("Creating password hash...");
-        var passwordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(password, 13);
-        Console.WriteLine($"Hash created, starts with: {passwordHash.Substring(0, Math.Min(20, passwordHash.Length))}...");
-
+        if (_context.Users.Any(u => u.Username.ToLower() == usernameLower)) throw new UserAlreadyExistsException(username);
+        
+        var passwordHash = PasswordHasher.Hash(password);
         var newUser = new User {
             Username = username,
             PasswordHash = passwordHash,
@@ -95,228 +35,75 @@ public class UserService {
             BestMatchesCount = 0,
             AverageCompatibilityScore = 0.0
         };
-
-        Console.WriteLine("Adding user to database...");
         _context.Users.Add(newUser);
-
-        Console.WriteLine("Saving changes to database...");
-        var saveResult = _context.SaveChanges();
-        Console.WriteLine($"SaveChanges returned: {saveResult}");
-
-        var totalUsers = _context.Users.Count();
-        Console.WriteLine($"✅ User '{username}' registered successfully");
-        Console.WriteLine($"📊 Total users in DB now: {totalUsers}");
-
+        _context.SaveChanges();
         return (true, "Registration successful! You can now log in.");
-    }
+    } 
     catch (UserAlreadyExistsException ex) {
-        // Handle duplicate username - this is expected and user-friendly
-        _logger.LogException(ex, $"Registration failed - Duplicate username: {username}");
-        Console.WriteLine($"❌ {ex.Message}");
-        return (false, "This username is already taken. Please choose a different one.");
+        _logger.LogException(ex, $"User with this username already exists: {username}");
+        return (false, "This username is already taken");
     }
     catch (DbUpdateException ex) {
-        // Handle database-specific errors (connection issues, constraint violations, etc.)
-        _logger.LogException(ex, $"Database error during registration - Username: {username}");
-        Console.WriteLine($"❌ Database error during registration: {ex.Message}");
-        return (false, "Unable to complete registration due to a database error. Please try again later.");
+        _logger.LogException(ex, $"Database error for user: {username}");
+        return (false, "Unable to complete registration due to a database error");
     }
     catch (InvalidOperationException ex) {
-        // Handle BCrypt or other operational errors
-        _logger.LogException(ex, $"Operation error during registration - Username: {username}");
-        Console.WriteLine($"❌ Operation error: {ex.Message}");
-        return (false, "Registration failed due to a system error. Please try again.");
+        _logger.LogException(ex, $"Operation error for user: {username}");
+        return (false, "Registration failed due to a system error");
     }
     catch (Exception ex) {
-        // Catch-all for unexpected errors
-        _logger.LogException(ex, $"Unexpected error during registration - Username: {username}");
-        Console.WriteLine($"❌ UNEXPECTED ERROR during registration: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
-        return (false, "An unexpected error occurred during registration. Please contact support if this persists.");
+        _logger.LogException(ex, $"Unexpected error for user: {username}"); ;
+        return (false, "An unexpected error occurred during registration");
     }
 }
-    
-    /// <summary>
-    /// Attempts to authenticate a user with the specified credentials.
-    /// </summary>
-    /// <param name="username">The username of the account.</param>
-    /// <param name="password">The password to verify.</param>
-    /// <returns>
-    /// A tuple containing:
-    /// <list type="bullet">
-    /// <item><term>Success</term><description><c>true</c> if login was successful; otherwise <c>false</c>.</description></item>
-    /// <item><term>Message</term><description>A description of the login result.</description></item>
-    /// </list>
-    /// </returns>
-    /// <remarks>
-    /// If login succeeds, the <see cref="CurrentUser"/> property is set and the <see cref="OnAuthenticationChanged"/> event is triggered.
-    /// </remarks>
     public (bool Success, string Message) LoginUser(string username, string password) {
-        Console.WriteLine("\n=== LOGIN ATTEMPT ===");
-        Console.WriteLine($"Username: '{username}'");
-        Console.WriteLine($"Password length: {password?.Length ?? 0}");
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) {return (false, "Username and password cannot be empty.");}
 
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) {
-            Console.WriteLine("❌ Empty username or password");
-            return (false, "Username and password cannot be empty.");
-        }
-
-        try {
-            var totalUsers = _context.Users.Count();
-            Console.WriteLine($"📊 Total users in DB: {totalUsers}");
-
-            if (totalUsers == 0) {
-                Console.WriteLine("⚠️ Database is empty! Please register first.");
-                return (false, "No users found. Please register first.");
-            }
-
-            // List all users for debugging
-            Console.WriteLine("Users in database:");
-            foreach (var u in _context.Users.ToList()) {
-                Console.WriteLine($"  - {u.Username} (created: {u.CreatedAt})");
-            }
-            Console.WriteLine($"Searching for user: '{username}'");
-            // PATAISYTA: naudojame ToLower() vietoj StringComparison
-            var usernameLower = username.ToLower();
-            var user = _context.Users
-                .Where(u => u.Username.ToLower() == usernameLower)
-                .FirstOrDefault();
-
-            Console.WriteLine($"User found in DB: {user != null}");
-
-            if (user != null) {
-                Console.WriteLine($"Found user: {user.Username}");
-                Console.WriteLine(
-                    $"Stored hash starts with: {user.PasswordHash.Substring(0, Math.Min(20, user.PasswordHash.Length))}...");
-                Console.WriteLine("Verifying password...");
-
-                bool passwordValid = BCrypt.Net.BCrypt.EnhancedVerify(password, user.PasswordHash);
-                Console.WriteLine($"Password verification result: {passwordValid}");
-
-                if (passwordValid) {
-                    CurrentUser = user.Username;
-                    Console.WriteLine($"✅ Login successful! CurrentUser set to: '{CurrentUser}'");
-                    Console.WriteLine($"IsAuthenticated: {IsAuthenticated}");
-
-                    OnAuthenticationChanged?.Invoke();
-                    Console.WriteLine("OnAuthenticationChanged event invoked");
-
-                    return (true, "Login successful!");
-                }else {
-                    Console.WriteLine("❌ Password verification failed - incorrect password");
-                    return (false, "Invalid username or password.");
-                }
-            }else {
-                Console.WriteLine($"❌ User '{username}' not found in database");
-                return (false, "Invalid username or password.");
-            }
-        }catch (Exception ex) {
-                Console.WriteLine($"❌ ERROR during login: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                return (false, $"Login error: {ex.Message}");
+        try{
+            var user = _context.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+            
+            if (user == null || !PasswordHasher.Verify(password, user.PasswordHash)) return (false, "Invalid username or password.");
+                CurrentUser = user.Username;
+                OnAuthenticationChanged?.Invoke();
+                return (true, "Login successful");
+        } catch (Exception ex){
+                _logger.LogException(ex, $"Unexpected error during login: {username}");
+                return (false, "An unexpected error occurred during login");
         }
     }
-    
-    /// <summary>
-    /// Logs out the currently authenticated user.
-    /// </summary>
-    /// <remarks>
-    /// Clears <see cref="CurrentUser"/> and triggers the <see cref="OnAuthenticationChanged"/> event.
-    /// </remarks>
     public void LogoutUser() {
-        Console.WriteLine($"\n=== LOGOUT ===");
-        Console.WriteLine($"Logging out user: {CurrentUser}");
         CurrentUser = null;
         OnAuthenticationChanged?.Invoke();
-        Console.WriteLine("✅ Logout successful");
     }
+    public int GetTotalUsersCount() => _context.Users.Count();
     
-    /// <summary>
-    /// Retrieves the total number of registered users in the system.
-    /// </summary>
-    /// <returns>The number of users stored in the database.</returns>
-    public int GetTotalUsersCount() {
-        var count = _context.Users.Count();
-        Console.WriteLine($"GetTotalUsersCount: {count}");
-        return count;
-    }
-    
-    /// <summary>
-    /// Updates the statistical data of a specified user after a game.
-    /// </summary>
-    /// <param name="username">The username of the user to update.</param>
-    /// <param name="compatibilityScore">The compatibility score obtained in the game.</param>
-    /// <param name="wasBestMatch">Indicates whether the user was part of the best-matching pair.</param>
-    /// <remarks>
-    /// This method updates the user's total games played, recalculates their average compatibility score, 
-    /// and increments their best match count if applicable.
-    /// </remarks>
     public void UpdateUserStatistics(string username, double compatibilityScore, bool wasBestMatch) {
-        Console.WriteLine($"\n=== UPDATE USER STATISTICS ===");
-        Console.WriteLine($"Username: {username}, Score: {compatibilityScore}, BestMatch: {wasBestMatch}");
+        var user = _context.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+        if (user == null) return;
 
-        // PATAISYTA: naudojame ToLower()
-        var usernameLower = username.ToLower();
-        var user = _context.Users
-            .Where(u => u.Username.ToLower() == usernameLower)
-            .FirstOrDefault();
+        user.TotalGamesPlayed++;
+        if (wasBestMatch) user.BestMatchesCount++;
 
-        if (user != null) {
-            user.TotalGamesPlayed++;
+        user.AverageCompatibilityScore =
+            ((user.AverageCompatibilityScore * (user.TotalGamesPlayed - 1)) + compatibilityScore)
+            / user.TotalGamesPlayed;
 
-            if (wasBestMatch) { user.BestMatchesCount++; }
-
-            user.AverageCompatibilityScore =
-                ((user.AverageCompatibilityScore * (user.TotalGamesPlayed - 1)) + compatibilityScore)
-                / user.TotalGamesPlayed;
-
-            _context.SaveChanges();
-
-            Console.WriteLine($"✅ Updated stats for {username}:");
-            Console.WriteLine($"   Games: {user.TotalGamesPlayed}");
-            Console.WriteLine($"   Avg Score: {user.AverageCompatibilityScore:F2}");
-            Console.WriteLine($"   Best Matches: {user.BestMatchesCount}");
-        }else { Console.WriteLine($"❌ User '{username}' not found for statistics update"); }
+        _context.SaveChanges();
     }
-    
-    /// <summary>
-    /// Retrieves a sorted list of top users for the leaderboard.
-    /// </summary>
-    /// <param name="topCount">The number of top users to include in the leaderboard. Defaults to 10.</param>
-    /// <returns>A list of users ordered by their ranking score.</returns>
-    /// <remarks>
-    /// The sorting logic relies on the <see cref="User"/> model's <c>IComparable</c> implementation.
-    /// </remarks>
     public List<User> GetLeaderboard(int topCount = 10) {
-        Console.WriteLine($"\n=== GET LEADERBOARD (top {topCount}) ===");
-        var totalUsers = _context.Users.Count();
-        Console.WriteLine($"Total users in DB: {totalUsers}");
-        // Sort using CompareTo (which handles the ranking logic)
-        var sortedUsers = _context.Users.AsEnumerable().OrderBy(u => u).ToList();
-        // Debug output
-        Console.WriteLine("Leaderboard:");
-        int rank = 1;
-        foreach (var user in sortedUsers.Take(topCount)) {
-            Console.WriteLine($"  {rank}. {user.Username} - Games: {user.TotalGamesPlayed}, Avg: {user.AverageCompatibilityScore:F2}, Best: {user.BestMatchesCount}");
-            rank++;
-        }
-        return sortedUsers.Take(topCount).ToList();
+        return _context.Users
+            .AsEnumerable()
+            .OrderBy(u => u)
+            .Take(topCount)
+            .ToList();
     }
-    
-    /// <summary>
-    /// Retrieves the rank position of a specific user within the leaderboard.
-    /// </summary>
-    /// <param name="username">The username whose rank should be retrieved.</param>
-    /// <returns>The user's rank position (1-based index), or 0 if the user is not found.</returns>
     public int GetUserRank(string username) {
-        Console.WriteLine($"\n=== GET USER RANK for '{username}' ===");
-        var sortedUsers = _context.Users.AsEnumerable().OrderBy(u => u).ToList();
-        // Čia galime naudoti StringComparison, nes jau ne LINQ užklausa
+        var sortedUsers = _context.Users
+            .AsEnumerable()
+            .OrderByDescending(u => u)
+            .ToList();
         var rank = sortedUsers.FindIndex(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)) + 1;
-        Console.WriteLine($"Rank for {username}: {rank} out of {sortedUsers.Count}");
         return rank;
     }
-    
-    
 }
 
