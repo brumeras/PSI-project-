@@ -16,6 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Servisai - visi Scoped (nes naudoja DbContext)
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CompatibilityService>();
+builder.Services.AddScoped<LoggingService>();
 
 // GameRoomService - Singleton (neturi DB priklausomybių)
 builder.Services.AddSingleton<GameRoomService>();
