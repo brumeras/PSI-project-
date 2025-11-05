@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNOTS", "KNOTS\KNOTS.csproj", "{99A7F1CA-6AFB-4698-B3BD-42E217D9310E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNOTS.testing", "KNOTS.testing\KNOTS.testing.csproj", "{A410EE6A-EFB1-4F9F-85C0-AC041F191036}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{99A7F1CA-6AFB-4698-B3BD-42E217D9310E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99A7F1CA-6AFB-4698-B3BD-42E217D9310E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99A7F1CA-6AFB-4698-B3BD-42E217D9310E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A410EE6A-EFB1-4F9F-85C0-AC041F191036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A410EE6A-EFB1-4F9F-85C0-AC041F191036}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A410EE6A-EFB1-4F9F-85C0-AC041F191036}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A410EE6A-EFB1-4F9F-85C0-AC041F191036}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -301,22 +301,6 @@ public class UserService {
         return rank;
     }
     
-    /// <summary>
-    /// Retrieves a user record by username.
-    /// </summary>
-    /// <param name="username">The username of the user to find.</param>
-    /// <returns>
-    /// The matching <see cref="User"/> object if found; otherwise <c>null</c>.
-    /// </returns>
-    public User? GetUserByUsername(string username) {
-        Console.WriteLine($"GetUserByUsername: '{username}'");
-        // PATAISYTA: naudojame ToLower()
-        var usernameLower = username.ToLower();
-        var user = _context.Users
-            .Where(u => u.Username.ToLower() == usernameLower)
-            .FirstOrDefault();
-        Console.WriteLine($"User found: {user != null}");
-        return user;
-    }
+    
 }
 
