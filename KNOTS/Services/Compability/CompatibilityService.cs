@@ -2,7 +2,7 @@
 using KNOTS.Compability;
 using KNOTS.Data;
 using KNOTS.Models;
-using KNOTS.Services;
+using System.Collections.Concurrent;
 using KNOTS.Services.Compability;
 
 namespace KNOTS.Services;
@@ -22,7 +22,7 @@ public class CompatibilityService {
     private readonly CompatibilityCalculator _calculator;
     
     // Saugoti kambario klausimus atmintinėje
-    private static Dictionary<string, List<GameStatement>> _roomStatements = new();
+    private static ConcurrentDictionary<string, List<GameStatement>> _roomStatements = new();
     
     /// <summary>
     /// Initializes a new instance of the <see cref="CompatibilityService"/> class
@@ -444,15 +444,16 @@ public class CompatibilityService {
         var swipesToRemove = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
         _context.PlayerSwipes.RemoveRange(swipesToRemove);
         _context.SaveChanges();
-        
-        // Išvalyti kambario klausimus iš cache
-        if (_roomStatements.ContainsKey(roomCode))
-        {
-            _roomStatements.Remove(roomCode);
-            Console.WriteLine($"✅ Cleared room statements cache for {roomCode}");
+
+        // Remove cached statements in a thread-safe way (reikalavimas)
+        if (_roomStatements.TryRemove(roomCode, out var removedList)) {
+            Console.WriteLine($" Cleared cached statements for room {roomCode} ({removedList.Count} removed)");
         }
-        
-        Console.WriteLine($"✅ Cleared swipe data for room {roomCode}");
+        else {
+            Console.WriteLine($" No cached statements found for room {roomCode}");
+        }
+
+        Console.WriteLine($" Cleared swipe data for room {roomCode}");
     }
 
     /// <summary>
