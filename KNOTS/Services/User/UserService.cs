@@ -18,9 +18,9 @@ public class UserService {
     }
     
    public (bool Success, string Message) RegisterUser(string username, string password) {
-    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) {return (false, "Username and password cannot be empty."); }
-    if (username.Length < 3) {return (false, "Username must be at least 3 characters long."); }
-    if (password.Length < 4) {return (false, "Password must be at least 4 characters long."); }
+    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Username and password cannot be empty.");
+    if (username.Length < 3) throw new ArgumentException("Username must be at least 3 characters long.");
+    if (password.Length < 4) throw new ArgumentException("Password must be at least 4 characters long.");
     
     try {
         var usernameLower = username.ToLower();
@@ -41,34 +41,41 @@ public class UserService {
     } 
     catch (UserAlreadyExistsException ex) {
         _logger.LogException(ex, $"User with this username already exists: {username}");
-        return (false, "This username is already taken");
+        return (false, ex.Message);
     }
     catch (DbUpdateException ex) {
         _logger.LogException(ex, $"Database error for user: {username}");
-        return (false, "Unable to complete registration due to a database error");
+        return (false, ex.Message);
     }
     catch (InvalidOperationException ex) {
         _logger.LogException(ex, $"Operation error for user: {username}");
-        return (false, "Registration failed due to a system error");
+        return (false, ex.Message);
     }
     catch (Exception ex) {
         _logger.LogException(ex, $"Unexpected error for user: {username}"); ;
-        return (false, "An unexpected error occurred during registration");
+        return (false, ex.Message);
     }
 }
     public (bool Success, string Message) LoginUser(string username, string password) {
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) {return (false, "Username and password cannot be empty.");}
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Username and password cannot be empty");
 
-        try{
+        try {
             var user = _context.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
-            
-            if (user == null || !PasswordHasher.Verify(password, user.PasswordHash)) return (false, "Invalid username or password.");
-                CurrentUser = user.Username;
-                OnAuthenticationChanged?.Invoke();
-                return (true, "Login successful");
+
+            if (user == null || !PasswordHasher.Verify(password, user.PasswordHash))
+                throw new InvalidCredentialsException("Invalid username or password");
+            CurrentUser = user.Username;
+            OnAuthenticationChanged?.Invoke();
+            return (true, "Login successful");
+        } catch (ArgumentException ex) {
+            _logger.LogException(ex, $"Username and password cannot be empty");
+            return (false, ex.Message);
+        } catch (InvalidCredentialsException ex){
+            _logger.LogException(ex, $"Invalid username or password: {username}");
+            return (false, ex.Message);
         } catch (Exception ex){
                 _logger.LogException(ex, $"Unexpected error during login: {username}");
-                return (false, "An unexpected error occurred during login");
+                return (false, ex.Message);
         }
     }
     public void LogoutUser() {
@@ -79,16 +86,20 @@ public class UserService {
     
     public void UpdateUserStatistics(string username, double compatibilityScore, bool wasBestMatch) {
         var user = _context.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
-        if (user == null) return;
+        if (user == null) throw new UserNotFoundException(username);
 
-        user.TotalGamesPlayed++;
-        if (wasBestMatch) user.BestMatchesCount++;
+        try{
+            user.TotalGamesPlayed++;
+            if (wasBestMatch) user.BestMatchesCount++;
 
-        user.AverageCompatibilityScore =
-            ((user.AverageCompatibilityScore * (user.TotalGamesPlayed - 1)) + compatibilityScore)
-            / user.TotalGamesPlayed;
+            user.AverageCompatibilityScore =
+                ((user.AverageCompatibilityScore * (user.TotalGamesPlayed - 1)) + compatibilityScore)
+                / user.TotalGamesPlayed;
 
-        _context.SaveChanges();
+            _context.SaveChanges();
+        } catch (UserNotFoundException ex){
+            _logger.LogException(ex, $"User with this username doesn't exist: {username}");
+        }
     }
     public List<User> GetLeaderboard(int topCount = 10) {
         return _context.Users

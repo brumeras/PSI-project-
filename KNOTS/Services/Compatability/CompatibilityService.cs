@@ -11,6 +11,7 @@ public class CompatibilityService {
     private readonly UserService _userService;
     private readonly CompatibilityCalculator _calculator;
     private readonly SwipeRepository _swipeRepo;
+    private readonly LoggingService _logger;
 
     private static ConcurrentDictionary<string, List<GameStatement>> _roomStatements = new();
     public CompatibilityService(AppDbContext context, UserService userService) {
@@ -18,12 +19,12 @@ public class CompatibilityService {
         _userService = userService;
         _swipeRepo = new SwipeRepository(context);
         _calculator = new CompatibilityCalculator(_swipeRepo); 
+        _logger = new LoggingService();
         EnsureDefaultStatements();
     }
 
-    private void EnsureDefaultStatements(){
-        var allStatements = new List<GameStatement>
-        {
+    private void EnsureDefaultStatements() {
+        var allStatements = new List<GameStatement> {
             new GameStatement { Id = "D1", Text = "I like getting up early in the morning", Topic = "General" },
             new GameStatement { Id = "D2", Text = "I prefer relaxing at home over going to parties", Topic = "General" },
             new GameStatement { Id = "D3", Text = "I enjoy spontaneous trips", Topic = "General" },
@@ -59,7 +60,7 @@ public class CompatibilityService {
             new GameStatement { Id = "F12", Text = "I like solving complex math problems", Topic = "Science" },
             new GameStatement { Id = "F13", Text = "I enjoy learning about chemistry reactions", Topic = "Science" },
             new GameStatement { Id = "F14", Text = "I like reading about medical discoveries", Topic = "Science" },
-            new GameStatement { Id = "S15", Text = "I enjoy studying the environment", Topic = "Science" },
+            new GameStatement { Id = "F15", Text = "I enjoy studying the environment", Topic = "Science" },
             new GameStatement { Id = "F16", Text = "I like programming and computer science topics", Topic = "Science" },
             new GameStatement { Id = "F17", Text = "I enjoy discussing scientific theories", Topic = "Science" },
             new GameStatement { Id = "F18", Text = "I like attending lectures about space exploration", Topic = "Science" },
@@ -130,62 +131,49 @@ public class CompatibilityService {
             new GameStatement { Id = "H17", Text = "I enjoy writing short stories or poems", Topic = "Hobbies" },
             new GameStatement { Id = "H18", Text = "I like building models or puzzles", Topic = "Hobbies" },
             new GameStatement { Id = "H19", Text = "I enjoy playing card games", Topic = "Hobbies" },
-            new GameStatement { Id = "H20", Text = "I like experimenting with photography techniques", Topic = "Hobbies" },
+            new GameStatement { Id = "H20", Text = "I like experimenting with photography techniques", Topic = "Hobbies" }
         };
-        
+
         var existingIds = _context.Statements.Select(s => s.Id).ToHashSet();
         var newStatements = allStatements
             .Where(s => !existingIds.Contains(s.Id))
             .ToList();
 
-        if (newStatements.Any()) {
+        if (newStatements.Any()){
             _context.Statements.AddRange(newStatements);
             _context.SaveChanges();
-            Console.WriteLine($"Created {newStatements.Count} new statements in database.");
-        }else {
-            Console.WriteLine($"All statements already exist ({existingIds.Count} total).");
-        } ;
-    }
-    public List<GameStatement> GetRoomStatements(string roomCode, List<string>? selectedTopics = null, int count = 10) {
-        var allDbTopics = _context.Statements.Select(s => s.Topic).Distinct().ToList();
-        if (_roomStatements.ContainsKey(roomCode)) {
-            return _roomStatements[roomCode];
         }
+    }
+
+    public List<GameStatement> GetRoomStatements(string roomCode, List<string>? selectedTopics = null, int count = 10) {
+        if (_roomStatements.ContainsKey(roomCode)) {return _roomStatements[roomCode];}
 
         var random = new Random();
-        List<GameStatement> statements;
+        var query = _context.Statements.AsQueryable();
+        if (selectedTopics != null && selectedTopics.Any())
+            query = query.Where(s => selectedTopics.Contains(s.Topic));
 
-        if (selectedTopics != null && selectedTopics.Any()) {
-            var filteredStatements = _context.Statements
-                .Where(s => selectedTopics.Contains(s.Topic))
-                .ToList();
-            statements = filteredStatements
-                .OrderBy(x => random.Next())
-                .Take(Math.Min(count, filteredStatements.Count))
-                .ToList();
-        } else {
-            var allStatements = _context.Statements.ToList();
-            statements = allStatements
-                .OrderBy(x => random.Next())
-                .Take(Math.Min(count, allStatements.Count))
-                .ToList();
-        }
+        var statements = query
+            .ToList()
+            .OrderBy(_ => random.Next())
+            .Take(Math.Min(count, query.Count()))
+            .ToList();
+
         _roomStatements[roomCode] = statements;
-        Console.WriteLine($"Created new {statements.Count} statements for room {roomCode}");
         return statements;
     }
     public bool SaveSwipe(string roomCode, string playerUsername, string statementId, bool swipeRight) {
         try {
             var statement = _context.Statements.FirstOrDefault(s => s.Id == statementId);
-            if (statement == null) {return false;}
+            if (statement == null) throw new Exception("Statement not found");
 
             var existing = _context.PlayerSwipes
-                .FirstOrDefault(s => s.RoomCode == roomCode && 
-                                   s.PlayerUsername == playerUsername && 
-                                   s.StatementId == statementId);
-            if (existing != null) { _context.PlayerSwipes.Remove(existing);}
+                .FirstOrDefault(s => s.RoomCode == roomCode &&
+                                     s.PlayerUsername == playerUsername &&
+                                     s.StatementId == statementId);
+            if (existing != null) { _context.PlayerSwipes.Remove(existing); }
 
-            var swipeRecord = new PlayerSwipeRecord {
+            var swipeRecord = new PlayerSwipeRecord{
                 RoomCode = roomCode,
                 PlayerUsername = playerUsername,
                 StatementId = statementId,
@@ -195,25 +183,13 @@ public class CompatibilityService {
             };
             _context.PlayerSwipes.Add(swipeRecord);
             _context.SaveChanges();
-            LogRoomStatistics(roomCode);
             return true;
+        } catch (Exception ex) { 
+            _logger.LogException(ex, ex.Message);
+            return false;
         }
-        catch (Exception ex) {return false;}
     }
-    public List<PlayerSwipe> GetRoomSwipes(string roomCode) {
-        return _context.PlayerSwipes
-            .Where(s => s.RoomCode == roomCode)
-            .Select(s => new PlayerSwipe(
-                s.PlayerUsername,
-                s.StatementId,
-                s.StatementText,
-                s.AgreeWithStatement
-            ) { SwipedAt = s.SwipedAt })
-            .ToList();
-    }
-    public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername) {
-        return _calculator._swipeRepo.GetPlayerSwipes(roomCode, playerUsername);
-    }
+    public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername) {return _swipeRepo.GetPlayerSwipes(roomCode, playerUsername);}
     public bool HaveAllPlayersFinished(string roomCode, List<string> playerUsernames, int totalStatements) {
         foreach (var player in playerUsernames) {
             var swipeCount = _context.PlayerSwipes
@@ -222,19 +198,15 @@ public class CompatibilityService {
         }
         return true;
     }
-    public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames) {
-        LogRoomStatistics(roomCode);
-        return _calculator.CalculateAllCompatibilities(roomCode, playerUsernames);
-    }
+    public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames) {return _calculator.CalculateAllCompatibilities(roomCode, playerUsernames); }
     public void SaveGameToHistory(string roomCode, List<string> playerUsernames) {
-        try {
-            LogRoomStatistics(roomCode);
+        try
+        {
             var allResults = CalculateAllCompatibilities(roomCode, playerUsernames);
-            if (!allResults.Any()) {return;}
-
+            if (!allResults.Any()) throw new Exception("No compatibility results found");
             var bestMatch = allResults.First();
-            
-            var historyRecord = new GameHistoryRecord {
+            var historyRecord = new GameHistoryRecord
+            {
                 RoomCode = roomCode,
                 PlayedDate = DateTime.Now,
                 TotalPlayers = playerUsernames.Count,
@@ -243,20 +215,19 @@ public class CompatibilityService {
                 BestMatchPercentage = bestMatch.Percentage,
                 ResultsJson = JsonSerializer.Serialize(allResults)
             };
-
             _context.GameHistory.Add(historyRecord);
             _context.SaveChanges();
-            
-            // Naudoti CompatibilityCalculator logiką vietoj sudėtingo ciklo
-            foreach (var player in playerUsernames) {
+
+            foreach (var player in playerUsernames)
+            {
                 var stats = _calculator.GetPlayerStatistics(player, allResults);
                 _userService.UpdateUserStatistics(
-                    stats.PlayerUsername, 
-                    stats.BestMatchPercentage, 
+                    stats.PlayerUsername,
+                    stats.BestMatchPercentage,
                     stats.WasBestMatch
                 );
             }
-        } catch (Exception ex){}
+        } catch (Exception ex) { _logger.LogException(ex, ex.Message); }
     }
 
     public List<GameHistoryEntry> GetPlayerHistory(string playerUsername) {
@@ -269,8 +240,7 @@ public class CompatibilityService {
                 var players = JsonSerializer.Deserialize<List<string>>(h.PlayerUsernames) ?? new List<string>();
                 return players.Contains(playerUsername);
             })
-            .Select(h => new GameHistoryEntry
-            {
+            .Select(h => new GameHistoryEntry {
                 RoomCode = h.RoomCode,
                 PlayedDate = h.PlayedDate,
                 TotalPlayers = h.TotalPlayers,
@@ -280,45 +250,9 @@ public class CompatibilityService {
             })
             .ToList();
     }
-    public List<GameHistoryEntry> GetAllHistory() {
-        return _context.GameHistory
-            .OrderByDescending(h => h.PlayedDate)
-            .Select(h => new GameHistoryEntry {
-                RoomCode = h.RoomCode,
-                PlayedDate = h.PlayedDate,
-                TotalPlayers = h.TotalPlayers,
-                BestMatchPlayer = h.BestMatchPlayer,
-                BestMatchPercentage = h.BestMatchPercentage,
-            })
-            .ToList();
-    }
     public void ClearRoomData(string roomCode) {
         var swipesToRemove = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
         _context.PlayerSwipes.RemoveRange(swipesToRemove);
         _context.SaveChanges();
-        Console.WriteLine($" Cleared swipe data for room {roomCode}");
-    }
-    public Dictionary<string, object> GetRoomStatistics(string roomCode) {
-        var roomSwipes = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
-        
-        var stats = new Dictionary<string, object> {
-            ["TotalSwipes"] = roomSwipes.Count(),
-            ["UniquePlayers"] = roomSwipes.Select(s => s.PlayerUsername).Distinct().Count(),
-            ["UniqueStatements"] = roomSwipes.Select(s => s.StatementId).Distinct().Count(),
-            ["RightSwipes"] = roomSwipes.Count(s => s.AgreeWithStatement),
-            ["LeftSwipes"] = roomSwipes.Count(s => !s.AgreeWithStatement)
-        };
-        return stats;
-    }
-    public int GetStatisticValue(string roomCode, string statKey) {
-        var stats = GetRoomStatistics(roomCode);
-        if (stats.ContainsKey(statKey)) return (int)stats[statKey]; 
-        return 0;
-    }
-    private void LogRoomStatistics(string roomCode) {
-        var totalSwipes = GetStatisticValue(roomCode, "TotalSwipes");
-        var uniquePlayers = GetStatisticValue(roomCode, "UniquePlayers");
-        var rightSwipes = GetStatisticValue(roomCode, "RightSwipes");
-        var leftSwipes = GetStatisticValue(roomCode, "LeftSwipes");
     }
 }

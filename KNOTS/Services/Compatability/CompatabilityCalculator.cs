@@ -81,5 +81,4 @@ public class CompatibilityCalculator {
             WasBestMatch = playerInfo?.WasBestMatchForPartner ?? false
         };
     }
-    public List<PlayerSwipe> GetPlayerSwipes(string roomCode, string playerUsername){return _swipeRepo.GetPlayerSwipes(roomCode, playerUsername);}
 }

@@ -12,5 +12,4 @@ public static class GameRoomExs {
         if (room.hasPlayer(username)) return new JoinRoomResult { Success = false, Message = "Username is already taken", State = room.State };
         return new JoinRoomResult { Success = true, State = room.State };
     }
-    
 }

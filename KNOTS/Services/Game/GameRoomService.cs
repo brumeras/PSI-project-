@@ -21,10 +21,9 @@ namespace KNOTS.Services;
             _playerManager = new PlayerManager(_roomRepository, _playerMappingRepository, _roomManager);
             _queryService = new RoomQueryService(_roomRepository, _playerMappingRepository);
         }
-        public void AddPlayer(string connectionId, string username) { _playerMappingRepository.AddPlayer(connectionId, username); }
         public string CreateRoom(string hostConnectionId, string hostUsername) {
             var room = _roomManager.CreateRoom(hostConnectionId, hostUsername);
-            _playerMappingRepository.MapPlayerToRoom(hostConnectionId, room.RoomCode);
+            _playerMappingRepository.AddPlayer(hostConnectionId, hostUsername, room.RoomCode);
             return room.RoomCode;
         }
         public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username) { return _playerManager.JoinRoom(roomCode, connectionId, username); }

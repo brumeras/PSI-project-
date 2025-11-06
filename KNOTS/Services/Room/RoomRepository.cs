@@ -13,6 +13,5 @@ public class RoomRepository {
     public GameRoom? GetRoom(string roomCode) => _rooms.TryGetValue(roomCode, out var room) ? room : null;
     public void AddRoom(GameRoom room) { _rooms[room.RoomCode] = room; }
     public bool RemoveRoom(string roomCode) { return _rooms.TryRemove(roomCode, out _); }
-    public List<GameRoom> GetAllRooms() { return _rooms.Values.ToList(); }
     public HashSet<string> GetAllRoomCodes() { return _rooms.Keys.ToHashSet(); }
 }

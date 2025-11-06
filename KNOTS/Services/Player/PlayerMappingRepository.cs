@@ -2,15 +2,17 @@ using System.Collections.Concurrent;
 
 namespace KNOTS.Services;
 public class PlayerMappingRepository {
-    private readonly ConcurrentDictionary<string, string> _playerToRoom = new(); // ConnectionId -> RoomCode
-    private readonly ConcurrentDictionary<string, string> _connectionToUsername = new(); // ConnectionId -> Username
-    public void AddPlayer(string connectionId, string username) { _connectionToUsername[connectionId] = username; }
-    public void MapPlayerToRoom(string connectionId, string roomCode) { _playerToRoom[connectionId] = roomCode; }
-    public string? GetPlayerUsername(string connectionId) => _connectionToUsername.TryGetValue(connectionId, out var username) ? username : null;
-    public bool RemovePlayer(string connectionId, out string? roomCode, out string? username){
-        _connectionToUsername.TryGetValue(connectionId, out username);
-        var hasRoom = _playerToRoom.TryRemove(connectionId, out roomCode);
-        _connectionToUsername.TryRemove(connectionId, out _);
-        return hasRoom;
+    private readonly ConcurrentDictionary<string, (string Username, string RoomCode)> _playerMappings = new(); 
+    public void AddPlayer(string connectionId, string username, string roomCode) {_playerMappings[connectionId] = (username, roomCode); }
+    public bool RemovePlayer(string connectionId, out string? roomCode, out string? username) {
+        if (_playerMappings.TryRemove(connectionId, out var info)) {
+            username = info.Username;
+            roomCode = info.RoomCode;
+            return true;
+        }
+        username = null;
+        roomCode = null;
+        return false;
     }
+    public string? GetPlayerUsername(string connectionId) => _playerMappings.TryGetValue(connectionId, out var info) ? info.Username : null;
 }
