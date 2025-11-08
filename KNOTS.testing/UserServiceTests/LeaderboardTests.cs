@@ -97,7 +97,6 @@ public class UserServiceLeaderboardTests : IDisposable {
     /// <summary>
     /// Tests that GetLeaderboard orders users based on the User's IComparable implementation.
     /// Verifies the method executes without errors and returns users in some defined order.
-    /// Note: The actual order depends on how User.CompareTo is implemented.
     /// </summary>
     [Fact]
     public void GetLeaderboard_OrderedByUserComparison() {
