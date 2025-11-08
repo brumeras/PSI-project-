@@ -5,49 +5,24 @@ using KNOTS.Hubs;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-// SQLite duomenų bazė - SCOPED (saugus būdas)
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=knots.db"));
-
-// Servisai - visi Scoped (nes naudoja DbContext)
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=knots.db"));
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CompatibilityService>();
 builder.Services.AddScoped<LoggingService>();
-
-// GameRoomService - Singleton (neturi DB priklausomybių)
 builder.Services.AddSingleton<GameRoomService>();
-
-// SignalR
 builder.Services.AddSignalR();
-
 var app = builder.Build();
 
-// Sukuriame ir inicializuojame duomenų bazę
-Console.WriteLine("🔧 Initializing database...");
-using (var scope = app.Services.CreateScope())
-{
+using (var scope = app.Services.CreateScope()) {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    
-    try
-    {
-        Console.WriteLine("📦 Creating database...");
+    try {
         dbContext.Database.EnsureCreated();
-        Console.WriteLine("✅ Database created successfully");
-        
         var tableCount = dbContext.Model.GetEntityTypes().Count();
-        Console.WriteLine($"✅ Database has {tableCount} entity types configured");
-        
         var compatService = scope.ServiceProvider.GetRequiredService<CompatibilityService>();
-        Console.WriteLine("✅ CompatibilityService initialized");
-    }
-    catch (Exception ex)
+    } catch (Exception ex)
     {
-        Console.WriteLine($"❌ Database initialization failed: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        Console.WriteLine("kazkas negerai su db sukurimu");
         throw;
     }
 }
@@ -56,18 +31,9 @@ if (!app.Environment.IsDevelopment()) {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
-
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapHub<GameHub>("/gamehub");
-Console.WriteLine("✅ SignalR Hub mapped to /gamehub");
-
-Console.WriteLine("🚀 Application started successfully!");
-Console.WriteLine("📍 Navigate to the application in your browser");
-
 app.Run();
