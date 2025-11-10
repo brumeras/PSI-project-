@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using KNOTS.Compability;
+using KNOTS.Services.Compatability;
 
 namespace KNOTS.Services.Compability;
 
 public class CompatibilityCalculator {
-    private readonly SwipeRepository _swipeRepo;
-    public CompatibilityCalculator(SwipeRepository swipeRepo) {_swipeRepo = swipeRepo;}
+    private readonly ISwipeRepository _swipeRepo;
+    public CompatibilityCalculator(ISwipeRepository swipeRepo) {_swipeRepo = swipeRepo;}
     public CompatibilityScore Calculate(string roomCode, string player1, string player2) {
         var p1 = _swipeRepo.GetPlayerSwipes(roomCode, player1);
         var p2 = _swipeRepo.GetPlayerSwipes(roomCode, player2);

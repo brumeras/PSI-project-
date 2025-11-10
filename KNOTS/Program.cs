@@ -16,14 +16,13 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope()) {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<LoggingService>();
     try {
         dbContext.Database.EnsureCreated();
         var tableCount = dbContext.Model.GetEntityTypes().Count();
         var compatService = scope.ServiceProvider.GetRequiredService<CompatibilityService>();
-    } catch (Exception ex)
-    {
-        Console.WriteLine("kazkas negerai su db sukurimu");
-        throw;
+    } catch (Exception ex){
+        logger.LogException(ex, ex.Message);
     }
 }
 

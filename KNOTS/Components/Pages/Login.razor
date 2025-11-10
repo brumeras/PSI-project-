@@ -208,8 +208,8 @@
     private string Password = string.Empty;
     private string statusMessage = string.Empty;
 
-    [Inject] private UserService UserService { get; set; }
-    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] public required UserService UserService { get; set; }
+    [Inject] public required NavigationManager NavigationManager { get; set; }
 
     private void LoginToWeb()
     {

@@ -7,11 +7,13 @@ public class PlayerManager {
         public PlayerManager(
             RoomRepository roomRepository,
             PlayerMappingRepository playerMappingRepository,
-            RoomManager roomManager)
+            RoomManager roomManager,
+            LoggingService logger)
         {
             _roomRepository = roomRepository;
             _playerMappingRepository = playerMappingRepository;
             _roomManager = roomManager;
+            _logger = logger;
         }
         public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username) {
             if (!_roomRepository.TryGetRoom(roomCode, out var room) || room == null) throw new Exception("Room not found");

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.SignalR;
 using KNOTS.Services;
 using System.Threading.Channels;
 
@@ -34,9 +35,9 @@ public class GameHub : Hub {
         var username = _gameRoomService.GetPlayerUsername(connectionId);
         await Clients.Group(roomCode).SendAsync("GameAction", username, action, data);
     }
-    public async IAsyncEnumerable<object> StreamRoomUpdates(string roomCode, CancellationToken cancellationToken) {
+    //pridetas [EnumeratorCancellation], nes reikia taisyklingai perduoti cancellation token enumeratoriui
+    public async IAsyncEnumerable<object> StreamRoomUpdates(string roomCode, [EnumeratorCancellation] CancellationToken cancellationToken) {
         var channel = Channel.CreateUnbounded<object>();
-        void UpdateHandler(object update) { channel.Writer.TryWrite(update); }
         try { await foreach (var update in channel.Reader.ReadAllAsync(cancellationToken)) { yield return update; } }
         finally {channel.Writer.Complete();}
     }
@@ -47,7 +48,7 @@ public class GameHub : Hub {
     }
     public async IAsyncEnumerable<PlayerStatus> StreamPlayerStatuses(
         string roomCode, 
-        CancellationToken cancellationToken){
+        [EnumeratorCancellation] CancellationToken cancellationToken){
         var updateInterval = TimeSpan.FromSeconds(1);
         while (!cancellationToken.IsCancellationRequested) {
             var roomInfo = _gameRoomService.GetRoomInfo(roomCode);

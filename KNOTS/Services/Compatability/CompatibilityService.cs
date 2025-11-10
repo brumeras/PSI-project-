@@ -151,7 +151,7 @@ public class CompatibilityService {
         var random = new Random();
         var query = _context.Statements.AsQueryable();
         if (selectedTopics != null && selectedTopics.Any())
-            query = query.Where(s => selectedTopics.Contains(s.Topic));
+            query = query.Where(s => s.Topic != null && selectedTopics.Contains(s.Topic));
 
         var statements = query
             .ToList()
@@ -200,8 +200,7 @@ public class CompatibilityService {
     }
     public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames) {return _calculator.CalculateAllCompatibilities(roomCode, playerUsernames); }
     public void SaveGameToHistory(string roomCode, List<string> playerUsernames) {
-        try
-        {
+        try{
             var allResults = CalculateAllCompatibilities(roomCode, playerUsernames);
             if (!allResults.Any()) throw new Exception("No compatibility results found");
             var bestMatch = allResults.First();
