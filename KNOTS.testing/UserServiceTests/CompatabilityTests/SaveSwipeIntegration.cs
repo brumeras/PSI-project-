@@ -18,6 +18,6 @@ public class SaveSwipeIntegration : UserServiceTestBase{
         Assert.Equal("room1", saved.RoomCode);
         Assert.Equal("player1", saved.PlayerUsername);
         Assert.Equal("X1", saved.StatementId);
-        Assert.Equal(true, saved.AgreeWithStatement);
+        Assert.True(saved.AgreeWithStatement);
     }
 }
