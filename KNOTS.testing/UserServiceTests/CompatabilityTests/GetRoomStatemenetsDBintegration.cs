@@ -11,4 +11,4 @@ public class GetRoomStatemenetsDBintegration : UserServiceTestBase {
         Assert.True(Context.Statements.Any());
         Assert.All(res, s => Assert.Contains(s.Id, Context.Statements.Select(x => x.Id)));
     }
-}
+} 
