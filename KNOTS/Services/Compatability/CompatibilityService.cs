@@ -23,7 +23,7 @@ public class CompatibilityService {
         EnsureDefaultStatements();
     }
 
-    private void EnsureDefaultStatements() {
+    public void EnsureDefaultStatements() {
         var allStatements = new List<GameStatement> {
             new GameStatement { Id = "D1", Text = "I like getting up early in the morning", Topic = "General" },
             new GameStatement { Id = "D2", Text = "I prefer relaxing at home over going to parties", Topic = "General" },
