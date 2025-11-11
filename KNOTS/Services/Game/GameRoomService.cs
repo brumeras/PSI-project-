@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace KNOTS.Services;
-    public class GameRoomService {
+    public class GameRoomService{
         private readonly RoomRepository _roomRepository;
         private readonly PlayerMappingRepository _playerMappingRepository;
         private readonly RoomManager _roomManager;
@@ -17,8 +17,9 @@ namespace KNOTS.Services;
             _playerMappingRepository = new PlayerMappingRepository();
 
             var codeGenerator = new RoomCodeGenerator();
+            var logger = new LoggingService();
             _roomManager = new RoomManager(_roomRepository, codeGenerator);
-            _playerManager = new PlayerManager(_roomRepository, _playerMappingRepository, _roomManager);
+            _playerManager = new PlayerManager(_roomRepository, _playerMappingRepository, _roomManager, logger);
             _queryService = new RoomQueryService(_roomRepository, _playerMappingRepository);
         }
         public string CreateRoom(string hostConnectionId, string hostUsername) {

@@ -9,20 +9,16 @@ using Xunit;
 //This test allows to see whether two swipes exist
 //and if each site has a correct link to the user and statement. 
 
-public class SwipeIntegrationTest
-{
-    private AppDbContext temporaryDB1()
-    {
+public class SwipeIntegrationTest {
+    private AppDbContext temporaryDB1(){
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()) // Kiekvienam testui nauja DB
             .Options;
-
         return new AppDbContext(options);
     }
 
     [Fact]
-    private void checkSwipes()
-    {
+    private void checkSwipes(){
         using var context = temporaryDB1();
 
         var user = new User { Username = "checkas", PasswordHash = "matas" };
@@ -32,8 +28,7 @@ public class SwipeIntegrationTest
         var statement2 = new GameStatement { Id = "3333", Text = "am am am am", Topic = "topic2" };
         context.Statements.AddRange(statement1, statement2);
 
-        var swipe1 = new PlayerSwipeRecord()
-        {
+        var swipe1 = new PlayerSwipeRecord(){
             RoomCode = "room1",
             PlayerUsername = user.Username,
             StatementId = statement1.Id,
@@ -41,17 +36,14 @@ public class SwipeIntegrationTest
             AgreeWithStatement = true
         };
 
-        var swipe2 = new PlayerSwipeRecord
-        {
+        var swipe2 = new PlayerSwipeRecord {
             RoomCode = "room1",
             PlayerUsername = user.Username,
             StatementId = statement2.Id,
             StatementText = statement2.Text,
             AgreeWithStatement = false
         };
-
         context.PlayerSwipes.AddRange(swipe1, swipe2);
-
         context.SaveChanges();
 
         var savedSwipes = context.PlayerSwipes
