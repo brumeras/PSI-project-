@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Reflection;
 using KNOTS.Data;
+using KNOTS.Models;
 using KNOTS.Services;
 using KNOTS.Services.Compability;
 using Microsoft.EntityFrameworkCore;
@@ -90,5 +94,32 @@ public abstract class EndToEndTestBase : IDisposable
         Context.Database.EnsureDeleted();
         Context.Dispose();
         Console.WriteLine("[E2E Teardown] Test environment disposed.");
+    }
+
+    /// <summary>
+    /// Clears all statements from the in-memory database and seeds the provided set.
+    /// </summary>
+    /// <param name="statements">Statements that should exist after seeding.</param>
+    protected void SeedStatements(IEnumerable<GameStatement> statements)
+    {
+        Context.Statements.RemoveRange(Context.Statements);
+        Context.SaveChanges();
+
+        Context.Statements.AddRange(statements);
+        Context.SaveChanges();
+
+        ResetRoomStatementCache();
+    }
+
+    /// <summary>
+    /// Resets the static room statement cache on the CompatibilityService to ensure
+    /// deterministic behaviour between tests.
+    /// </summary>
+    protected void ResetRoomStatementCache()
+    {
+        var cacheField = typeof(CompatibilityService)
+            .GetField("_roomStatements", BindingFlags.NonPublic | BindingFlags.Static);
+
+        cacheField?.SetValue(null, new ConcurrentDictionary<string, List<GameStatement>>());
     }
 }

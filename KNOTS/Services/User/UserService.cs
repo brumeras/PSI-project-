@@ -102,19 +102,24 @@ public class UserService {
         }
     }
     public List<User> GetLeaderboard(int topCount = 10) {
-        return _context.Users
+        var users = _context.Users
             .AsEnumerable()
-            .OrderBy(u => u)
+            .ToList();
+
+        users.Sort();
+
+        return users
             .Take(topCount)
             .ToList();
     }
     public int GetUserRank(string username) {
         var sortedUsers = _context.Users
             .AsEnumerable()
-            .OrderByDescending(u => u)
             .ToList();
+
+        sortedUsers.Sort();
+
         var rank = sortedUsers.FindIndex(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)) + 1;
         return rank;
     }
 }
-
