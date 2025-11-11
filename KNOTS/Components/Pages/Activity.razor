@@ -1,8 +1,8 @@
 ﻿@page "/activity"
 @using KNOTS.Services
 @using KNOTS.Services.Interfaces
-@inject CompatibilityService CompatibilityService
-@inject UserService UserService
+@inject InterfaceCompatibilityService CompatibilityService
+@inject InterfaceUserService UserService
 @attribute [StreamRendering]
 @rendermode InteractiveServer
 
@@ -48,7 +48,6 @@
         }
         else
         {
-            <!-- Statistics Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);">
@@ -81,7 +80,6 @@
                 </div>
             </div>
 
-            <!-- Game History Table -->
             <div class="history-card">
                 <div class="history-header">
                     <h4>🎮 Your Game Results</h4>
@@ -153,7 +151,6 @@
             </div>
         }
 
-        <!-- Details Modal -->
         @if (selectedGame != null)
         {
             <div class="modal-overlay" @onclick="CloseDetails">
@@ -782,3 +779,4 @@
         selectedGame = null;
     }
 }
+

@@ -1,6 +1,11 @@
 ﻿@page "/leaderboard"
+@using KNOTS.Services.Interfaces
+@using KNOTS.Models
 @using KNOTS.Services
+
 @inject UserService UserService
+@inject InterfaceUserService UserServiceInterface
+
 @rendermode InteractiveServer
 
 <PageTitle>Leaderboard - KNOTS</PageTitle>
@@ -362,7 +367,7 @@
 </style>
 
 @code {
-    private List<KNOTS.Services.User>? leaderboard = new List<KNOTS.Services.User>();
+    private List<User>? leaderboard = new List<KNOTS.Services.User>();
     private int currentUserRank = 0;
     private int totalUsers = 0;
     private bool isLoading = true;
