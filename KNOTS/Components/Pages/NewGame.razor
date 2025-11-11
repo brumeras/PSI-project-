@@ -1,7 +1,8 @@
 ﻿@using KNOTS.Models
 @using KNOTS.Services
-@inject UserService UserService
-@inject CompatibilityService CompatibilityService
+@using KNOTS.Services.Interfaces
+@inject InterfaceUserService UserService
+@inject InterfaceCompatibilityService CompatibilityService
 @rendermode InteractiveServer
 
 <div class="swipe-container">
@@ -456,7 +457,6 @@
 
     protected override void OnParametersSet()
     {
-        // Užkrauti klausimus, kai RoomCode pasikeičia
         if (UserService.IsAuthenticated && !string.IsNullOrEmpty(RoomCode) && !statements.Any())
         {
             LoadStatements();
@@ -474,12 +474,9 @@
 
         try
         {
-            // SVARBU: Naudoti GetRoomStatements vietoj GetRandomStatements
             statements = CompatibilityService.GetRoomStatements(RoomCode, SelectedTopics, 10);
             statusMessage = $"Loaded {statements.Count} statements. Let's begin!";
             Console.WriteLine($"✅ [NewGame] Loaded {statements.Count} statements for room {RoomCode}");
-            
-            // Parodyti klausimų ID debug tikslais
             Console.WriteLine($"📋 [NewGame] Statement IDs: {string.Join(", ", statements.Select(s => s.Id))}");
         }
         catch (Exception ex)

@@ -2,9 +2,10 @@
 @using System.Text.Json
 @using Microsoft.JSInterop
 @using KNOTS.Services
+@using KNOTS.Services.Interfaces
 @inject IJSRuntime JSRuntime
-@inject UserService UserService
-@inject CompatibilityService CompatibilityService
+@inject InterfaceUserService UserService
+@inject InterfaceCompatibilityService CompatibilityService
 @inject GameRoomService GameRoomService
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable

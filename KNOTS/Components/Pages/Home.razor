@@ -1,7 +1,8 @@
 ﻿@page "/Home"
 @rendermode InteractiveServer
 @using KNOTS.Services
-@inject UserService UserService
+@using KNOTS.Services.Interfaces
+@inject InterfaceUserService UserService
 @inject NavigationManager Navigation
 
 <PageTitle>Home</PageTitle>
@@ -9,18 +10,16 @@
 <div class="full-screen-container">
     @if (UserService.IsAuthenticated)
     {
-        <!-- Navigacija viršuje -->
         <nav class="top-navigation">
             <div class="nav-brand">KNOTS</div>
             <div class="nav-links">
                 <a href="/Home" class="nav-link active">Home</a>
                 <a href="/activity" class="nav-link">My Activity</a>
-                <a href="/leaderboard" class="nav-link">View Top Knotters</a> <!-- 🔧 Pataisyta -->
+                <a href="/leaderboard" class="nav-link">View Top Knotters</a>
             </div>
             <button class="btn-logout" @onclick="Logout">Logout</button>
         </nav>
 
-        <!-- Pagrindinis turinys -->
         <div class="content-wrapper">
             <div class="welcome-section">
                 <h1 class="welcome-title">Welcome, @UserService.CurrentUser!</h1>

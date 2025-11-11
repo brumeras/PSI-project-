@@ -1,7 +1,9 @@
 ﻿@using KNOTS.Compability
 @using KNOTS.Services
-@inject CompatibilityService CompatibilityService
+@using KNOTS.Services.Interfaces
+@inject InterfaceCompatibilityService CompatibilityService
 @inject GameRoomService GameRoomService
+
 
 <div class="results-container">
     @if (isCalculating)
