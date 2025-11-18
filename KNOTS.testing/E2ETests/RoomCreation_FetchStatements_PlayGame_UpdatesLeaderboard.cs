@@ -1,3 +1,4 @@
+/*
 using System.Collections.Generic;
 using System.Linq;
 using KNOTS.Models;
@@ -6,7 +7,7 @@ using KNOTS.Testing;
 using Xunit;
 
 namespace TestProject1.E2ETests;
-/*
+
 public class RoomCreationFetchStatementsPlayGameUpdatesLeaderboard : EndToEndTestBase
 {
     [Fact]
