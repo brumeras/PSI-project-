@@ -275,22 +275,16 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 13,
-    "metrics": [
-      { "value": 1190, "exceeded": true },
-      { "value": 34, "exceeded": true },
-    ]},
-  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 14,
     "metrics": [
       { "value": 1190, "exceeded": true },
       { "value": 34, "exceeded": true },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 7,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 13,
     "metrics": [
-      { "value": 1056, "exceeded": true },
-      { "value": 32, "exceeded": true },
+      { "value": 1190, "exceeded": true },
+      { "value": 34, "exceeded": true },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 9,
@@ -299,10 +293,10 @@ var riskHotspots = [
       { "value": 32, "exceeded": true },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 25,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 7,
     "metrics": [
-      { "value": 930, "exceeded": true },
-      { "value": 30, "exceeded": true },
+      { "value": 1056, "exceeded": true },
+      { "value": 32, "exceeded": true },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 26,
@@ -311,10 +305,10 @@ var riskHotspots = [
       { "value": 30, "exceeded": true },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 14,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 25,
     "metrics": [
-      { "value": 600, "exceeded": true },
-      { "value": 24, "exceeded": true },
+      { "value": 930, "exceeded": true },
+      { "value": 30, "exceeded": true },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 18,
@@ -323,10 +317,10 @@ var riskHotspots = [
       { "value": 24, "exceeded": true },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "LoadLeaderboard()", "methodShortName": "LoadLeaderboard()", "fileIndex": 0, "line": 380,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 14,
     "metrics": [
-      { "value": 156, "exceeded": true },
-      { "value": 12, "exceeded": false },
+      { "value": 600, "exceeded": true },
+      { "value": 24, "exceeded": true },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "LoadLeaderboard()", "methodShortName": "LoadLeaderboard()", "fileIndex": 0, "line": 384,
@@ -335,13 +329,7 @@ var riskHotspots = [
       { "value": 12, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 10,
-    "metrics": [
-      { "value": 156, "exceeded": true },
-      { "value": 12, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "PerformSwipe()", "methodShortName": "PerformSwipe()", "fileIndex": 0, "line": 503,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "LoadLeaderboard()", "methodShortName": "LoadLeaderboard()", "fileIndex": 0, "line": 380,
     "metrics": [
       { "value": 156, "exceeded": true },
       { "value": 12, "exceeded": false },
@@ -359,10 +347,16 @@ var riskHotspots = [
       { "value": 12, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetBestMatchEver()", "methodShortName": "GetBestMatchEver()", "fileIndex": 0, "line": 764,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 10,
     "metrics": [
-      { "value": 72, "exceeded": true },
-      { "value": 8, "exceeded": false },
+      { "value": 156, "exceeded": true },
+      { "value": 12, "exceeded": false },
+    ]},
+  {
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "PerformSwipe()", "methodShortName": "PerformSwipe()", "fileIndex": 0, "line": 503,
+    "metrics": [
+      { "value": 156, "exceeded": true },
+      { "value": 12, "exceeded": false },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetBestMatchEver()", "methodShortName": "GetBestMatchEver()", "fileIndex": 0, "line": 762,
@@ -371,13 +365,19 @@ var riskHotspots = [
       { "value": 8, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "OnJoinedRoom()", "methodShortName": "OnJoinedRoom()", "fileIndex": 0, "line": 839,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetBestMatchEver()", "methodShortName": "GetBestMatchEver()", "fileIndex": 0, "line": 764,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "OnJoinedRoom()", "methodShortName": "OnJoinedRoom()", "fileIndex": 0, "line": 840,
+    "metrics": [
+      { "value": 72, "exceeded": true },
+      { "value": 8, "exceeded": false },
+    ]},
+  {
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "OnJoinedRoom()", "methodShortName": "OnJoinedRoom()", "fileIndex": 0, "line": 839,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
@@ -395,18 +395,6 @@ var riskHotspots = [
       { "value": 8, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetProgressClass(System.Double)", "methodShortName": "GetProgressClass(...)", "fileIndex": 0, "line": 740,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetBadgeClass(System.Double)", "methodShortName": "GetBadgeClass(...)", "fileIndex": 0, "line": 748,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetProgressClass(System.Double)", "methodShortName": "GetProgressClass(...)", "fileIndex": 0, "line": 738,
     "metrics": [
       { "value": 42, "exceeded": true },
@@ -419,25 +407,19 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetProgressClass(System.Double)", "methodShortName": "GetProgressClass(...)", "fileIndex": 0, "line": 740,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetBadgeClass(System.Double)", "methodShortName": "GetBadgeClass(...)", "fileIndex": 0, "line": 748,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Error", "reportPath": "KNOTS_Error.html", "methodName": "OnInitialized()", "methodShortName": "OnInitialized()", "fileIndex": 0, "line": 32,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "CheckIfAllFinished()", "methodShortName": "CheckIfAllFinished()", "fileIndex": 0, "line": 749,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "GetPlayersFinishedCount()", "methodShortName": "GetPlayersFinishedCount()", "fileIndex": 0, "line": 768,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "OnAfterRenderAsync()", "methodShortName": "OnAfterRenderAsync()", "fileIndex": 0, "line": 666,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
@@ -461,19 +443,19 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "CalculateResults()", "methodShortName": "CalculateResults()", "fileIndex": 0, "line": 447,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "CheckIfAllFinished()", "methodShortName": "CheckIfAllFinished()", "fileIndex": 0, "line": 749,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "GetProgressBarClass(System.Double)", "methodShortName": "GetProgressBarClass(...)", "fileIndex": 0, "line": 482,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "GetPlayersFinishedCount()", "methodShortName": "GetPlayersFinishedCount()", "fileIndex": 0, "line": 768,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "GetBadgeClass(System.Double)", "methodShortName": "GetBadgeClass(...)", "fileIndex": 0, "line": 490,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "OnAfterRenderAsync()", "methodShortName": "OnAfterRenderAsync()", "fileIndex": 0, "line": 666,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
@@ -497,7 +479,19 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Home", "reportPath": "KNOTS_Home.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 10,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "CalculateResults()", "methodShortName": "CalculateResults()", "fileIndex": 0, "line": 447,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "GetProgressBarClass(System.Double)", "methodShortName": "GetProgressBarClass(...)", "fileIndex": 0, "line": 482,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "GetBadgeClass(System.Double)", "methodShortName": "GetBadgeClass(...)", "fileIndex": 0, "line": 490,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
@@ -509,13 +503,19 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "OnParametersSet()", "methodShortName": "OnParametersSet()", "fileIndex": 0, "line": 458,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Home", "reportPath": "KNOTS_Home.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 10,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "OnParametersSet()", "methodShortName": "OnParametersSet()", "fileIndex": 0, "line": 459,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "OnParametersSet()", "methodShortName": "OnParametersSet()", "fileIndex": 0, "line": 458,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
