@@ -22,18 +22,18 @@ public class RoomCreationFetchStatementsPlayGameUpdatesLeaderboard : EndToEndTes
         
         SeedStatements(new List<GameStatement>
         {
-            new GameStatement { Id = "LB-1", Text = "Statement 1", Topic = "General" },
-            new GameStatement { Id = "LB-2", Text = "Statement 2", Topic = "General" }
+            new GameStatement { Id = "LB-1", Text = "Leaderboard statement 1", Topic = "General" },
+            new GameStatement { Id = "LB-2", Text = "Leaderboard statement 2", Topic = "General" }
         });
+        
+        CompatibilityService.SaveSwipe(room.RoomCode, "host", "LB-1", true);
+        CompatibilityService.SaveSwipe(room.RoomCode, "host", "LB-2", false);
+
+        CompatibilityService.SaveSwipe(room.RoomCode, "guest-one", "LB-1", true);
+        CompatibilityService.SaveSwipe(room.RoomCode, "guest-one", "LB-2", false);
         
         CompatibilityService.SaveSwipe(room.RoomCode, "guest-two", "LB-1", true);
         CompatibilityService.SaveSwipe(room.RoomCode, "guest-two", "LB-2", false);
-
-        CompatibilityService.SaveSwipe(room.RoomCode, "host", "LB-1", true);
-        CompatibilityService.SaveSwipe(room.RoomCode, "host", "LB-2", false);
-        
-        CompatibilityService.SaveSwipe(room.RoomCode, "guest-one", "LB-1", true);
-        CompatibilityService.SaveSwipe(room.RoomCode, "guest-one", "LB-2", false);
 
         var players = room.Players.Select(p => p.Username).ToList();
         CompatibilityService.SaveGameToHistory(room.RoomCode, players);
