@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace KNOTS.Services;
-    public class GameRoomService{
+    public class GameRoomService : IGameRoomService{
         private readonly RoomRepository _roomRepository;
         private readonly PlayerMappingRepository _playerMappingRepository;
         private readonly RoomManager _roomManager;
