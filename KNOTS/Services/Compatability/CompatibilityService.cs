@@ -33,15 +33,10 @@ public class CompatibilityService : InterfaceCompatibilityService
         EnsureDefaultStatements();
     }
 
-<<<<<<< HEAD
-    public void EnsureDefaultStatements() {
-        var allStatements = new List<GameStatement> {
-=======
     private void EnsureDefaultStatements()
     {
         var allStatements = new List<GameStatement>
         {
->>>>>>> DependencyInjection
             new GameStatement { Id = "D1", Text = "I like getting up early in the morning", Topic = "General" },
             new GameStatement { Id = "D2", Text = "I prefer relaxing at home over going to parties", Topic = "General" },
             new GameStatement { Id = "D3", Text = "I enjoy spontaneous trips", Topic = "General" },
@@ -174,7 +169,7 @@ public class CompatibilityService : InterfaceCompatibilityService
         var query = _context.Statements.AsQueryable();
         
         if (selectedTopics != null && selectedTopics.Any())
-            query = query.Where(s => s.Topic != null && selectedTopics.Contains(s.Topic));
+            query = query.Where(s => selectedTopics.Contains(s.Topic));
 
         var statements = query
             .ToList()
@@ -241,11 +236,6 @@ public class CompatibilityService : InterfaceCompatibilityService
         }
         return true;
     }
-<<<<<<< HEAD
-    public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames) {return _calculator.CalculateAllCompatibilities(roomCode, playerUsernames); }
-    public void SaveGameToHistory(string roomCode, List<string> playerUsernames) {
-        try{
-=======
 
     public List<CompatibilityScore> CalculateAllCompatibilities(string roomCode, List<string> playerUsernames)
     {
@@ -256,7 +246,6 @@ public class CompatibilityService : InterfaceCompatibilityService
     {
         try
         {
->>>>>>> DependencyInjection
             var allResults = CalculateAllCompatibilities(roomCode, playerUsernames);
             if (!allResults.Any()) throw new Exception("No compatibility results found");
             

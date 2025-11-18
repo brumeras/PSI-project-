@@ -2,16 +2,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using KNOTS.Compability;
-<<<<<<< HEAD
-using KNOTS.Services.Compatability;
-
-namespace KNOTS.Services.Compability;
-
-public class CompatibilityCalculator {
-    private readonly ISwipeRepository _swipeRepo;
-    public CompatibilityCalculator(ISwipeRepository swipeRepo) {_swipeRepo = swipeRepo;}
-    public CompatibilityScore Calculate(string roomCode, string player1, string player2) {
-=======
 using KNOTS.Services.Interfaces;
 
 namespace KNOTS.Services.Compability;
@@ -27,7 +17,6 @@ public class CompatibilityCalculator : InterfaceCompatibilityCalculator
     
     public CompatibilityScore Calculate(string roomCode, string player1, string player2)
     {
->>>>>>> DependencyInjection
         var p1 = _swipeRepo.GetPlayerSwipes(roomCode, player1);
         var p2 = _swipeRepo.GetPlayerSwipes(roomCode, player2);
         

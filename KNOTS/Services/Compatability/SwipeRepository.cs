@@ -1,19 +1,11 @@
 ﻿using KNOTS.Compability;
 using KNOTS.Data;
-<<<<<<< HEAD
-using KNOTS.Services.Compatability;
-
-namespace KNOTS.Services.Compability;
-
-public class SwipeRepository : ISwipeRepository {
-=======
 using KNOTS.Services.Interfaces;
 
 namespace KNOTS.Services.Compability;
 
 public class SwipeRepository : InterfaceSwipeRepository
 {
->>>>>>> DependencyInjection
     private readonly AppDbContext _context;
     
     public SwipeRepository(AppDbContext context)

@@ -135,21 +135,12 @@ public class UserService : InterfaceUserService
             _logger.LogException(ex, $"User with this username doesn't exist: {username}");
         }
     }
-<<<<<<< HEAD
-    public List<User> GetLeaderboard(int topCount = 10) {
-        var users = _context.Users
-=======
     
     public List<User> GetLeaderboard(int topCount = 10)
     {
         return _context.Users
->>>>>>> DependencyInjection
             .AsEnumerable()
-            .ToList();
-
-        users.Sort();
-
-        return users
+            .OrderBy(u => u)
             .Take(topCount)
             .ToList();
     }
@@ -158,15 +149,9 @@ public class UserService : InterfaceUserService
     {
         var sortedUsers = _context.Users
             .AsEnumerable()
+            .OrderByDescending(u => u)
             .ToList();
-
-        sortedUsers.Sort();
-
         var rank = sortedUsers.FindIndex(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)) + 1;
         return rank;
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> DependencyInjection

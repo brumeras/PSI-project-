@@ -207,13 +207,8 @@
     private string Password = string.Empty;
     private string statusMessage = string.Empty;
 
-<<<<<<< HEAD
-    [Inject] public required UserService UserService { get; set; }
-    [Inject] public required NavigationManager NavigationManager { get; set; }
-=======
     [Inject] private InterfaceUserService UserService { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
->>>>>>> DependencyInjection
 
     private void LoginToWeb()
     {
