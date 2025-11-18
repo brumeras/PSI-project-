@@ -23,7 +23,8 @@ builder.Services.AddScoped<InterfaceSwipeRepository, SwipeRepository>();
 builder.Services.AddScoped<InterfaceCompatibilityCalculator, CompatibilityCalculator>();
 builder.Services.AddScoped<InterfaceUserService, UserService>();
 builder.Services.AddScoped<InterfaceCompatibilityService, CompatibilityService>();
-builder.Services.AddSingleton<GameRoomService>();
+builder.Services.AddSingleton<IGameRoomService, GameRoomService>();
+
 
 // SignalR
 builder.Services.AddSignalR();
