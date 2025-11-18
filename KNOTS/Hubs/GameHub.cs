@@ -5,8 +5,8 @@ using System.Threading.Channels;
 
 namespace KNOTS.Hubs;
 public class GameHub : Hub {
-    private readonly GameRoomService _gameRoomService;
-    public GameHub(GameRoomService gameRoomService) { _gameRoomService = gameRoomService;}
+    private readonly IGameRoomService _gameRoomService;
+    public GameHub(IGameRoomService gameRoomService) { _gameRoomService = gameRoomService;}
     public async Task CreateRoom(string username) {
             var connectionId = Context.ConnectionId;
             var roomCode = _gameRoomService.CreateRoom(connectionId, username);
@@ -39,8 +39,7 @@ public class GameHub : Hub {
     public async IAsyncEnumerable<object> StreamRoomUpdates(string roomCode, [EnumeratorCancellation] CancellationToken cancellationToken) {
         var channel = Channel.CreateUnbounded<object>();
         try { await foreach (var update in channel.Reader.ReadAllAsync(cancellationToken)) { yield return update; } }
-        finally {channel.Writer.Complete();}
-    }
+        finally {channel.Writer.Complete();}}
     public async Task UploadGameActions(IAsyncEnumerable<GameActionData> actionsStream) {
         var connectionId = Context.ConnectionId;
         var username = _gameRoomService.GetPlayerUsername(connectionId);
@@ -58,10 +57,7 @@ public class GameHub : Hub {
                     yield return new PlayerStatus {
                         Username = player.Username,
                         IsOnline = true,
-                        Timestamp = DateTime.UtcNow
-                    };
-                }
-            }
+                        Timestamp = DateTime.UtcNow }; } }
             await Task.Delay(updateInterval, cancellationToken);
         }
     }
@@ -75,14 +71,4 @@ public class GameHub : Hub {
         }
         await base.OnDisconnectedAsync(exception);
         }
-    }
-    public class GameActionData {
-        public string RoomCode { get; set; } = string.Empty;
-        public string Action { get; set; } = string.Empty;
-        public object? Data { get; set; }
-    }
-    public class PlayerStatus {
-        public string Username { get; set; } = string.Empty;
-        public bool IsOnline { get; set; }
-        public DateTime Timestamp { get; set; }
     }
