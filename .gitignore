@@ -488,3 +488,6 @@ knots.db
 knots.db-shm
 knots.db-wal
 
+# Ignore coverage report
+KNOTS.testing/CoverageReport/
+
