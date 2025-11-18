@@ -217,50 +217,48 @@ var assemblies = [
       { "name": "KNOTS.Compability.CompatibilityScore", "rp": "KNOTS_CompatibilityScore.html", "cl": 15, "ucl": 0, "cal": 15, "tl": 21, "cb": 2, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Components.Layout.EmptyLayout", "rp": "KNOTS_EmptyLayout.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 3, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Components.Layout.MainLayout", "rp": "KNOTS_MainLayout.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 71, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Components.Pages.Activity", "rp": "KNOTS_Activity.html", "cl": 0, "ucl": 163, "cal": 163, "tl": 782, "cb": 0, "tb": 120, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Components.Pages.Activity", "rp": "KNOTS_Activity.html", "cl": 0, "ucl": 104, "cal": 104, "tl": 782, "cb": 0, "tb": 62, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Components.Pages.Error", "rp": "KNOTS_Error.html", "cl": 0, "ucl": 10, "cal": 10, "tl": 35, "cb": 0, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Components.Pages.Game", "rp": "KNOTS_Game.html", "cl": 0, "ucl": 333, "cal": 333, "tl": 908, "cb": 0, "tb": 152, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Components.Pages.GameResults", "rp": "KNOTS_GameResults.html", "cl": 0, "ucl": 159, "cal": 159, "tl": 510, "cb": 0, "tb": 102, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Components.Pages.Home", "rp": "KNOTS_Home.html", "cl": 0, "ucl": 31, "cal": 31, "tl": 264, "cb": 0, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Components.Pages.Leaderboard", "rp": "KNOTS_Leaderboard.html", "cl": 0, "ucl": 117, "cal": 117, "tl": 423, "cb": 0, "tb": 64, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Components.Pages.Login", "rp": "KNOTS_Login.html", "cl": 0, "ucl": 47, "cal": 47, "tl": 241, "cb": 0, "tb": 16, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Components.Pages.NewGame", "rp": "KNOTS_NewGame.html", "cl": 0, "ucl": 180, "cal": 180, "tl": 584, "cb": 0, "tb": 78, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Components.Pages.Game", "rp": "KNOTS_Game.html", "cl": 0, "ucl": 259, "cal": 259, "tl": 908, "cb": 0, "tb": 80, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Components.Pages.GameResults", "rp": "KNOTS_GameResults.html", "cl": 0, "ucl": 105, "cal": 105, "tl": 510, "cb": 0, "tb": 56, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Components.Pages.Home", "rp": "KNOTS_Home.html", "cl": 0, "ucl": 22, "cal": 22, "tl": 264, "cb": 0, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Components.Pages.Leaderboard", "rp": "KNOTS_Leaderboard.html", "cl": 0, "ucl": 83, "cal": 83, "tl": 423, "cb": 0, "tb": 36, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Components.Pages.Login", "rp": "KNOTS_Login.html", "cl": 0, "ucl": 36, "cal": 36, "tl": 241, "cb": 0, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Components.Pages.NewGame", "rp": "KNOTS_NewGame.html", "cl": 0, "ucl": 133, "cal": 133, "tl": 586, "cb": 0, "tb": 44, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Data.AppDbContext", "rp": "KNOTS_AppDbContext.html", "cl": 48, "ucl": 0, "cal": 48, "tl": 60, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Exceptions.InvalidCredentialsException", "rp": "KNOTS_InvalidCredentialsException.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 5, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Exceptions.UserAlreadyExistsException", "rp": "KNOTS_UserAlreadyExistsException.html", "cl": 1, "ucl": 1, "cal": 2, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Exceptions.UserNotFoundException", "rp": "KNOTS_UserNotFoundException.html", "cl": 1, "ucl": 1, "cal": 2, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Hubs.GameActionData", "rp": "KNOTS_GameActionData.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 88, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Hubs.GameHub", "rp": "KNOTS_GameHub.html", "cl": 0, "ucl": 63, "cal": 63, "tl": 88, "cb": 0, "tb": 18, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Hubs.PlayerStatus", "rp": "KNOTS_PlayerStatus.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 88, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Migrations.AddTopicToGameStatement", "rp": "KNOTS_AddTopicToGameStatement.html", "cl": 0, "ucl": 215, "cal": 215, "tl": 265, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Migrations.AppDbContextModelSnapshot", "rp": "KNOTS_AppDbContextModelSnapshot.html", "cl": 0, "ucl": 136, "cal": 136, "tl": 159, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Hubs.GameActionData", "rp": "KNOTS_GameActionData.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 6, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Hubs.GameHub", "rp": "KNOTS_GameHub.html", "cl": 57, "ucl": 2, "cal": 59, "tl": 74, "cb": 12, "tb": 18, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Hubs.PlayerStatus", "rp": "KNOTS_PlayerStatus.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Models.GameHistoryRecord", "rp": "KNOTS_GameHistoryRecord.html", "cl": 7, "ucl": 1, "cal": 8, "tl": 16, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Models.GameStatement", "rp": "KNOTS_GameStatement.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 10, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Models.PlayerSwipeRecord", "rp": "KNOTS_PlayerSwipeRecord.html", "cl": 6, "ucl": 1, "cal": 7, "tl": 15, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.Compability.CompatibilityCalculator", "rp": "KNOTS_CompatibilityCalculator.html", "cl": 93, "ucl": 0, "cal": 93, "tl": 112, "cb": 44, "tb": 50, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.Compability.CompatibilityCalculator", "rp": "KNOTS_CompatibilityCalculator.html", "cl": 77, "ucl": 0, "cal": 77, "tl": 112, "cb": 24, "tb": 28, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.Compability.PlayerGameStatistics", "rp": "KNOTS_PlayerGameStatistics.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 8, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.Compability.PlayerMatchInfo", "rp": "KNOTS_PlayerMatchInfo.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 10, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.Compability.SwipeRepository", "rp": "KNOTS_SwipeRepository.html", "cl": 19, "ucl": 0, "cal": 19, "tl": 28, "cb": 1, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.CompatibilityService", "rp": "KNOTS_CompatibilityService.html", "cl": 288, "ucl": 0, "cal": 288, "tl": 313, "cb": 45, "tb": 58, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.DisconnectedPlayerInfo", "rp": "KNOTS_DisconnectedPlayerInfo.html", "cl": 0, "ucl": 6, "cal": 6, "tl": 9, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.Compability.SwipeRepository", "rp": "KNOTS_SwipeRepository.html", "cl": 15, "ucl": 0, "cal": 15, "tl": 28, "cb": 1, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.CompatibilityService", "rp": "KNOTS_CompatibilityService.html", "cl": 252, "ucl": 4, "cal": 256, "tl": 313, "cb": 25, "tb": 34, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.DisconnectedPlayerInfo", "rp": "KNOTS_DisconnectedPlayerInfo.html", "cl": 2, "ucl": 4, "cal": 6, "tl": 9, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.GameHistoryEntry", "rp": "KNOTS_GameHistoryEntry.html", "cl": 6, "ucl": 0, "cal": 6, "tl": 13, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.GamePlayer", "rp": "KNOTS_GamePlayer.html", "cl": 10, "ucl": 0, "cal": 10, "tl": 15, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.GameRoom", "rp": "KNOTS_GameRoom.html", "cl": 11, "ucl": 2, "cal": 13, "tl": 20, "cb": 3, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.GameRoom", "rp": "KNOTS_GameRoom.html", "cl": 7, "ucl": 6, "cal": 13, "tl": 20, "cb": 2, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.GameRoomExs", "rp": "KNOTS_GameRoomExs.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 15, "cb": 0, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.GameRoomService", "rp": "KNOTS_GameRoomService.html", "cl": 0, "ucl": 20, "cal": 20, "tl": 36, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.JoinRoomResult", "rp": "KNOTS_JoinRoomResult.html", "cl": 0, "ucl": 8, "cal": 8, "tl": 11, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.LoggingService", "rp": "KNOTS_LoggingService.html", "cl": 16, "ucl": 5, "cal": 21, "tl": 29, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.JoinRoomResult", "rp": "KNOTS_JoinRoomResult.html", "cl": 1, "ucl": 7, "cal": 8, "tl": 11, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.LoggingService", "rp": "KNOTS_LoggingService.html", "cl": 12, "ucl": 4, "cal": 16, "tl": 29, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.PasswordHasher", "rp": "KNOTS_PasswordHasher.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 5, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.PlayerManager", "rp": "KNOTS_PlayerManager.html", "cl": 0, "ucl": 39, "cal": 39, "tl": 51, "cb": 0, "tb": 14, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.PlayerMappingRepository", "rp": "KNOTS_PlayerMappingRepository.html", "cl": 3, "ucl": 9, "cal": 12, "tl": 18, "cb": 2, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.PlayerSwipe", "rp": "KNOTS_PlayerSwipe.html", "cl": 12, "ucl": 0, "cal": 12, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.RoomCodeGenerator", "rp": "KNOTS_RoomCodeGenerator.html", "cl": 6, "ucl": 0, "cal": 6, "tl": 13, "cb": 2, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.RoomManager", "rp": "KNOTS_RoomManager.html", "cl": 19, "ucl": 0, "cal": 19, "tl": 26, "cb": 8, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.RoomCodeGenerator", "rp": "KNOTS_RoomCodeGenerator.html", "cl": 1, "ucl": 5, "cal": 6, "tl": 13, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.RoomManager", "rp": "KNOTS_RoomManager.html", "cl": 9, "ucl": 10, "cal": 19, "tl": 26, "cb": 8, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.RoomQueryService", "rp": "KNOTS_RoomQueryService.html", "cl": 10, "ucl": 0, "cal": 10, "tl": 18, "cb": 6, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "KNOTS.Services.RoomRepository", "rp": "KNOTS_RoomRepository.html", "cl": 5, "ucl": 5, "cal": 10, "tl": 17, "cb": 2, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.User", "rp": "KNOTS_User.html", "cl": 19, "ucl": 15, "cal": 34, "tl": 52, "cb": 6, "tb": 18, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "KNOTS.Services.UserService", "rp": "KNOTS_UserService.html", "cl": 121, "ucl": 14, "cal": 135, "tl": 157, "cb": 49, "tb": 52, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Program", "rp": "KNOTS_Program.html", "cl": 0, "ucl": 55, "cal": 55, "tl": 70, "cb": 0, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.User", "rp": "KNOTS_User.html", "cl": 6, "ucl": 28, "cal": 34, "tl": 52, "cb": 0, "tb": 18, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "KNOTS.Services.UserService", "rp": "KNOTS_UserService.html", "cl": 67, "ucl": 40, "cal": 107, "tl": 157, "cb": 27, "tb": 30, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Program", "rp": "KNOTS_Program.html", "cl": 0, "ucl": 40, "cal": 40, "tl": 71, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
 ];
 
@@ -275,22 +273,10 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 13,
-    "metrics": [
-      { "value": 1190, "exceeded": true },
-      { "value": 34, "exceeded": true },
-    ]},
-  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 14,
     "metrics": [
       { "value": 1190, "exceeded": true },
       { "value": 34, "exceeded": true },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 7,
-    "metrics": [
-      { "value": 1056, "exceeded": true },
-      { "value": 32, "exceeded": true },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 9,
@@ -299,22 +285,10 @@ var riskHotspots = [
       { "value": 32, "exceeded": true },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 25,
-    "metrics": [
-      { "value": 930, "exceeded": true },
-      { "value": 30, "exceeded": true },
-    ]},
-  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 26,
     "metrics": [
       { "value": 930, "exceeded": true },
       { "value": 30, "exceeded": true },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 14,
-    "metrics": [
-      { "value": 600, "exceeded": true },
-      { "value": 24, "exceeded": true },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 18,
@@ -323,55 +297,31 @@ var riskHotspots = [
       { "value": 24, "exceeded": true },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "LoadLeaderboard()", "methodShortName": "LoadLeaderboard()", "fileIndex": 0, "line": 380,
-    "metrics": [
-      { "value": 156, "exceeded": true },
-      { "value": 12, "exceeded": false },
-    ]},
-  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Leaderboard", "reportPath": "KNOTS_Leaderboard.html", "methodName": "LoadLeaderboard()", "methodShortName": "LoadLeaderboard()", "fileIndex": 0, "line": 384,
     "metrics": [
       { "value": 156, "exceeded": true },
       { "value": 12, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 10,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 13,
     "metrics": [
       { "value": 156, "exceeded": true },
       { "value": 12, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "PerformSwipe()", "methodShortName": "PerformSwipe()", "fileIndex": 0, "line": 503,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "PerformSwipe()", "methodShortName": "PerformSwipe()", "fileIndex": 0, "line": 502,
     "metrics": [
       { "value": 156, "exceeded": true },
       { "value": 12, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 11,
+    "assembly": "KNOTS", "class": "KNOTS.Services.User", "reportPath": "KNOTS_User.html", "methodName": "CompareTo(KNOTS.Services.User)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 14,
     "metrics": [
-      { "value": 156, "exceeded": true },
-      { "value": 12, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "PerformSwipe()", "methodShortName": "PerformSwipe()", "fileIndex": 0, "line": 500,
-    "metrics": [
-      { "value": 156, "exceeded": true },
-      { "value": 12, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetBestMatchEver()", "methodShortName": "GetBestMatchEver()", "fileIndex": 0, "line": 764,
-    "metrics": [
-      { "value": 72, "exceeded": true },
-      { "value": 8, "exceeded": false },
+      { "value": 110, "exceeded": true },
+      { "value": 10, "exceeded": false },
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetBestMatchEver()", "methodShortName": "GetBestMatchEver()", "fileIndex": 0, "line": 762,
-    "metrics": [
-      { "value": 72, "exceeded": true },
-      { "value": 8, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "OnJoinedRoom()", "methodShortName": "OnJoinedRoom()", "fileIndex": 0, "line": 839,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
@@ -395,18 +345,6 @@ var riskHotspots = [
       { "value": 8, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetProgressClass(System.Double)", "methodShortName": "GetProgressClass(...)", "fileIndex": 0, "line": 740,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetBadgeClass(System.Double)", "methodShortName": "GetBadgeClass(...)", "fileIndex": 0, "line": 748,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Activity", "reportPath": "KNOTS_Activity.html", "methodName": "GetProgressClass(System.Double)", "methodShortName": "GetProgressClass(...)", "fileIndex": 0, "line": 738,
     "metrics": [
       { "value": 42, "exceeded": true },
@@ -420,24 +358,6 @@ var riskHotspots = [
     ]},
   {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Error", "reportPath": "KNOTS_Error.html", "methodName": "OnInitialized()", "methodShortName": "OnInitialized()", "fileIndex": 0, "line": 32,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "CheckIfAllFinished()", "methodShortName": "CheckIfAllFinished()", "fileIndex": 0, "line": 749,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "GetPlayersFinishedCount()", "methodShortName": "GetPlayersFinishedCount()", "fileIndex": 0, "line": 768,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Game", "reportPath": "KNOTS_Game.html", "methodName": "OnAfterRenderAsync()", "methodShortName": "OnAfterRenderAsync()", "fileIndex": 0, "line": 666,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
@@ -461,24 +381,6 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "CalculateResults()", "methodShortName": "CalculateResults()", "fileIndex": 0, "line": 447,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "GetProgressBarClass(System.Double)", "methodShortName": "GetProgressBarClass(...)", "fileIndex": 0, "line": 482,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "GetBadgeClass(System.Double)", "methodShortName": "GetBadgeClass(...)", "fileIndex": 0, "line": 490,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.GameResults", "reportPath": "KNOTS_GameResults.html", "methodName": "CalculateResults()", "methodShortName": "CalculateResults()", "fileIndex": 0, "line": 449,
     "metrics": [
       { "value": 42, "exceeded": true },
@@ -497,31 +399,13 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Home", "reportPath": "KNOTS_Home.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 10,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
     "assembly": "KNOTS", "class": "KNOTS.Components.Pages.Home", "reportPath": "KNOTS_Home.html", "methodName": "BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)", "methodShortName": "BuildRenderTree(...)", "fileIndex": 0, "line": 11,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "OnParametersSet()", "methodShortName": "OnParametersSet()", "fileIndex": 0, "line": 458,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "OnParametersSet()", "methodShortName": "OnParametersSet()", "fileIndex": 0, "line": 459,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "KNOTS", "class": "KNOTS.Hubs.GameHub", "reportPath": "KNOTS_GameHub.html", "methodName": "StreamPlayerStatuses()", "methodShortName": "StreamPlayerStatuses()", "fileIndex": 0, "line": 51,
+    "assembly": "KNOTS", "class": "KNOTS.Components.Pages.NewGame", "reportPath": "KNOTS_NewGame.html", "methodName": "OnParametersSet()", "methodShortName": "OnParametersSet()", "fileIndex": 0, "line": 461,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
