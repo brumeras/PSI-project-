@@ -1,9 +1,13 @@
 using KNOTS.Models;
 using KNOTS.Services;
+using KNOTS.Services.Interfaces;
+using KNOTS.Services.Compability;
+using KNOTS.Compability;
 
 namespace TestProject1.UserServiceTests.CompatabilityTests;
 
-public class ClearRoomDataIntegration : UserServiceTestBase{
+public class ClearRoomDataIntegration : UserServiceTestBase
+{
     [Fact]
     public void ClearRoomData()
     {
@@ -13,7 +17,13 @@ public class ClearRoomDataIntegration : UserServiceTestBase{
             new PlayerSwipeRecord { RoomCode = "room2", PlayerUsername = "trecias", StatementId = "s3", StatementText = "statement 3", AgreeWithStatement = true }
         );
         Context.SaveChanges();
-        var service = new CompatibilityService(Context, new UserService(Context, new LoggingService()));
+        
+        InterfaceLoggingService loggingService = new LoggingService();
+        InterfaceUserService userService = new UserService(Context, loggingService);
+        InterfaceSwipeRepository swipeRepository = new SwipeRepository(Context);
+        InterfaceCompatibilityCalculator calculator = new CompatibilityCalculator(swipeRepository);
+        
+        var service = new CompatibilityService(Context, userService, swipeRepository, calculator, loggingService);
         service.ClearRoomData("room1");
         
         Assert.Empty(Context.PlayerSwipes.Where(s => s.RoomCode == "room1"));

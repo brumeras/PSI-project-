@@ -1,12 +1,23 @@
 using KNOTS.Models;
 using KNOTS.Services;
+using KNOTS.Services.Interfaces;
+using KNOTS.Services.Compability;
+using KNOTS.Compability;
 
 namespace TestProject1.UserServiceTests.CompatabilityTests;
 
-public class HaveAllPlayersFinishedFalseIntegration : UserServiceTestBase {
+public class HaveAllPlayersFinishedFalseIntegration : UserServiceTestBase 
+{
     [Fact]
-    public void HaveAllPlayersFinishedFalse() {
-        var service = new CompatibilityService(Context, UserService);
+    public void HaveAllPlayersFinishedFalse() 
+    {
+        InterfaceLoggingService loggingService = new LoggingService();
+        InterfaceUserService userService = new UserService(Context, loggingService);
+        InterfaceSwipeRepository swipeRepository = new SwipeRepository(Context);
+        InterfaceCompatibilityCalculator calculator = new CompatibilityCalculator(swipeRepository);
+        
+        var service = new CompatibilityService(Context, userService, swipeRepository, calculator, loggingService);
+        
         var room = "room";
         var players = new List<string> {"player1", "player2"};
         var totalSt = 2;
@@ -17,6 +28,7 @@ public class HaveAllPlayersFinishedFalseIntegration : UserServiceTestBase {
             new PlayerSwipeRecord { RoomCode = room, PlayerUsername = "player2", StatementId = "s1" }
         );
         Context.SaveChanges();
+        
         var res = service.HaveAllPlayersFinished(room, players, totalSt);
         Assert.False(res);
     }

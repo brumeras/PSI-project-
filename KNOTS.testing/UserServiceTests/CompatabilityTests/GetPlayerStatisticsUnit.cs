@@ -1,6 +1,6 @@
 using KNOTS.Compability;
 using KNOTS.Services.Compability;
-using KNOTS.Services.Compatability;
+using KNOTS.Services.Interfaces;
 using Moq;
 
 namespace TestProject1.UserServiceTests.CompatabilityTests;
@@ -13,7 +13,7 @@ public class GetPlayerStatisticsUnit {
             new CompatibilityScore("pirmas", "trecias", 2, 2, new List<string>{"s1", "s2"}),
             new CompatibilityScore("antras", "trecias", 0, 2, new List<string>()),
         };
-        var calculator = new CompatibilityCalculator(Mock.Of<ISwipeRepository>());
+        var calculator = new CompatibilityCalculator(Mock.Of<InterfaceSwipeRepository>());
         var statpirmas = calculator.GetPlayerStatistics("pirmas", res);
         var statantras = calculator.GetPlayerStatistics("antras", res);
         var statidk =  calculator.GetPlayerStatistics("idk", res);

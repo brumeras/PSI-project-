@@ -1,6 +1,6 @@
 using KNOTS.Services;
 using KNOTS.Services.Compability;
-using KNOTS.Services.Compatability;
+using KNOTS.Services.Interfaces;
 using Moq;
 
 namespace TestProject1.UserServiceTests.CompatabilityTests;
@@ -21,7 +21,7 @@ public class CalculateUnit : UserServiceTestBase {
             }
         };
         //naudojam packaga mockinimui repositoriju, pas destytoja konspekte rasta, mock arkartos ta interfeisa
-        var mockRepo = new Mock<ISwipeRepository>();
+        var mockRepo = new Mock<InterfaceSwipeRepository>();
         mockRepo.Setup(r => r.GetPlayerSwipes(It.IsAny<string>(), "pirmas")).Returns(fakeSwipes["pirmas"]);
         mockRepo.Setup(r => r.GetPlayerSwipes(It.IsAny<string>(), "antras")).Returns(fakeSwipes["antras"]);
         

@@ -1,6 +1,6 @@
 using KNOTS.Services;
 using KNOTS.Services.Compability;
-using KNOTS.Services.Compatability;
+using KNOTS.Services.Interfaces;
 using Moq;
 
 namespace TestProject1.UserServiceTests.CompatabilityTests;
@@ -11,7 +11,7 @@ public class CalculateAllCompatibilitiesUnit{
         var roomCode = "room1";
         var players = new List<string> { "pirmas", "antras", "trecias" };
 
-        var mockRepo = new Mock<ISwipeRepository>();
+        var mockRepo = new Mock<InterfaceSwipeRepository>();
         mockRepo.Setup(r => r.GetPlayerSwipes(roomCode, "pirmas")).Returns(new List<PlayerSwipe>
         {
             new PlayerSwipe("pirmas", "s1", "statement 1", true),

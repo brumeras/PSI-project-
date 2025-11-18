@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -6,6 +6,8 @@ using KNOTS.Data;
 using KNOTS.Models;
 using KNOTS.Services;
 using KNOTS.Services.Compability;
+using KNOTS.Services.Interfaces;
+using KNOTS.Compability;
 using Microsoft.EntityFrameworkCore;
 
 namespace KNOTS.Testing;
@@ -28,27 +30,27 @@ public abstract class EndToEndTestBase : IDisposable
     /// <summary>
     /// Common logging service shared across tests.
     /// </summary>
-    protected readonly LoggingService Logger;
+    protected readonly InterfaceLoggingService Logger;
 
     /// <summary>
     /// Provides user authentication, registration, and stats management.
     /// </summary>
-    protected readonly UserService UserService;
+    protected readonly InterfaceUserService UserService;
 
     /// <summary>
     /// Provides compatibility calculations and swipe logic.
     /// </summary>
-    protected readonly CompatibilityService CompatibilityService;
+    protected readonly InterfaceCompatibilityService CompatibilityService;
 
     /// <summary>
     /// Provides direct access to player swipe data.
     /// </summary>
-    protected readonly SwipeRepository SwipeRepository;
+    protected readonly InterfaceSwipeRepository SwipeRepository;
 
     /// <summary>
     /// Provides access to the compatibility calculator logic.
     /// </summary>
-    protected readonly CompatibilityCalculator Calculator;
+    protected readonly InterfaceCompatibilityCalculator Calculator;
 
     /// <summary>
     /// Initializes a full in-memory test environment with services.
@@ -66,7 +68,8 @@ public abstract class EndToEndTestBase : IDisposable
         SwipeRepository = new SwipeRepository(Context);
         Calculator = new CompatibilityCalculator(SwipeRepository);
         UserService = new UserService(Context, Logger);
-        CompatibilityService = new CompatibilityService(Context, UserService);
+        
+        CompatibilityService = new CompatibilityService(Context, UserService, SwipeRepository, Calculator, Logger);
 
         Console.WriteLine("[E2E Setup] In-memory environment initialized.");
     }

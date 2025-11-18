@@ -1,25 +1,34 @@
 using KNOTS.Models;
 using KNOTS.Services;
+using KNOTS.Services.Interfaces;
 using KNOTS.Services.Compability;
-using Microsoft.Identity.Client;
+using KNOTS.Compability;
 
 namespace TestProject1.UserServiceTests.CompatabilityTests;
 
-public class SaveGameToHistoryIntegration : UserServiceTestBase{
+public class SaveGameToHistoryIntegration : UserServiceTestBase
+{
     [Fact]
-    public void SaveGameToHistory_SavesAndUpdates() {
+    public void SaveGameToHistory_SavesAndUpdates() 
+    {
+        InterfaceLoggingService loggingService = new LoggingService();
+        
         Context.Users.AddRange(
             new User{Username = "pirmas", PasswordHash = "hash1"},
             new User{Username = "antras", PasswordHash = "hash2"}
-            );
+        );
         Context.PlayerSwipes.AddRange(
             new PlayerSwipeRecord {RoomCode = "room1", PlayerUsername = "pirmas", StatementId = "s1", StatementText = "statement1", AgreeWithStatement = true },
             new PlayerSwipeRecord {RoomCode = "room1", PlayerUsername = "antras", StatementId = "s1", StatementText = "statement1", AgreeWithStatement = true }
         );
         Context.SaveChanges();
         
-        var userService = new UserService(Context, new LoggingService());
-        var service = new CompatibilityService(Context, userService);
+        InterfaceUserService userService = new UserService(Context, loggingService);
+        InterfaceSwipeRepository swipeRepository = new SwipeRepository(Context);
+        InterfaceCompatibilityCalculator calculator = new CompatibilityCalculator(swipeRepository);
+        
+        var service = new CompatibilityService(Context, userService, swipeRepository, calculator, loggingService);
+        
         var roomCode = "room1";
         var players = new List<string>{"pirmas", "antras"};
         
@@ -31,5 +40,4 @@ public class SaveGameToHistoryIntegration : UserServiceTestBase{
         Assert.NotEmpty(saved.ResultsJson);
         Assert.NotNull(saved.BestMatchPlayer);
     }
-    
 }

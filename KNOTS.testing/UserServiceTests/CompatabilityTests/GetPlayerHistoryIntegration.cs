@@ -1,16 +1,21 @@
 using KNOTS.Compability;
 using KNOTS.Models;
 using KNOTS.Services;
+using KNOTS.Services.Interfaces;
+using KNOTS.Services.Compability;
 using System.Text.Json;
 
 namespace TestProject1.UserServiceTests.CompatabilityTests;
 
-public class GetPlayerHistoryIntegration : UserServiceTestBase{
+public class GetPlayerHistoryIntegration : UserServiceTestBase
+{
     [Fact]
-    public void GetPlayerHistory_OnlyEntries() {
+    public void GetPlayerHistory_OnlyEntries() 
+    {
         var player1 = "pirmas";
         var player2 = "antras";
-        var history1 = new GameHistoryRecord{
+        var history1 = new GameHistoryRecord
+        {
             RoomCode = "room1",
             PlayedDate = DateTime.Now,
             TotalPlayers = 2,
@@ -22,8 +27,12 @@ public class GetPlayerHistoryIntegration : UserServiceTestBase{
         Context.GameHistory.Add(history1);
         Context.SaveChanges();
         
-        var userService = new UserService(Context, new LoggingService());
-        var service = new CompatibilityService(Context, userService);
+        InterfaceLoggingService loggingService = new LoggingService();
+        InterfaceUserService userService = new UserService(Context, loggingService);
+        InterfaceSwipeRepository swipeRepository = new SwipeRepository(Context);
+        InterfaceCompatibilityCalculator calculator = new CompatibilityCalculator(swipeRepository);
+        
+        var service = new CompatibilityService(Context, userService, swipeRepository, calculator, loggingService);
         var res = service.GetPlayerHistory(player1);
         
         Assert.Single(res);

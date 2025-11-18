@@ -10,7 +10,14 @@
 
     <ItemGroup>
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+<<<<<<< HEAD
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
+=======
+        <PackageReference Include="coverlet.collector" Version="6.0.4">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+>>>>>>> DependencyInjection
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
