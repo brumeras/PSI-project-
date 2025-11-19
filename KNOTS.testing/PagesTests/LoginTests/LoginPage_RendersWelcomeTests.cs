@@ -3,6 +3,7 @@ using KNOTS.Components.Pages;
 using NSubstitute;
 using Xunit;
 
+
 public class LoginPage_RendersWelcomeTests : LoginPageTestsBase
 {
     [Fact]
