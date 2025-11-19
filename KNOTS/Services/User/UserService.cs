@@ -138,10 +138,9 @@ public class UserService : InterfaceUserService
     
     public List<User> GetLeaderboard(int topCount = 10)
     {
-        return _context.Users
-            .AsEnumerable()
-            .OrderBy(u => u)
-            .Take(topCount)
+        var leaderboard = new Leaderboard<User>(_context.Users.AsEnumerable());
+        return leaderboard
+            .SelectTop(topCount, user => user)
             .ToList();
     }
     
