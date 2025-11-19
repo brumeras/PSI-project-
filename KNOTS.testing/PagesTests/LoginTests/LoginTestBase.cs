@@ -17,7 +17,7 @@ public abstract class LoginPageTestsBase : TestContext
         _userServiceMock = Substitute.For<InterfaceUserService>();
         Services.AddSingleton(_userServiceMock);
 
-        Services.AddScoped<NavigationManager, TestNavigationManager>();
+        Services.AddSingleton<NavigationManager, TestNavigationManager>();
         _navManager = Services.GetRequiredService<NavigationManager>();
     }
 }
