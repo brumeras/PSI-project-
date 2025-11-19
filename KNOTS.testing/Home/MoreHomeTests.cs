@@ -5,6 +5,7 @@ using Xunit;
 using System;
 using Bunit.TestDoubles;
 using KNOTS.Components.Pages;
+using Microsoft.AspNetCore.Components;
 
 public class HomeTests
 {
@@ -62,7 +63,7 @@ public class HomeTests
 
         ctx.Services.AddSingleton<InterfaceUserService>(fake);
 
-        var cut = ctx.RenderComponent<Home>();
+        var cut = ctx.Render<Home>();
 
         cut.Markup.Contains("You are not logged in.");
         cut.Markup.Contains("Go to login page");
@@ -79,7 +80,7 @@ public class HomeTests
 
         ctx.Services.AddSingleton<InterfaceUserService>(fake);
 
-        var cut = ctx.RenderComponent<Home>();
+        var cut = ctx.Render<Home>();
 
         Assert.Contains("Welcome, TestUser!", cut.Markup);
         Assert.Contains("Logout", cut.Markup);
@@ -96,7 +97,7 @@ public class HomeTests
 
         ctx.Services.AddSingleton<InterfaceUserService>(fake);
 
-        var cut = ctx.RenderComponent<Home>();
+        var cut = ctx.Render<Home>();
 
         Assert.Contains("/Home", cut.Markup);
         Assert.Contains("/activity", cut.Markup);
@@ -113,15 +114,16 @@ public class HomeTests
 
         ctx.Services.AddSingleton<InterfaceUserService>(fake);
 
-        var nav = ctx.Services.GetRequiredService<FakeNavigationManager>();
+        var fakeNav = new TestNavigationManager();
+        ctx.Services.AddSingleton<NavigationManager>(fakeNav);
 
-        var cut = ctx.RenderComponent<Home>();
+        var cut = ctx.Render<Home>();
 
         // Find and click logout button
         cut.Find("button.btn-logout").Click();
 
         Assert.False(fake.IsAuthenticated);
         Assert.Null(fake.CurrentUser);
-        Assert.Equal("/", nav.Uri);  // redirect successful
+        Assert.Equal("http://localhost/", fakeNav.Uri);  // redirect successful
     }
 }
