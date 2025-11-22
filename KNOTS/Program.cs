@@ -3,6 +3,7 @@ using KNOTS.Services;
 using KNOTS.Services.Interfaces;
 using KNOTS.Data;
 using KNOTS.Hubs;
+using KNOTS.Services.Chat;
 using KNOTS.Services.Compability;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,7 @@ builder.Services.AddSingleton<IGameRoomService, GameRoomService>();
 
 // SignalR
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IMessageService, MessageService>();
 
 var app = builder.Build();
 
@@ -67,5 +69,5 @@ app.UseAntiforgery();
 // Routing
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapHub<GameHub>("/gamehub");
-
+app.MapHub<ChatHub>("/chathub");
 app.Run();

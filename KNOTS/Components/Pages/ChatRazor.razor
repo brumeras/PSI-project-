@@ -1,0 +1,107 @@
+@page "/chat/{MatchedUsername}"
+@using KNOTS.Models
+@using KNOTS.Services.Chat
+@inject IMessageService MessageService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>Pokalbis su @MatchedUsername</h3>
+    </div>
+    
+    <div class="messages-container" @ref="messagesContainer">
+        @if (messages.Any())
+        {
+            @foreach (var message in messages)
+            {
+                <div class="message @(message.SenderId == CurrentUsername ? "sent" : "received")">
+                    <div class="message-content">@message.Content</div>
+                    <div class="message-time">@message.SentAt.ToString("HH:mm")</div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="no-messages">Pradėkite pokalbį...</p>
+        }
+    </div>
+    
+    <div class="input-container">
+        <input @bind="messageInput" 
+               @bind:event="oninput"
+               @onkeydown="HandleKeyPress"
+               placeholder="Rašyti žinutę..." 
+               class="message-input" />
+        <button @onclick="SendMessage" class="send-button" disabled="@string.IsNullOrWhiteSpace(messageInput)">
+            Siųsti
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string MatchedUsername { get; set; } = string.Empty;
+    
+    private List<Message> messages = new();
+    private string messageInput = "";
+    private string CurrentUsername = "testuser"; // TODO: Gauk iš autentifikacijos/session
+    private ElementReference messagesContainer;
+    private System.Threading.Timer? refreshTimer;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMessages();
+        
+        // Periodinė žinučių perkrova (polling metodas)
+        refreshTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await LoadMessages();
+                StateHasChanged();
+            });
+        }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+    }
+    
+    private async Task LoadMessages()
+    {
+        messages = await MessageService.GetConversation(CurrentUsername, MatchedUsername);
+    }
+    
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(messageInput))
+            return;
+            
+        var newMessage = new Message
+        {
+            SenderId = CurrentUsername,
+            ReceiverId = MatchedUsername,
+            Content = messageInput.Trim(),
+            SentAt = DateTime.UtcNow,
+            IsRead = false
+        };
+        
+        // Išsaugok į DB per servisą
+        await MessageService.SendMessage(newMessage);
+        
+        // Pridėk į lokalų sąrašą
+        messages.Add(newMessage);
+        messageInput = "";
+        
+        StateHasChanged();
+    }
+    
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+    
+    public void Dispose()
+    {
+        refreshTimer?.Dispose();
+    }
+}
