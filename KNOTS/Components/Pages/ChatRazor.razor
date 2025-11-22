@@ -7,11 +7,21 @@
 
 <div class="chat-container">
     <div class="chat-header">
-        <h3>Pokalbis su @MatchedUsername</h3>
+        <div class="header-content">
+            <button class="btn-back" @onclick="GoBack">←</button>
+            <h3>Pokalbis su @MatchedUsername</h3>
+            <button class="btn-refresh" @onclick="RefreshMessages" disabled="@isRefreshing">
+                @(isRefreshing ? "⏳" : "🔄")
+            </button>
+        </div>
     </div>
     
     <div class="messages-container" @ref="messagesContainer">
-        @if (messages.Any())
+        @if (isLoading)
+        {
+            <p class="loading-text">Kraunama...</p>
+        }
+        else if (messages.Any())
         {
             @foreach (var message in messages)
             {
@@ -32,12 +42,198 @@
                @bind:event="oninput"
                @onkeydown="HandleKeyPress"
                placeholder="Rašyti žinutę..." 
-               class="message-input" />
-        <button @onclick="SendMessage" class="send-button" disabled="@string.IsNullOrWhiteSpace(messageInput)">
-            Siųsti
+               class="message-input"
+               disabled="@isSending" />
+        <button @onclick="SendMessage" 
+                class="send-button" 
+                disabled="@(string.IsNullOrWhiteSpace(messageInput) || isSending)">
+            @(isSending ? "..." : "Siųsti")
         </button>
     </div>
 </div>
+
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+    }
+
+    .chat-header {
+        padding: 1rem;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .chat-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        flex: 1;
+        text-align: center;
+    }
+
+    .btn-back, .btn-refresh {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1.2rem;
+        min-width: 40px;
+    }
+
+    .btn-back:hover:not(:disabled), .btn-refresh:hover:not(:disabled) {
+        background: rgba(255,255,255,0.3);
+    }
+
+    .btn-refresh:hover:not(:disabled) {
+        transform: rotate(180deg);
+    }
+
+    .btn-back:disabled, .btn-refresh:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        background: #f5f5f5;
+    }
+
+    .loading-text, .no-messages {
+        text-align: center;
+        color: #999;
+        padding: 2rem;
+        font-style: italic;
+    }
+
+    .message {
+        max-width: 70%;
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        word-wrap: break-word;
+        animation: slideIn 0.3s ease;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message.sent {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        border-bottom-right-radius: 0.25rem;
+    }
+
+    .message.received {
+        align-self: flex-start;
+        background: white;
+        border: 1px solid #e0e0e0;
+        color: #333;
+        border-bottom-left-radius: 0.25rem;
+    }
+
+    .message-content {
+        margin-bottom: 0.25rem;
+        line-height: 1.4;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.7;
+    }
+
+    .input-container {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: white;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .message-input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 1rem;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .message-input:focus {
+        border-color: #bd87f8;
+    }
+
+    .message-input:disabled {
+        background: #f5f5f5;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .send-button {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        border: none;
+        border-radius: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 90px;
+    }
+
+    .send-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .send-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    @@media (max-width: 768px) {
+        .chat-container {
+            max-width: 100%;
+        }
+
+        .message {
+            max-width: 85%;
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+        }
+    }
+</style>
 
 @code {
     [Parameter] public string MatchedUsername { get; set; } = string.Empty;
@@ -46,50 +242,73 @@
     private string messageInput = "";
     private string CurrentUsername = "testuser"; // TODO: Gauk iš autentifikacijos/session
     private ElementReference messagesContainer;
-    private System.Threading.Timer? refreshTimer;
+    private bool isLoading = true;
+    private bool isSending = false;
+    private bool isRefreshing = false;
     
     protected override async Task OnInitializedAsync()
     {
         await LoadMessages();
-        
-        // Periodinė žinučių perkrova (polling metodas)
-        refreshTimer = new System.Threading.Timer(async _ =>
-        {
-            await InvokeAsync(async () =>
-            {
-                await LoadMessages();
-                StateHasChanged();
-            });
-        }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+        isLoading = false;
     }
     
     private async Task LoadMessages()
     {
-        messages = await MessageService.GetConversation(CurrentUsername, MatchedUsername);
+        try
+        {
+            messages = await MessageService.GetConversation(CurrentUsername, MatchedUsername);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading messages: {ex.Message}");
+            messages = new List<Message>();
+        }
+    }
+    
+    private async Task RefreshMessages()
+    {
+        if (isRefreshing) return;
+        
+        isRefreshing = true;
+        StateHasChanged();
+        
+        await LoadMessages();
+        
+        isRefreshing = false;
+        StateHasChanged();
     }
     
     private async Task SendMessage()
     {
-        if (string.IsNullOrWhiteSpace(messageInput))
+        if (string.IsNullOrWhiteSpace(messageInput) || isSending)
             return;
-            
-        var newMessage = new Message
+        
+        isSending = true;
+        
+        try
         {
-            SenderId = CurrentUsername,
-            ReceiverId = MatchedUsername,
-            Content = messageInput.Trim(),
-            SentAt = DateTime.UtcNow,
-            IsRead = false
-        };
-        
-        // Išsaugok į DB per servisą
-        await MessageService.SendMessage(newMessage);
-        
-        // Pridėk į lokalų sąrašą
-        messages.Add(newMessage);
-        messageInput = "";
-        
-        StateHasChanged();
+            var newMessage = new Message
+            {
+                SenderId = CurrentUsername,
+                ReceiverId = MatchedUsername,
+                Content = messageInput.Trim(),
+                SentAt = DateTime.UtcNow,
+                IsRead = false
+            };
+            
+            await MessageService.SendMessage(newMessage);
+            messages.Add(newMessage);
+            messageInput = "";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending message: {ex.Message}");
+        }
+        finally
+        {
+            isSending = false;
+            StateHasChanged();
+        }
     }
     
     private async Task HandleKeyPress(KeyboardEventArgs e)
@@ -100,8 +319,8 @@
         }
     }
     
-    public void Dispose()
+    private void GoBack()
     {
-        refreshTimer?.Dispose();
+        Navigation.NavigateTo("/");
     }
 }
