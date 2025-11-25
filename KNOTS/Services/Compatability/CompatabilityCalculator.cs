@@ -52,13 +52,12 @@ public class CompatibilityCalculator : InterfaceCompatibilityCalculator
     public Dictionary<string, PlayerMatchInfo> GetBestMatchesForPlayers(List<CompatibilityScore> allResults)
     {
         var playerMatches = new Dictionary<string, PlayerMatchInfo>();
-        var allPlayers = allResults.SelectMany(r => new[] { r.Player1, r.Player2 }).Distinct().ToList();
+        var allPlayers = allResults.SelectMany(r => new[] { r.Player1, r.Player2 }).Distinct();
         
         foreach (var player in allPlayers)
         {
             var playerResults = allResults
                 .Where(r => r.Player1 == player || r.Player2 == player)
-                .OrderByDescending(r => r.Percentage)
                 .ToList();
             
             if (!playerResults.Any()) continue;

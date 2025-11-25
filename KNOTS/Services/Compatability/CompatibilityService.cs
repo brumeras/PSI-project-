@@ -242,30 +242,38 @@ public class CompatibilityService : InterfaceCompatibilityService
         return _calculator.CalculateAllCompatibilities(roomCode, playerUsernames);
     }
 
-    public void SaveGameToHistory(string roomCode, List<string> playerUsernames)
-    {
-        try
-        {
+    public void SaveGameToHistory(string roomCode, List<string> playerUsernames) {
+        try {
             var allResults = CalculateAllCompatibilities(roomCode, playerUsernames);
             if (!allResults.Any()) throw new Exception("No compatibility results found");
             
-            var bestMatch = allResults.First();
-            var historyRecord = new GameHistoryRecord
-            {
-                RoomCode = roomCode,
-                PlayedDate = DateTime.Now,
-                TotalPlayers = playerUsernames.Count,
-                PlayerUsernames = JsonSerializer.Serialize(playerUsernames),
-                BestMatchPlayer = bestMatch.Player2,
-                BestMatchPercentage = bestMatch.Percentage,
-                ResultsJson = JsonSerializer.Serialize(allResults)
-            };
-            
-            _context.GameHistory.Add(historyRecord);
-            _context.SaveChanges();
+            foreach (var player in playerUsernames) {
+                
+                var alreadySavedForPlayer = _context.GameHistory
+                    .Any(h => h.RoomCode == roomCode && h.PlayerUsernames.Contains(player));
+                if (alreadySavedForPlayer) continue;
+                
+                var bestForPlayer = allResults
+                    .Where(r => r.Player1 == player || r.Player2 == player)
+                    .OrderByDescending(r => r.Percentage)
+                    .First();
 
-            foreach (var player in playerUsernames)
-            {
+                var bestMatchPlayer = bestForPlayer.Player1 == player 
+                    ? bestForPlayer.Player2 
+                    : bestForPlayer.Player1;
+                
+                var historyRecord = new GameHistoryRecord
+                {
+                    RoomCode = roomCode,
+                    PlayedDate = DateTime.Now,
+                    TotalPlayers = playerUsernames.Count,
+                    PlayerUsernames = JsonSerializer.Serialize(playerUsernames),
+                    BestMatchPlayer = bestMatchPlayer,
+                    BestMatchPercentage = bestForPlayer.Percentage,
+                    ResultsJson = JsonSerializer.Serialize(allResults)
+                };
+                _context.GameHistory.Add(historyRecord);
+                _context.SaveChanges();
                 var stats = _calculator.GetPlayerStatistics(player, allResults);
                 _userService.UpdateUserStatistics(
                     stats.PlayerUsername,
@@ -273,9 +281,7 @@ public class CompatibilityService : InterfaceCompatibilityService
                     stats.WasBestMatch
                 );
             }
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             _logger.LogException(ex, ex.Message);
         }
     }
