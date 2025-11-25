@@ -11,7 +11,10 @@
 
 <div class="leaderboard-container">
     <div class="leaderboard-header">
-        <h1>🏆 Top Knotters</h1>
+        <div class="leaderboard-header-top">
+            <h1>Top Knotters</h1>
+            <a href="/Home" class="btn-gradient btn-home">Home</a>
+        </div>
         <p>Rankings based on best matches and compatibility scores</p>
     </div>
 
@@ -21,7 +24,7 @@
             <i class="bi bi-lock-fill"></i>
             <h3>Authentication Required</h3>
             <p>Please login to view the leaderboard.</p>
-            <a href="/" class="btn-login-link">Go to Login</a>
+            <a href="/" class="btn-gradient btn-login-link">Go to Login</a>
         </div>
     }
     else if (isLoading)
@@ -56,22 +59,7 @@
                         {
                             <tr class="@(user.Username == UserService.CurrentUser ? "current-user-row" : "")">
                                 <td>
-                                    @if (rank == 1)
-                                    {
-                                        <span class="medal gold">🥇</span>
-                                    }
-                                    else if (rank == 2)
-                                    {
-                                        <span class="medal silver">🥈</span>
-                                    }
-                                    else if (rank == 3)
-                                    {
-                                        <span class="medal bronze">🥉</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="rank-number">@rank</span>
-                                    }
+                                    <span class="rank-number @(rank <= 3 ? "top-rank" : string.Empty)">@rank</span>
                                 </td>
                                 <td>
                                     <strong>@user.Username</strong>
@@ -109,12 +97,31 @@
             <i class="bi bi-trophy" style="font-size: 3rem; color: #f888e9;"></i>
             <h3>No Rankings Yet</h3>
             <p>No players have completed games yet. Be the first to play!</p>
-            <a href="/game" class="btn-play">Start Playing</a>
+            <a href="/game" class="btn-gradient btn-play">Start Playing</a>
         </div>
     }
 </div>
 
 <style>
+
+    .btn-gradient {
+        display: inline-block;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.75rem 1.6rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
+        color: white;
+    }
+
     .leaderboard-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -124,6 +131,13 @@
     .leaderboard-header {
         text-align: center;
         margin-bottom: 2rem;
+    }
+    
+    .leaderboard-header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
     }
 
     .leaderboard-header h1 {
@@ -166,15 +180,7 @@
     }
 
     .btn-login-link {
-        display: inline-block;
-        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
-        color: white;
         padding: 1rem 2rem;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
     }
 
     .btn-login-link:hover {
@@ -250,18 +256,8 @@
         border-bottom-right-radius: 10px;
     }
 
-    .current-user-row {
-        background: linear-gradient(135deg, #e7f3ff 0%, #f0e7ff 100%) !important;
-        border: 2px solid #bd87f8 !important;
-    }
-
     .current-user-row td {
         border-color: #bd87f8 !important;
-    }
-
-    .medal {
-        font-size: 1.5rem;
-        display: inline-block;
     }
 
     .rank-number {
@@ -270,6 +266,10 @@
         font-size: 1.1rem;
     }
 
+    .top-rank {
+        color: #d4af37;
+    }
+    
     .you-badge {
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
@@ -326,22 +326,12 @@
         margin-bottom: 2rem;
     }
 
-    .btn-play {
-        display: inline-block;
-        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
-        color: white;
-        padding: 1rem 2rem;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    .btn-home {
+        padding: 0.7rem 1.6rem;
     }
 
-    .btn-play:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
-        color: white;
+    .btn-play {
+        padding: 1rem 2rem;
     }
 
     @@media (max-width: 768px) {
@@ -358,10 +348,7 @@
             padding: 0.75rem 0.5rem;
             font-size: 0.85rem;
         }
-
-        .medal {
-            font-size: 1.2rem;
-        }
+        
     }
 </style>
 
