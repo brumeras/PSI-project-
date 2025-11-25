@@ -3,16 +3,23 @@ using Microsoft.EntityFrameworkCore;
 using KNOTS.Services;
 
 namespace KNOTS.Data;
-public class AppDbContext : DbContext {
+
+public class AppDbContext : DbContext 
+{
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
+    
     public DbSet<User> Users { get; set; }
     public DbSet<GameStatement> Statements { get; set; }
     public DbSet<PlayerSwipeRecord> PlayerSwipes { get; set; }
     public DbSet<GameHistoryRecord> GameHistory { get; set; }
-    protected override void OnModelCreating(ModelBuilder modelBuilder) {
+    public DbSet<Message> Messages { get; set; }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder) 
+    {
         base.OnModelCreating(modelBuilder);
+        
         // User configuration
         modelBuilder.Entity<User>(entity =>
         {
@@ -24,6 +31,7 @@ public class AppDbContext : DbContext {
             entity.Property(e => e.AverageCompatibilityScore).HasDefaultValue(0.0);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now')");
         });
+        
         // GameStatement configuration
         modelBuilder.Entity<GameStatement>(entity =>
         {
@@ -32,6 +40,7 @@ public class AppDbContext : DbContext {
             entity.Property(e => e.Text).IsRequired().HasMaxLength(500);
             entity.Property(e => e.Topic).IsRequired().HasMaxLength(50);
         });
+        
         // PlayerSwipeRecord configuration
         modelBuilder.Entity<PlayerSwipeRecord>(entity =>
         {
@@ -45,6 +54,7 @@ public class AppDbContext : DbContext {
             entity.HasIndex(e => new { e.RoomCode, e.PlayerUsername, e.StatementId })
                 .IsUnique();
         });
+        
         // GameHistoryRecord configuration
         modelBuilder.Entity<GameHistoryRecord>(entity =>
         {
@@ -55,6 +65,19 @@ public class AppDbContext : DbContext {
             entity.Property(e => e.BestMatchPlayer).HasMaxLength(50);
             entity.Property(e => e.ResultsJson).IsRequired();
         });
+        
+        // Message configuration
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.SenderId).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.ReceiverId).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Content).IsRequired().HasMaxLength(2000);
+            entity.Property(e => e.SentAt).HasDefaultValueSql("datetime('now')");
+            entity.Property(e => e.IsRead).HasDefaultValue(false);
+            
+            entity.HasIndex(e => new { e.SenderId, e.ReceiverId });
+            entity.HasIndex(e => e.SentAt);
+        });
     }
 }
-
