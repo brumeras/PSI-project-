@@ -24,18 +24,18 @@
             </div>
             
             <div class="results-body">
-                <h4 class="section-title">🏆 Top Matches</h4>
+                <h4 class="section-title">Top Matches</h4>
                 
                 @for (int i = 0; i < compatibilityResults.Count; i++)
                 {
                     var currentIndex = i; 
                     var result = compatibilityResults[i];
-                    var medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "";
+                    var rankLabel = $"#{i + 1}";
                     
                     <div class="result-item @(i == 0 ? "best-match" : "")">
                         <div class="result-header-row">
                             <h5 class="match-title">
-                                @medal @result.Player1 & @result.Player2
+                                <span class="rank-chip">@rankLabel</span> @result.Player1 & @result.Player2
                             </h5>
                             <span class="score-badge @GetBadgeClass(result.Percentage)">
                                 @result.Percentage%
@@ -81,7 +81,7 @@
                     @if (myMatches.Any())
                     {
                         <hr class="section-divider" />
-                        <h4 class="section-title">💖 Your Personal Matches</h4>
+                        <h4 class="section-title">Your Personal Matches</h4>
                         
                         @foreach (var match in myMatches)
                         {
@@ -111,7 +111,7 @@
                 
                 <div class="action-section">
                     <button class="btn-save" @onclick="SaveToHistory">
-                        💾 Save Results & Finish
+                        Save Results & Finish
                     </button>
                 </div>
             </div>
@@ -226,6 +226,18 @@
         font-size: 1.2rem;
         color: #333;
     }
+
+    .rank-chip {
+        display: inline-block;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 0.25rem 0.65rem;
+        font-weight: 700;
+        margin-right: 0.5rem;
+        font-size: 0.9rem;
+    }
+
 
     .score-badge {
         padding: 0.5rem 1rem;

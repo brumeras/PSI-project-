@@ -9,7 +9,7 @@
 
 
 <div class="swipe-container">
-    <h3 class="swipe-title">💭 Swipe Your Answers</h3>
+    <h3 class="swipe-title">Swipe Your Answers</h3>
 
     @if (!UserService.IsAuthenticated)
     {
@@ -471,7 +471,7 @@
         if (string.IsNullOrEmpty(RoomCode))
         {
             statusMessage = "Error: No room code provided";
-            Console.WriteLine("❌ [NewGame] Cannot load statements - RoomCode is empty");
+            Console.WriteLine("[ERROR] [NewGame] Cannot load statements - RoomCode is empty");
             return;
         }
 
@@ -479,13 +479,13 @@
         {
             statements = CompatibilityService.GetRoomStatements(RoomCode, SelectedTopics, 10);
             statusMessage = $"Loaded {statements.Count} statements. Let's begin!";
-            Console.WriteLine($"✅ [NewGame] Loaded {statements.Count} statements for room {RoomCode}");
-            Console.WriteLine($"📋 [NewGame] Statement IDs: {string.Join(", ", statements.Select(s => s.Id))}");
+            Console.WriteLine($"[INFO] [NewGame] Loaded {statements.Count} statements for room {RoomCode}");
+            Console.WriteLine($"[DEBUG] [NewGame] Statement IDs: {string.Join(", ", statements.Select(s => s.Id))}");
         }
         catch (Exception ex)
         {
             statusMessage = $"Error loading statements: {ex.Message}";
-            Console.WriteLine($"❌ [NewGame] Error loading statements: {ex.Message}");
+            Console.WriteLine($"[ERROR] [NewGame] Error loading statements: {ex.Message}");
         }
     }
 
@@ -523,16 +523,16 @@
             if (!saved)
             {
                 statusMessage = "Error saving your answer. Please try again.";
-                Console.WriteLine($"❌ [NewGame] Failed to save swipe for statement {statement.Id}");
+                Console.WriteLine($"[ERROR] [NewGame] Failed to save swipe for statement {statement.Id}");
             }
             else
             {
-                Console.WriteLine($"✅ [NewGame] Successfully saved swipe {currentStatementIndex + 1}/{statements.Count}");
+                Console.WriteLine($"[INFO] [NewGame] Successfully saved swipe {currentStatementIndex + 1}/{statements.Count}");
             }
         }
         else
         {
-            Console.WriteLine("❌ [NewGame] Cannot save swipe - RoomCode is empty");
+            Console.WriteLine("[ERROR] [NewGame] Cannot save swipe - RoomCode is empty");
         }
 
         await Task.Delay(500);
@@ -548,7 +548,7 @@
         {
             currentStatementIndex++;
             statusMessage = "Statement skipped.";
-            Console.WriteLine($"⏭️ [NewGame] Skipped to statement {currentStatementIndex + 1}");
+            Console.WriteLine($"[INFO] [NewGame] Skipped to statement {currentStatementIndex + 1}");
         }
     }
 
@@ -558,7 +558,7 @@
         {
             currentStatementIndex--;
             statusMessage = "";
-            Console.WriteLine($"⏮️ [NewGame] Went back to statement {currentStatementIndex + 1}");
+            Console.WriteLine($"[INFO] [NewGame] Went back to statement {currentStatementIndex + 1}");
         }
     }
 
@@ -566,7 +566,7 @@
     {
         currentStatementIndex = 0;
         statusMessage = "Reviewing your answers...";
-        Console.WriteLine($"🔄 [NewGame] Reset to beginning");
+        Console.WriteLine($"[INFO] [NewGame] Reset to beginning");
     }
 
     private double GetProgressPercentage()
@@ -580,7 +580,7 @@
         bool isComplete = currentStatementIndex >= statements.Count;
         if (isComplete)
         {
-            Console.WriteLine($"✅ [NewGame] Player completed all {statements.Count} statements");
+            Console.WriteLine($"[INFO] [NewGame] Player completed all {statements.Count} statements");
         }
         return isComplete;
     }

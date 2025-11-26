@@ -38,7 +38,7 @@
             @if (string.IsNullOrEmpty(currentRoomCode))
             {
                 <div class="lobby-section">
-                    <h2 class="section-title">🎮 Game Lobby</h2>
+                    <h2 class="section-title">Game Lobby</h2>
                     <p class="welcome-text">Hello, <strong>@UserService.CurrentUser</strong>!</p>
                     @if (!string.IsNullOrEmpty(playerId))
                     {
@@ -100,7 +100,7 @@
                         <div class="room-header">
                             <div>
                                 <h3>Room Code: <span class="room-code">@currentRoomCode</span></h3>
-                                <p class="players-count">👥 @playersInRoom.Count player(s) connected</p>
+                                <p class="players-count"><i class="bi bi-people-fill"></i> @playersInRoom.Count player(s) connected</p>
                             </div>
                         </div>
                         
@@ -713,7 +713,7 @@
 
     private void GoToHome()
     {
-        NavigationManager.NavigateTo("/home");
+        NavigationManager.NavigateTo("/Home");
     }
     
     private async Task CreateRoom()
@@ -831,7 +831,7 @@
         playersInRoom.Clear();
         playersInRoom.Add(UserService.CurrentUser ?? "");
         isConnecting = false;
-        Console.WriteLine($"✅ Room {roomCode} created with topics: {string.Join(", ", selectedTopics)}");
+        Console.WriteLine($"[INFO] Room {roomCode} created with topics: {string.Join(", ", selectedTopics)}");
         await InvokeAsync(StateHasChanged);
     }
 
