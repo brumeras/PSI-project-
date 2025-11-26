@@ -247,10 +247,16 @@ public class CompatibilityService : InterfaceCompatibilityService
             var allResults = CalculateAllCompatibilities(roomCode, playerUsernames);
             if (!allResults.Any()) throw new Exception("No compatibility results found");
             
+            var roomHistory = _context.GameHistory
+                .Where(h => h.RoomCode == roomCode)
+                .ToList();
+            
             foreach (var player in playerUsernames) {
-                
-                var alreadySavedForPlayer = _context.GameHistory
-                    .Any(h => h.RoomCode == roomCode && h.PlayerUsernames.Contains(player));
+                var alreadySavedForPlayer = roomHistory.Any(h => {
+                    var players = JsonSerializer.Deserialize<List<string>>(h.PlayerUsernames) ?? new List<string>();
+                    return players.Contains(player);
+                });
+
                 if (alreadySavedForPlayer) continue;
                 
                 var bestForPlayer = allResults
@@ -258,22 +264,24 @@ public class CompatibilityService : InterfaceCompatibilityService
                     .OrderByDescending(r => r.Percentage)
                     .First();
 
-                var bestMatchPlayer = bestForPlayer.Player1 == player 
-                    ? bestForPlayer.Player2 
+                var bestMatchPlayer = bestForPlayer.Player1 == player
+                    ? bestForPlayer.Player2
                     : bestForPlayer.Player1;
-                
-                var historyRecord = new GameHistoryRecord
-                {
+
+                var historyRecord = new GameHistoryRecord {
                     RoomCode = roomCode,
                     PlayedDate = DateTime.Now,
                     TotalPlayers = playerUsernames.Count,
-                    PlayerUsernames = JsonSerializer.Serialize(playerUsernames),
+                    PlayerUsernames = JsonSerializer.Serialize(new List<string> { player }),
                     BestMatchPlayer = bestMatchPlayer,
                     BestMatchPercentage = bestForPlayer.Percentage,
-                    ResultsJson = JsonSerializer.Serialize(allResults)
+                    ResultsJson = JsonSerializer.Serialize(
+                        allResults.Where(r => r.Player1 == player || r.Player2 == player)
+                    )
                 };
+
                 _context.GameHistory.Add(historyRecord);
-                _context.SaveChanges();
+
                 var stats = _calculator.GetPlayerStatistics(player, allResults);
                 _userService.UpdateUserStatistics(
                     stats.PlayerUsername,
@@ -281,13 +289,11 @@ public class CompatibilityService : InterfaceCompatibilityService
                     stats.WasBestMatch
                 );
             }
-        } catch (Exception ex) {
-            _logger.LogException(ex, ex.Message);
-        }
-    }
 
-    public List<GameHistoryEntry> GetPlayerHistory(string playerUsername)
-    {
+            _context.SaveChanges();
+        } catch (Exception ex) { _logger.LogException(ex, ex.Message); }
+    }
+    public List<GameHistoryEntry> GetPlayerHistory(string playerUsername) {
         var allHistory = _context.GameHistory
             .OrderByDescending(h => h.PlayedDate)
             .ToList();
@@ -310,8 +316,7 @@ public class CompatibilityService : InterfaceCompatibilityService
             .ToList();
     }
 
-    public void ClearRoomData(string roomCode)
-    {
+    public void ClearRoomData(string roomCode) {
         var swipesToRemove = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
         _context.PlayerSwipes.RemoveRange(swipesToRemove);
         _context.SaveChanges();
