@@ -3,7 +3,7 @@
 @using KNOTS.Services.Interfaces
 @inject InterfaceCompatibilityService CompatibilityService
 @inject IGameRoomService GameRoomService
-
+@inject NavigationManager Navigation
 
 <div class="results-container">
     @if (isCalculating)
@@ -28,7 +28,6 @@
                 
                 @for (int i = 0; i < compatibilityResults.Count; i++)
                 {
-                    // SPRENDIMAS 2: Sukuriamas lokalus kintamasis, kad išvengti for ciklo kintamojo srities problemos
                     var currentIndex = i; 
                     var result = compatibilityResults[i];
                     var medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "";
@@ -52,12 +51,10 @@
                         
                         @if (result.MatchedStatements.Any())
                         {
-                            // Naudojamas currentIndex
                             <button class="btn-toggle" @onclick="() => ToggleDetails(currentIndex)">
                                 @(expandedIndex == currentIndex ? "Hide" : "Show") matched statements
                             </button>
                             
-                            // Naudojamas currentIndex
                             @if (expandedIndex == currentIndex)
                             {
                                 <div class="matched-statements">
@@ -92,15 +89,20 @@
                             
                             <div class="personal-match">
                                 <div class="personal-match-content">
-                                    <strong>You & @otherPlayer</strong>
-                                    <div class="personal-match-score">
-                                        <span class="score-badge @GetBadgeClass(match.Percentage)">
-                                            @match.Percentage%
-                                        </span>
-                                        <small class="match-count">
-                                            (@match.MatchingSwipes/@match.TotalStatements)
-                                        </small>
+                                    <div class="personal-match-info">
+                                        <strong>You & @otherPlayer</strong>
+                                        <div class="personal-match-score">
+                                            <span class="score-badge @GetBadgeClass(match.Percentage)">
+                                                @match.Percentage%
+                                            </span>
+                                            <small class="match-count">
+                                                (@match.MatchingSwipes/@match.TotalStatements)
+                                            </small>
+                                        </div>
                                     </div>
+                                    <button class="btn-chat" @onclick="() => OpenChat(otherPlayer)">
+                                        💬 Pradėti pokalbį
+                                    </button>
                                 </div>
                             </div>
                         }
@@ -340,6 +342,12 @@
         border-radius: 10px;
         margin-bottom: 1rem;
         border-left: 4px solid #bd87f8;
+        transition: all 0.3s ease;
+    }
+
+    .personal-match:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(189, 135, 248, 0.3);
     }
 
     .personal-match-content {
@@ -347,6 +355,12 @@
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .personal-match-info {
+        display: flex;
+        flex-direction: column;
         gap: 0.5rem;
     }
 
@@ -358,6 +372,29 @@
 
     .match-count {
         color: #666;
+    }
+
+    .btn-chat {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(248, 136, 233, 0.3);
+        white-space: nowrap;
+    }
+
+    .btn-chat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.5);
+    }
+
+    .btn-chat:active {
+        transform: translateY(0);
     }
 
     .action-section {
@@ -418,7 +455,11 @@
 
         .personal-match-content {
             flex-direction: column;
-            align-items: flex-start;
+            align-items: stretch;
+        }
+
+        .btn-chat {
+            width: 100%;
         }
     }
 </style>
@@ -476,7 +517,6 @@
     private void ToggleDetails(int index)
     {
         expandedIndex = expandedIndex == index ? -1 : index;
-        // SPRENDIMAS 1: Būtina kviesti StateHasChanged, kad atnaujintų UI
         StateHasChanged(); 
     }
     
@@ -494,6 +534,11 @@
         if (percentage >= 60) return "medium";
         if (percentage >= 40) return "low";
         return "verylow";
+    }
+    
+    private void OpenChat(string username)
+    {
+        Navigation.NavigateTo($"/chat/{username}");
     }
     
     private async Task SaveToHistory()
