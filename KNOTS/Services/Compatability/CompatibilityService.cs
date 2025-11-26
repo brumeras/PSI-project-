@@ -242,30 +242,46 @@ public class CompatibilityService : InterfaceCompatibilityService
         return _calculator.CalculateAllCompatibilities(roomCode, playerUsernames);
     }
 
-    public void SaveGameToHistory(string roomCode, List<string> playerUsernames)
-    {
-        try
-        {
+    public void SaveGameToHistory(string roomCode, List<string> playerUsernames) {
+        try {
             var allResults = CalculateAllCompatibilities(roomCode, playerUsernames);
             if (!allResults.Any()) throw new Exception("No compatibility results found");
             
-            var bestMatch = allResults.First();
-            var historyRecord = new GameHistoryRecord
-            {
-                RoomCode = roomCode,
-                PlayedDate = DateTime.Now,
-                TotalPlayers = playerUsernames.Count,
-                PlayerUsernames = JsonSerializer.Serialize(playerUsernames),
-                BestMatchPlayer = bestMatch.Player2,
-                BestMatchPercentage = bestMatch.Percentage,
-                ResultsJson = JsonSerializer.Serialize(allResults)
-            };
+            var roomHistory = _context.GameHistory
+                .Where(h => h.RoomCode == roomCode)
+                .ToList();
             
-            _context.GameHistory.Add(historyRecord);
-            _context.SaveChanges();
+            foreach (var player in playerUsernames) {
+                var alreadySavedForPlayer = roomHistory.Any(h => {
+                    var players = JsonSerializer.Deserialize<List<string>>(h.PlayerUsernames) ?? new List<string>();
+                    return players.Contains(player);
+                });
 
-            foreach (var player in playerUsernames)
-            {
+                if (alreadySavedForPlayer) continue;
+                
+                var bestForPlayer = allResults
+                    .Where(r => r.Player1 == player || r.Player2 == player)
+                    .OrderByDescending(r => r.Percentage)
+                    .First();
+
+                var bestMatchPlayer = bestForPlayer.Player1 == player
+                    ? bestForPlayer.Player2
+                    : bestForPlayer.Player1;
+
+                var historyRecord = new GameHistoryRecord {
+                    RoomCode = roomCode,
+                    PlayedDate = DateTime.Now,
+                    TotalPlayers = playerUsernames.Count,
+                    PlayerUsernames = JsonSerializer.Serialize(new List<string> { player }),
+                    BestMatchPlayer = bestMatchPlayer,
+                    BestMatchPercentage = bestForPlayer.Percentage,
+                    ResultsJson = JsonSerializer.Serialize(
+                        allResults.Where(r => r.Player1 == player || r.Player2 == player)
+                    )
+                };
+
+                _context.GameHistory.Add(historyRecord);
+
                 var stats = _calculator.GetPlayerStatistics(player, allResults);
                 _userService.UpdateUserStatistics(
                     stats.PlayerUsername,
@@ -273,15 +289,11 @@ public class CompatibilityService : InterfaceCompatibilityService
                     stats.WasBestMatch
                 );
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogException(ex, ex.Message);
-        }
-    }
 
-    public List<GameHistoryEntry> GetPlayerHistory(string playerUsername)
-    {
+            _context.SaveChanges();
+        } catch (Exception ex) { _logger.LogException(ex, ex.Message); }
+    }
+    public List<GameHistoryEntry> GetPlayerHistory(string playerUsername) {
         var allHistory = _context.GameHistory
             .OrderByDescending(h => h.PlayedDate)
             .ToList();
@@ -304,8 +316,7 @@ public class CompatibilityService : InterfaceCompatibilityService
             .ToList();
     }
 
-    public void ClearRoomData(string roomCode)
-    {
+    public void ClearRoomData(string roomCode) {
         var swipesToRemove = _context.PlayerSwipes.Where(s => s.RoomCode == roomCode);
         _context.PlayerSwipes.RemoveRange(swipesToRemove);
         _context.SaveChanges();
