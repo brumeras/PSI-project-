@@ -621,19 +621,19 @@
 @code {
     private DotNetObjectReference<Game>? objectReference;
     private string playerId = "";
-    private string currentRoomCode = "";
+    public string currentRoomCode = "";
     private string roomCodeToJoin = "";
-    private string statusMessage = "";
-    private bool isConnecting = false;
-    private bool showResults = false;
-    private bool allPlayersFinished = false;
-    private List<string> playersInRoom = new();
+    public string statusMessage = "";
+    public bool isConnecting = false;
+    public bool showResults = false;
+    public bool allPlayersFinished = false;
+    public List<string> playersInRoom = new();
     private List<string> gameMessages = new();
     private NewGame? newGameFormRef;
     private System.Threading.Timer? statusCheckTimer;
     private Dictionary<string, bool> topicSelections = new();
-    private List<string> availableTopics = new() { "Science", "Movies", "Travel", "Hobbies" };
-    private HashSet<string> selectedTopics = new();
+    public List<string> availableTopics = new() { "Science", "Movies", "Travel", "Hobbies" };
+    public HashSet<string> selectedTopics = new();
 
     [Parameter]
     public string? Username { get; set; }
@@ -727,7 +727,7 @@
         await JSRuntime.InvokeVoidAsync("createRoom", UserService.CurrentUser, selectedTopics.ToArray());
     }
 
-    private void ToggleTopicSelectionFromDict()
+    public void ToggleTopicSelectionFromDict()
     {
         selectedTopics.Clear();
         foreach (var kvp in topicSelections)
@@ -765,7 +765,7 @@
         }
     }
     
-    private int GetPlayersFinishedCount()
+    public int GetPlayersFinishedCount()
     {
         if (string.IsNullOrEmpty(currentRoomCode)) return 0;
         
@@ -784,13 +784,13 @@
         return finishedCount;
     }
 
-    private double GetFinishedPercentage()
+    public double GetFinishedPercentage()
     {
         if (playersInRoom.Count == 0) return 0;
         return (double)GetPlayersFinishedCount() / playersInRoom.Count * 100;
     }
     
-    private void ShowResults()
+    public void ShowResults()
     {
         CheckIfAllFinished();
         
@@ -806,7 +806,7 @@
         }
     }
     
-    private void HandleResultsSaved()
+    public void HandleResultsSaved()
     {
         statusMessage = "Results saved! You can view them in the Activity page.";
         showResults = false;
