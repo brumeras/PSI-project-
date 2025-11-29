@@ -5,6 +5,7 @@ using KNOTS.Data;
 using KNOTS.Hubs;
 using KNOTS.Services.Chat;
 using KNOTS.Services.Compability;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,7 @@ builder.Services.AddScoped<InterfaceCompatibilityCalculator, CompatibilityCalcul
 builder.Services.AddScoped<InterfaceUserService, UserService>();
 builder.Services.AddScoped<InterfaceCompatibilityService, CompatibilityService>();
 builder.Services.AddSingleton<IGameRoomService, GameRoomService>();
+builder.Services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
 
 
 // SignalR
