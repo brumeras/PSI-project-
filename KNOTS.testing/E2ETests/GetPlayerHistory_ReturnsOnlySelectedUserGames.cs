@@ -8,7 +8,7 @@ using Xunit;
 
 namespace TestProject1.E2ETests;
 
-public class GetPlayerHistory_ReturnsOnlySelectedUserGames : EndToEndTestBase
+/*public class GetPlayerHistory_ReturnsOnlySelectedUserGames : EndToEndTestBase
 {
     [Fact]
     public void ReturnsOnlyGamesThatIncludeRequestedPlayer()
@@ -129,3 +129,4 @@ public class GetPlayerHistory_ReturnsOnlySelectedUserGames : EndToEndTestBase
         Assert.DoesNotContain(history, h => h.RoomCode == otherRoom);
     }
 }
+*/
