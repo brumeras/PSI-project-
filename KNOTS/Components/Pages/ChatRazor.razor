@@ -5,6 +5,7 @@
 @using KNOTS.Services.Interfaces
 @using Microsoft.JSInterop
 @using System.Linq
+@using System.Text.Json
 @using KNOTS.Services
 @inject IMessageService MessageService
 @inject InterfaceUserService UserService
@@ -252,6 +253,7 @@
     private static int temporaryIdCounter = 0;
     private bool shouldScrollToBottom = false;
     private string? lastKnownMessageKey;
+    private static readonly JsonSerializerOptions messageJsonOptions = new() { PropertyNameCaseInsensitive = true };
     
     protected override async Task OnInitializedAsync()
     {
@@ -309,6 +311,8 @@
             {
                 shouldScrollToBottom = true;
             }
+
+            await MessageService.MarkConversationAsRead(CurrentUsername, MatchedUsername);
         }
         catch (Exception ex)
         {
@@ -424,14 +428,14 @@
         await HandleIncomingMessage(messageJson);
     }
 
-    private Task HandleIncomingMessage(string messageJson)
+    private async Task HandleIncomingMessage(string messageJson)
     {
         try
         {
-            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(messageJson);
+            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(messageJson, messageJsonOptions);
             if (message == null)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             var normalizedSender = Normalize(message.SenderId);
@@ -444,14 +448,14 @@
 
             if (!isRelevant)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             RemoveMatchingPlaceholder(message);
 
             if (message.Id != 0 && messages.Any(m => m.Id == message.Id))
             {
-                return Task.CompletedTask;
+                return;
             }
 
             messages.Add(message);
@@ -460,14 +464,17 @@
                 .ToList();
             lastKnownMessageKey = CreateMessageKey(messages.LastOrDefault());
             shouldScrollToBottom = true;
+
+            if (normalizedReceiver == normalizedCurrent)
+            {
+                await MessageService.MarkConversationAsRead(CurrentUsername, MatchedUsername);
+            }
             InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to handle incoming chat message: {ex.Message}");
         }
-
-        return Task.CompletedTask;
     }
 
     private static string Normalize(string value) => (value ?? string.Empty).Trim().ToLowerInvariant();

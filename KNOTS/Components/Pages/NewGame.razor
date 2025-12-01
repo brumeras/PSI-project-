@@ -27,6 +27,57 @@
             <p class="mt-3">Loading game statements...</p>
         </div>
     }
+    else if (isReviewMode && statements.Any())
+    {
+        var current = statements[reviewIndex];
+        var hasAnswer = playerAnswers.TryGetValue(current.Id, out var agreeWithStatement);
+
+        <div class="statement-card review-mode">
+            <div class="card-content">
+                <div class="progress-badge">
+                    Reviewing answer @(reviewIndex + 1) of @statements.Count
+                </div>
+
+                <h2 class="statement-text">@current.Text</h2>
+
+                <div class="review-answer-status @(hasAnswer ? "" : "no-answer")">
+                    <i class="bi @(agreeWithStatement ? "bi-check-lg" : "bi-x-lg")"></i>
+                    <span>@(hasAnswer ? (agreeWithStatement ? "You chose Agree" : "You chose Disagree") : "No answer recorded")</span>
+                </div>
+
+                <div class="swipe-buttons">
+                    <button class="swipe-btn disagree @(hasAnswer && !agreeWithStatement ? "selected" : "")"
+                            @onclick="() => UpdateReviewSelection(false)">
+                        <i class="bi bi-x-lg"></i>
+                        <span class="btn-label">Mark Disagree</span>
+                    </button>
+
+                    <button class="swipe-btn agree @(hasAnswer && agreeWithStatement ? "selected" : "")"
+                            @onclick="() => UpdateReviewSelection(true)">
+                        <i class="bi bi-check-lg"></i>
+                        <span class="btn-label">Mark Agree</span>
+                    </button>
+                </div>
+
+                <div class="navigation-buttons review-navigation">
+                    <button class="nav-btn prev"
+                            @onclick="GoToPreviousReview"
+                            disabled="@(!statements.Any() || reviewIndex == 0)">
+                        <i class="bi bi-arrow-left"></i> Previous
+                    </button>
+                    <button class="nav-btn skip"
+                            @onclick="GoToNextReview"
+                            disabled="@(!statements.Any() || reviewIndex >= statements.Count - 1)">
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+
+                <button class="btn-review" @onclick="CloseReview">
+                    <i class="bi bi-arrow-counterclockwise"></i> Back to summary
+                </button>
+            </div>
+        </div>
+    }
     else if (currentStatementIndex >= statements.Count)
     {
         <div class="completed-card">
@@ -41,7 +92,7 @@
                     </div>
                 </div>
             </div>
-            <button class="btn-review" @onclick="ResetSwipes">
+            <button class="btn-review" @onclick="StartReview">
                 <i class="bi bi-arrow-clockwise"></i> Review Answers
             </button>
         </div>
@@ -209,6 +260,34 @@
         align-items: center;
         gap: 0.5rem;
         margin-top: 1rem;
+    }
+
+    .review-mode {
+        border: 2px solid #f888e9;
+    }
+
+    .review-answer-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        background: rgba(248, 136, 233, 0.12);
+        color: #333;
+        font-weight: 600;
+    }
+
+    .review-answer-status.no-answer {
+        background: #f9e3f7;
+        color: #a23434;
+    }
+
+    .swipe-btn.selected {
+        box-shadow: 0 0 0 3px rgba(248, 136, 233, 0.35);
+    }
+
+    .review-navigation {
+        margin-top: 1.5rem;
     }
 
     .btn-review:hover {
@@ -449,6 +528,9 @@
     private bool isAnimating = false;
     private string swipeClass = "";
     private string swipeStyle = "";
+    private Dictionary<string, bool> playerAnswers = new();
+    private int reviewIndex = 0;
+    private bool isReviewMode = false;
 
     protected override void OnInitialized()
     {
@@ -463,6 +545,11 @@
         if (UserService.IsAuthenticated && !string.IsNullOrEmpty(RoomCode) && !statements.Any())
         {
             LoadStatements();
+        }
+
+        if (UserService.IsAuthenticated && !string.IsNullOrEmpty(RoomCode) && statements.Any() && !playerAnswers.Any())
+        {
+            LoadPlayerAnswers();
         }
     }
 
@@ -481,6 +568,8 @@
             statusMessage = $"Loaded {statements.Count} statements. Let's begin!";
             Console.WriteLine($"[INFO] [NewGame] Loaded {statements.Count} statements for room {RoomCode}");
             Console.WriteLine($"[DEBUG] [NewGame] Statement IDs: {string.Join(", ", statements.Select(s => s.Id))}");
+
+            LoadPlayerAnswers();
         }
         catch (Exception ex)
         {
@@ -528,6 +617,7 @@
             else
             {
                 Console.WriteLine($"[INFO] [NewGame] Successfully saved swipe {currentStatementIndex + 1}/{statements.Count}");
+                playerAnswers[statement.Id] = agreeWithStatement;
             }
         }
         else
@@ -562,11 +652,81 @@
         }
     }
 
-    private void ResetSwipes()
+    private void StartReview()
     {
-        currentStatementIndex = 0;
+        if (!statements.Any()) return;
+
+        isReviewMode = true;
+        reviewIndex = 0;
         statusMessage = "Reviewing your answers...";
-        Console.WriteLine($"[INFO] [NewGame] Reset to beginning");
+        Console.WriteLine("[INFO] [NewGame] Entered review mode");
+    }
+
+    private void CloseReview()
+    {
+        isReviewMode = false;
+        statusMessage = string.Empty;
+        Console.WriteLine("[INFO] [NewGame] Closed review mode");
+    }
+
+    private void GoToNextReview()
+    {
+        if (reviewIndex < statements.Count - 1)
+        {
+            reviewIndex++;
+        }
+    }
+
+    private void GoToPreviousReview()
+    {
+        if (reviewIndex > 0)
+        {
+            reviewIndex--;
+        }
+    }
+
+    private void LoadPlayerAnswers()
+    {
+        var playerUsername = Username ?? UserService.CurrentUser ?? string.Empty;
+        if (string.IsNullOrEmpty(playerUsername) || string.IsNullOrEmpty(RoomCode))
+        {
+            return;
+        }
+
+        var swipes = CompatibilityService.GetPlayerSwipes(RoomCode, playerUsername);
+        playerAnswers = swipes.ToDictionary(s => s.StatementId, s => s.AgreeWithStatement);
+
+        if (playerAnswers.Count > 0)
+        {
+            currentStatementIndex = Math.Min(playerAnswers.Count, statements.Count);
+            Console.WriteLine($"[INFO] [NewGame] Loaded {playerAnswers.Count} saved answers for review");
+        }
+    }
+
+    private void UpdateReviewSelection(bool agreeWithStatement)
+    {
+        if (!isReviewMode || !statements.Any()) return;
+
+        var statement = statements[reviewIndex];
+        var playerUsername = Username ?? UserService.CurrentUser ?? string.Empty;
+
+        if (string.IsNullOrEmpty(RoomCode) || string.IsNullOrEmpty(playerUsername))
+        {
+            statusMessage = "Unable to save your review choice.";
+            return;
+        }
+
+        var saved = CompatibilityService.SaveSwipe(RoomCode, playerUsername, statement.Id, agreeWithStatement);
+        if (!saved)
+        {
+            statusMessage = "Error updating your answer. Please try again.";
+            Console.WriteLine($"[ERROR] [NewGame] Failed to update swipe for statement {statement.Id}");
+            return;
+        }
+
+        playerAnswers[statement.Id] = agreeWithStatement;
+        statusMessage = "Answer updated.";
+        Console.WriteLine($"[INFO] [NewGame] Updated answer for statement {reviewIndex + 1}");
     }
 
     private double GetProgressPercentage()
