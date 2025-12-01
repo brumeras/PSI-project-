@@ -6,6 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Azure.Core" Version="1.50.0" />
+        <PackageReference Include="AzureToolkit" Version="2.5.0" />
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
         <PackageReference Include="bunit" Version="2.0.66" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
