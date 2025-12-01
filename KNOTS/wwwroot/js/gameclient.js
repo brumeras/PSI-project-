@@ -30,8 +30,13 @@
     async function initializeGameConnection() {
         try {
             if (gameConnection) {
-                console.warn("[client] Game connection already initialized");
-                return true;
+                if (gameConnection.state === signalR.HubConnectionState.Disconnected) {
+                    console.warn("[client] Game connection existed but was disconnected — restarting");
+                    await gameConnection.start();
+                } else {
+                    console.warn("[client] Game connection already initialized");
+                }
+                return gameConnection.state === signalR.HubConnectionState.Connected;
             }
 
             gameConnection = new signalR.HubConnectionBuilder()
@@ -148,7 +153,7 @@
     }
 
     async function createRoom(username) {
-        if (!gameConnection) {
+        if (!gameConnection || gameConnection.state !== signalR.HubConnectionState.Connected) {
             console.error("[client] Game connection not established");
             return false;
         }
@@ -162,7 +167,7 @@
     }
 
     async function joinRoom(roomCode, username) {
-        if (!gameConnection) {
+        if (!gameConnection || gameConnection.state !== signalR.HubConnectionState.Connected) {
             console.error("[client] Game connection not established");
             return false;
         }
@@ -197,6 +202,10 @@
             } catch (err) {
                 console.error("[client] Error disconnecting from game:", err);
             }
+            gameConnection = null;
+            currentRoom = null;
+            currentPlayerId = null;
+            currentInGameNickname = null;
         }
     }
 

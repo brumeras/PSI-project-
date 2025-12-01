@@ -110,8 +110,12 @@
                 }
                 
                 <div class="action-section">
-                    <button class="btn-save" @onclick="SaveToHistory">
-                        Save Results & Finish
+                    <div class="auto-save">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>@(hasSavedResults ? "Results saved automatically." : "Saving results automatically...")</span>
+                    </div>
+                    <button class="btn-finish" @onclick="FinishViewing">
+                        Finish
                     </button>
                 </div>
             </div>
@@ -414,24 +418,42 @@
         margin-top: 2rem;
         padding-top: 2rem;
         border-top: 2px solid #e0e0e0;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
-    .btn-save {
+    .auto-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
-        border: none;
-        padding: 1rem 3rem;
+        padding: 0.85rem 1.5rem;
         border-radius: 12px;
-        font-weight: bold;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        font-weight: 700;
         box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
     }
 
-    .btn-save:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
+    .btn-finish {
+        background: white;
+        color: #bd87f8;
+        border: 2px solid #bd87f8;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.15);
+    }
+
+    .btn-finish:hover {
+        background: #bd87f8;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.3);
     }
 
     .no-results-card {
@@ -485,34 +507,37 @@
     
     [Parameter]
     public EventCallback OnResultsSaved { get; set; }
-    
+
     private List<CompatibilityScore>? compatibilityResults;
     private bool isCalculating = false;
+    private bool hasSavedResults = false;
+    private bool saveInProgress = false;
     private int expandedIndex = -1;
     
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(RoomCode))
         {
-            CalculateResults();
+            await CalculateResultsAsync();
         }
     }
-    
-    private void CalculateResults()
+
+    private async Task CalculateResultsAsync()
     {
         isCalculating = true;
         StateHasChanged();
-        
+
         try
         {
             var players = GameRoomService.GetRoomPlayerUsernames(RoomCode ?? "");
-            
+
             if (players.Count >= 2)
             {
                 compatibilityResults = CompatibilityService.CalculateAllCompatibilities(
-                    RoomCode ?? "", 
+                    RoomCode ?? "",
                     players
                 );
+                await EnsureResultsSavedAsync();
             }
         }
         catch (Exception ex)
@@ -553,14 +578,37 @@
         Navigation.NavigateTo($"/chat/{username}");
     }
     
-    private async Task SaveToHistory()
+    private async Task EnsureResultsSavedAsync()
     {
-        if (!string.IsNullOrEmpty(RoomCode))
+        if (hasSavedResults || saveInProgress)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(RoomCode) || compatibilityResults == null || !compatibilityResults.Any())
+        {
+            return;
+        }
+
+        saveInProgress = true;
+
+        try
         {
             var players = GameRoomService.GetRoomPlayerUsernames(RoomCode);
             CompatibilityService.SaveGameToHistory(RoomCode, players);
-            CompatibilityService.ClearRoomData(RoomCode);
-            
+            hasSavedResults = true;
+        }
+        finally
+        {
+            saveInProgress = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task FinishViewing()
+    {
+        if (OnResultsSaved.HasDelegate)
+        {
             await OnResultsSaved.InvokeAsync();
         }
     }
