@@ -1,31 +1,35 @@
 @page "/chat/{MatchedUsername}"
 @using KNOTS.Models
+@using System
 @using KNOTS.Services.Chat
+@using KNOTS.Services.Interfaces
+@using Microsoft.JSInterop
+@using System.Linq
+@using KNOTS.Services
 @inject IMessageService MessageService
-@inject NavigationManager Navigation
+@inject InterfaceUserService UserService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 @rendermode InteractiveServer
 
 <div class="chat-container">
     <div class="chat-header">
         <div class="header-content">
-            <button class="btn-back" @onclick="GoBack">←</button>
-            <h3>Pokalbis su @MatchedUsername</h3>
-            <button class="btn-refresh" @onclick="RefreshMessages" disabled="@isRefreshing">
-                @(isRefreshing ? "⏳" : "🔄")
-            </button>
+            <a href="/Home" class="btn-home">Home</a>
+            <h3>Chat with @MatchedUsername</h3>
         </div>
     </div>
     
     <div class="messages-container" @ref="messagesContainer">
         @if (isLoading)
         {
-            <p class="loading-text">Kraunama...</p>
+            <p class="loading-text">Loading...</p>
         }
         else if (messages.Any())
         {
             @foreach (var message in messages)
             {
-                <div class="message @(message.SenderId == CurrentUsername ? "sent" : "received")">
+                <div class="message @(IsSentByCurrentUser(message) ? "sent" : "received")">
                     <div class="message-content">@message.Content</div>
                     <div class="message-time">@message.SentAt.ToString("HH:mm")</div>
                 </div>
@@ -33,7 +37,7 @@
         }
         else
         {
-            <p class="no-messages">Pradėkite pokalbį...</p>
+            <p class="no-messages">Start the conversation...</p>
         }
     </div>
     
@@ -41,13 +45,13 @@
         <input @bind="messageInput" 
                @bind:event="oninput"
                @onkeydown="HandleKeyPress"
-               placeholder="Rašyti žinutę..." 
+               placeholder="Type a message..."
                class="message-input"
                disabled="@isSending" />
-        <button @onclick="SendMessage" 
-                class="send-button" 
+        <button @onclick="SendMessage"
+                class="send-button"
                 disabled="@(string.IsNullOrWhiteSpace(messageInput) || isSending)">
-            @(isSending ? "..." : "Siųsti")
+            @(isSending ? "Sending..." : "Send")
         </button>
     </div>
 </div>
@@ -83,29 +87,26 @@
         text-align: center;
     }
 
-    .btn-back, .btn-refresh {
-        background: rgba(255,255,255,0.2);
-        border: 1px solid rgba(255,255,255,0.3);
+    .btn-home {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
-        padding: 0.5rem 0.75rem;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-        font-size: 1.2rem;
-        min-width: 40px;
+        padding: 0.75rem 1.6rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 90px;
     }
 
-    .btn-back:hover:not(:disabled), .btn-refresh:hover:not(:disabled) {
-        background: rgba(255,255,255,0.3);
-    }
-
-    .btn-refresh:hover:not(:disabled) {
-        transform: rotate(180deg);
-    }
-
-    .btn-back:disabled, .btn-refresh:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    .btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
+        color: white;
     }
 
     .messages-container {
@@ -237,26 +238,77 @@
 
 @code {
     [Parameter] public string MatchedUsername { get; set; } = string.Empty;
-    
+
     private List<Message> messages = new();
     private string messageInput = "";
-    private string CurrentUsername = "testuser"; // TODO: Gauk iš autentifikacijos/session
+    private string CurrentUsername = string.Empty;
     private ElementReference messagesContainer;
     private bool isLoading = true;
     private bool isSending = false;
     private bool isRefreshing = false;
+    private DotNetObjectReference<ChatRazor>? dotNetRef;
+    private Task? autoRefreshTask;
+    private CancellationTokenSource? autoRefreshCts;
+    private static int temporaryIdCounter = 0;
+    private bool shouldScrollToBottom = false;
+    private string? lastKnownMessageKey;
     
     protected override async Task OnInitializedAsync()
     {
-        await LoadMessages();
+        CurrentUsername = UserService.CurrentUser ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(CurrentUsername) && !string.IsNullOrWhiteSpace(MatchedUsername))
+        {
+            await LoadMessages(forceScroll: true);
+            StartAutoRefresh();
+        }
+
         isLoading = false;
     }
-    
-    private async Task LoadMessages()
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            await ScrollToBottomIfNeeded();
+            return;
+        }
+
+        dotNetRef = DotNetObjectReference.Create(this);
+        await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", dotNetRef);
+
+        if (!string.IsNullOrWhiteSpace(CurrentUsername))
+        {
+            await JSRuntime.InvokeAsync<bool>("ensureChatAndSetUsername", CurrentUsername);
+        }
+
+        await ScrollToBottomIfNeeded();
+    }
+
+    public void Dispose()
+    {
+        JSRuntime.InvokeVoidAsync("setBlazorGameComponent", (object?)null);
+        dotNetRef?.Dispose();
+        autoRefreshCts?.Cancel();
+    }
+
+    private async Task LoadMessages(bool forceScroll = false, bool detectNewMessages = false)
     {
         try
         {
-            messages = await MessageService.GetConversation(CurrentUsername, MatchedUsername);
+            var previousKey = lastKnownMessageKey;
+            var fetched = await MessageService.GetConversation(CurrentUsername, MatchedUsername);
+
+            messages = fetched
+                .OrderBy(m => m.SentAt)
+                .ToList();
+
+            lastKnownMessageKey = CreateMessageKey(messages.LastOrDefault());
+
+            if (forceScroll || (detectNewMessages && lastKnownMessageKey != null && lastKnownMessageKey != previousKey))
+            {
+                shouldScrollToBottom = true;
+            }
         }
         catch (Exception ex)
         {
@@ -267,38 +319,79 @@
     
     private async Task RefreshMessages()
     {
-        if (isRefreshing) return;
-        
+        if (isRefreshing)
+        {
+            return;
+        }
+
         isRefreshing = true;
+
+        if (string.IsNullOrWhiteSpace(CurrentUsername) || string.IsNullOrWhiteSpace(MatchedUsername))
+        {
+            isRefreshing = false;
+            return;
+        }
+
+        await LoadMessages(detectNewMessages: true);
         StateHasChanged();
-        
-        await LoadMessages();
-        
         isRefreshing = false;
-        StateHasChanged();
     }
-    
+
+    private void StartAutoRefresh()
+    {
+        if (autoRefreshTask != null && !autoRefreshTask.IsCompleted)
+        {
+            return;
+        }
+
+        autoRefreshCts?.Cancel();
+        autoRefreshCts = new CancellationTokenSource();
+        autoRefreshTask = RunAutoRefresh(autoRefreshCts.Token);
+    }
+
+    private async Task RunAutoRefresh(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                await InvokeAsync(RefreshMessages);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // expected when disposing
+        }
+    }
+
     private async Task SendMessage()
     {
         if (string.IsNullOrWhiteSpace(messageInput) || isSending)
             return;
-        
+
+        if (string.IsNullOrWhiteSpace(CurrentUsername) || string.IsNullOrWhiteSpace(MatchedUsername))
+        {
+            Console.WriteLine("Cannot send message without valid participants");
+            return;
+        }
+
         isSending = true;
-        
+
         try
         {
-            var newMessage = new Message
+            var trimmed = messageInput.Trim();
+            AddOptimisticMessage(trimmed);
+
+            var sent = await JSRuntime.InvokeAsync<bool>("sendChatMessage", MatchedUsername, trimmed);
+
+            if (!sent)
             {
-                SenderId = CurrentUsername,
-                ReceiverId = MatchedUsername,
-                Content = messageInput.Trim(),
-                SentAt = DateTime.UtcNow,
-                IsRead = false
-            };
-            
-            await MessageService.SendMessage(newMessage);
-            messages.Add(newMessage);
-            messageInput = "";
+                Console.WriteLine("Error sending message via chat hub");
+            }
+
+            messageInput = string.Empty;
         }
         catch (Exception ex)
         {
@@ -319,8 +412,134 @@
         }
     }
     
-    private void GoBack()
+    [JSInvokable("OnChatMessageReceived")]
+    public async Task OnChatMessageReceived(string messageJson)
     {
-        Navigation.NavigateTo("/");
+        await HandleIncomingMessage(messageJson);
+    }
+
+    [JSInvokable("OnChatMessageSent")]
+    public async Task OnChatMessageSent(string messageJson)
+    {
+        await HandleIncomingMessage(messageJson);
+    }
+
+    private Task HandleIncomingMessage(string messageJson)
+    {
+        try
+        {
+            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(messageJson);
+            if (message == null)
+            {
+                return Task.CompletedTask;
+            }
+
+            var normalizedSender = Normalize(message.SenderId);
+            var normalizedReceiver = Normalize(message.ReceiverId);
+            var normalizedCurrent = Normalize(CurrentUsername);
+            var normalizedMatch = Normalize(MatchedUsername);
+
+            var isRelevant = (normalizedSender == normalizedCurrent && normalizedReceiver == normalizedMatch) ||
+                             (normalizedSender == normalizedMatch && normalizedReceiver == normalizedCurrent);
+
+            if (!isRelevant)
+            {
+                return Task.CompletedTask;
+            }
+
+            RemoveMatchingPlaceholder(message);
+
+            if (message.Id != 0 && messages.Any(m => m.Id == message.Id))
+            {
+                return Task.CompletedTask;
+            }
+
+            messages.Add(message);
+            messages = messages
+                .OrderBy(m => m.SentAt)
+                .ToList();
+            lastKnownMessageKey = CreateMessageKey(messages.LastOrDefault());
+            shouldScrollToBottom = true;
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to handle incoming chat message: {ex.Message}");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static string Normalize(string value) => (value ?? string.Empty).Trim().ToLowerInvariant();
+
+    private void AddOptimisticMessage(string content)
+    {
+        var placeholder = new Message
+        {
+            Id = Interlocked.Decrement(ref temporaryIdCounter),
+            SenderId = CurrentUsername,
+            ReceiverId = MatchedUsername,
+            Content = content,
+            SentAt = DateTime.Now,
+            IsRead = false
+        };
+
+        messages.Add(placeholder);
+        messages = messages
+            .OrderBy(m => m.SentAt)
+            .ToList();
+        lastKnownMessageKey = CreateMessageKey(messages.LastOrDefault());
+        shouldScrollToBottom = true;
+        StateHasChanged();
+    }
+
+    private void RemoveMatchingPlaceholder(Message incoming)
+    {
+        var incomingContent = Normalize(incoming.Content);
+
+        var placeholder = messages.FirstOrDefault(m =>
+            m.Id < 0 &&
+            Normalize(m.SenderId) == Normalize(CurrentUsername) &&
+            Normalize(m.ReceiverId) == Normalize(MatchedUsername) &&
+            Normalize(m.Content) == incomingContent);
+
+        if (placeholder != null)
+        {
+            messages.Remove(placeholder);
+        }
+    }
+
+    private bool IsSentByCurrentUser(Message message)
+    {
+        return Normalize(message.SenderId) == Normalize(CurrentUsername);
+    }
+
+    private static string? CreateMessageKey(Message? message)
+    {
+        if (message == null)
+        {
+            return null;
+        }
+
+        return $"{message.Id}-{message.SentAt:o}-{Normalize(message.SenderId)}-{Normalize(message.ReceiverId)}";
+    }
+
+    private async Task ScrollToBottomIfNeeded()
+    {
+        if (!shouldScrollToBottom)
+        {
+            return;
+        }
+
+        shouldScrollToBottom = false;
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("scrollMessagesToBottom", messagesContainer);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to scroll messages: {ex.Message}");
+        }
     }
 }

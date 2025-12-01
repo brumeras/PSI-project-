@@ -352,6 +352,15 @@
         }
     }
 
+    function scrollMessagesToBottom(element) {
+        try {
+            if (!element) return;
+            element.scrollTop = element.scrollHeight;
+        } catch (err) {
+            console.error("[client] Failed to scroll messages:", err);
+        }
+    }
+
     // Expose functions to global/window for debugging and Blazor interop
     global.setBlazorGameComponent = setBlazorGameComponent;
     global.setInGameNickname = setInGameNickname;
@@ -366,6 +375,7 @@
     global.sendChatMessage = sendChatMessage;
     global.whoAmI = whoAmI;
     global.debugConnectionInfo = debugConnectionInfo;
+    global.scrollMessagesToBottom = scrollMessagesToBottom;
 
     // Also export some state for quick inspection
     global._gameClientState = {
