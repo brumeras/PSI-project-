@@ -95,5 +95,27 @@ namespace KNOTS.Services.Chat
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task MarkConversationAsRead(string username1, string username2)
+        {
+            var n1 = Normalize(username1);
+            var n2 = Normalize(username2);
+
+            var unreadMessages = await _context.Messages
+                .Where(m => m.ReceiverId == n1 && m.SenderId == n2 && !m.IsRead)
+                .ToListAsync();
+
+            if (!unreadMessages.Any())
+            {
+                return;
+            }
+
+            foreach (var message in unreadMessages)
+            {
+                message.IsRead = true;
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
 }
