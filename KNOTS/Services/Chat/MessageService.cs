@@ -39,7 +39,6 @@ namespace KNOTS.Services.Chat
         {
             var n = Normalize(username);
 
-            // If EF translation complains about ToList inside projection, we can load and group in memory.
             return await _context.Messages
                 .Where(m => m.SenderId == n || m.ReceiverId == n)
                 .GroupBy(m => m.SenderId == n ? m.ReceiverId : m.SenderId)
@@ -65,10 +64,8 @@ namespace KNOTS.Services.Chat
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            // Normalize ids for persistence and routing
             message.SenderId = Normalize(message.SenderId);
             message.ReceiverId = Normalize(message.ReceiverId);
-
             if (message.SentAt == default) message.SentAt = DateTime.UtcNow;
 
             _context.Messages.Add(message);
@@ -77,21 +74,27 @@ namespace KNOTS.Services.Chat
             var receiverGroup = $"user:{message.ReceiverId}";
             var senderGroup = $"user:{message.SenderId}";
 
-            Console.WriteLine($"[MessageService] Saved message id={message.Id} from={message.SenderId} to={message.ReceiverId}. Broadcasting to groups '{receiverGroup}' and '{senderGroup}'.");
+            Console.WriteLine($"[MessageService] Saved message id={message.Id} from={message.SenderId} to={message.ReceiverId}. Broadcasting to groups '{receiverGroup}' AND '{senderGroup}' via ReceiveMessage.");
 
-            await _hub.Clients.Group(receiverGroup)
-                .SendAsync("ReceiveMessage", message);
-
-            await _hub.Clients.Group(senderGroup)
-                .SendAsync("MessageSent", message);
+            // Single unified event for both participants.
+            await _hub.Clients.Groups(receiverGroup, senderGroup)
+                .SendAsync("ReceiveMessage", new
+                {
+                    id = message.Id,
+                    senderId = message.SenderId,
+                    receiverId = message.ReceiverId,
+                    content = message.Content,
+                    sentAt = message.SentAt,
+                    isRead = message.IsRead
+                });
         }
 
         public async Task MarkAsRead(int messageId)
         {
-            var message = await _context.Messages.FindAsync(messageId);
-            if (message != null && !message.IsRead)
+            var msg = await _context.Messages.FindAsync(messageId);
+            if (msg != null && !msg.IsRead)
             {
-                message.IsRead = true;
+                msg.IsRead = true;
                 await _context.SaveChangesAsync();
             }
         }
@@ -101,20 +104,13 @@ namespace KNOTS.Services.Chat
             var n1 = Normalize(username1);
             var n2 = Normalize(username2);
 
-            var unreadMessages = await _context.Messages
+            var unread = await _context.Messages
                 .Where(m => m.ReceiverId == n1 && m.SenderId == n2 && !m.IsRead)
                 .ToListAsync();
 
-            if (!unreadMessages.Any())
-            {
-                return;
-            }
+            if (unread.Count == 0) return;
 
-            foreach (var message in unreadMessages)
-            {
-                message.IsRead = true;
-            }
-
+            foreach (var m in unread) m.IsRead = true;
             await _context.SaveChangesAsync();
         }
     }
