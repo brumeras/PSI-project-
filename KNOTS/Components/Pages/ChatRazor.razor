@@ -388,7 +388,35 @@
             var trimmed = messageInput.Trim();
             AddOptimisticMessage(trimmed);
 
-            var sent = await JSRuntime.InvokeAsync<bool>("sendChatMessage", MatchedUsername, trimmed);
+            var connectionReady = await JSRuntime.InvokeAsync<bool>("ensureChatAndSetUsername", CurrentUsername);
+            if (!connectionReady)
+            {
+                Console.WriteLine("Chat connection not ready; attempting direct send");
+            }
+
+            var sent = connectionReady && await JSRuntime.InvokeAsync<bool>("sendChatMessage", MatchedUsername, trimmed);
+
+            if (!sent)
+            {
+                try
+                {
+                    var fallbackMessage = new Message
+                    {
+                        SenderId = CurrentUsername,
+                        ReceiverId = MatchedUsername,
+                        Content = trimmed,
+                        SentAt = DateTime.UtcNow,
+                        IsRead = false
+                    };
+
+                    await MessageService.SendMessage(fallbackMessage);
+                    Console.WriteLine("Fallback direct send succeeded");
+                }
+                catch (Exception innerEx)
+                {
+                    Console.WriteLine($"Error during fallback send: {innerEx.Message}");
+                }
+            }
 
             if (!sent)
             {
