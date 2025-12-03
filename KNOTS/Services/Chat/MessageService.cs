@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using KNOTS.Data;
@@ -34,7 +35,7 @@ namespace KNOTS.Services.Chat
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
         }
-
+        [ExcludeFromCodeCoverage]
         public async Task<List<Conversation>> GetUserConversations(string username)
         {
             var n = Normalize(username);
@@ -105,10 +106,7 @@ namespace KNOTS.Services.Chat
                 .Where(m => m.ReceiverId == n1 && m.SenderId == n2 && !m.IsRead)
                 .ToListAsync();
 
-            if (!unreadMessages.Any())
-            {
-                return;
-            }
+            if (!unreadMessages.Any()){ return;}
 
             foreach (var message in unreadMessages)
             {

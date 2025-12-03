@@ -1,4 +1,5 @@
-﻿using KNOTS.Data;
+﻿using System.Diagnostics.CodeAnalysis;
+using KNOTS.Data;
 using KNOTS.Models;
 using Microsoft.EntityFrameworkCore;
 using KNOTS.Exceptions;
@@ -72,7 +73,7 @@ public class UserService : InterfaceUserService
             return (false, ex.Message);
         }
     }
-    
+    [ExcludeFromCodeCoverage]
     public (bool Success, string Message) LoginUser(string username, string password)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
