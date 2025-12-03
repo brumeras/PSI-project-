@@ -1,9 +1,18 @@
 ﻿@page "/Home"
 @rendermode InteractiveServer
+@using KNOTS.Models
 @using KNOTS.Services
+@using KNOTS.Services.Chat
 @using KNOTS.Services.Interfaces
+@using Microsoft.JSInterop
+@using System.Text.Json
+@using System.Threading
 @inject InterfaceUserService UserService
+@inject InterfaceCompatibilityService CompatibilityService
+@inject IMessageService MessageService
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <PageTitle>Home</PageTitle>
 
@@ -41,6 +50,92 @@
                 @if (!string.IsNullOrEmpty(statusMessage))
                 {
                     <p class="status-message">@statusMessage</p>
+                }
+            </div>
+
+            <div class="chat-section">
+                <div class="chat-header-bar">
+                    <div>
+                        <h2 class="section-title">Messages</h2>
+                        <p class="chat-subtitle">Reconnect with players from previous games and pick up your conversations anytime.</p>
+                    </div>
+                    @if (unreadCount > 0)
+                    {
+                        <span class="unread-chip">@unreadCount new</span>
+                    }
+                </div>
+
+                @if (latestNotification != null)
+                {
+                    <div class="chat-notification">
+                        <div class="chat-notification-text">
+                            <div class="chat-notification-title">New message</div>
+                            <div class="chat-notification-body">
+                                <strong>@latestNotification.Username</strong>: @latestNotification.Preview
+                            </div>
+                        </div>
+                        <div class="chat-notification-actions">
+                            <button class="btn-chat" @onclick="() => OpenChat(latestNotification.Username)">Open chat</button>
+                            <button class="btn-dismiss" @onclick="DismissNotification">Dismiss</button>
+                        </div>
+                    </div>
+                }
+
+                @if (chatLoading)
+                {
+                    <div class="chat-loading">
+                        <div class="spinner-border" style="color: #f888e9;" role="status"></div>
+                        <p>Loading your chats...</p>
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(chatError))
+                {
+                    <div class="chat-error">@chatError</div>
+                }
+                else if (contactSummaries.Count == 0)
+                {
+                    <div class="chat-empty">
+                        <h3>No chats yet</h3>
+                        <p>Play a game to meet new players and start messaging them directly from here.</p>
+                        <a href="/game" class="btn-connect">Find a match</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="chat-list">
+                        @foreach (var contact in contactSummaries)
+                        {
+                            <div class="chat-card @(contact.HasUnread ? "unread" : string.Empty)">
+                                <div class="chat-card-main">
+                                    <div class="chat-card-top">
+                                        <div class="chat-name">@contact.Username</div>
+                                        @if (contact.Compatibility.HasValue)
+                                        {
+                                            <span class="compat-chip">@contact.Compatibility.Value.ToString("F0")% match</span>
+                                        }
+                                    </div>
+                                    <div class="chat-preview">@contact.LastMessagePreview</div>
+                                </div>
+                                <div class="chat-card-meta">
+                                    <div class="chat-meta-top">
+                                        @if (contact.LastMessageAt.HasValue)
+                                        {
+                                            <span class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="timestamp muted">No messages yet</span>
+                                        }
+                                        @if (contact.HasUnread)
+                                        {
+                                            <span class="pill pill-new">New</span>
+                                        }
+                                    </div>
+                                    <button class="btn-chat" @onclick="() => OpenChat(contact.Username)">Open chat</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 }
             </div>
         </div>
@@ -198,6 +293,218 @@
         font-weight: 600;
     }
 
+    .chat-section {
+        margin-top: 2.5rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .chat-header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .chat-subtitle {
+        margin: 0;
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    .unread-chip {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+    }
+
+    .chat-loading,
+    .chat-empty {
+        text-align: center;
+        padding: 2rem;
+        color: #555;
+    }
+
+    .chat-error {
+        background: #ffe3e3;
+        color: #b71c1c;
+        padding: 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .chat-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chat-card {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid #e6e6e6;
+        border-radius: 14px;
+        background: #fafafa;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .chat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .chat-card.unread {
+        border-color: #f888e9;
+        background: linear-gradient(180deg, rgba(248, 136, 233, 0.08) 0%, #fafafa 100%);
+    }
+
+    .chat-card-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .chat-card-top {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .chat-name {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #2f2f2f;
+    }
+
+    .compat-chip {
+        background: #eef2ff;
+        color: #4b4db5;
+        padding: 0.25rem 0.65rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .chat-preview {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .chat-card-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+    }
+
+    .chat-meta-top {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #777;
+        font-size: 0.9rem;
+    }
+
+    .timestamp {
+        color: #777;
+        font-weight: 600;
+    }
+
+    .timestamp.muted {
+        color: #aaa;
+    }
+
+    .pill {
+        padding: 0.2rem 0.65rem;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border: 1px solid #f888e9;
+    }
+
+    .pill-new {
+        background: #fff;
+        color: #f888e9;
+    }
+
+    .btn-chat {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        border: none;
+        padding: 0.55rem 1.15rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.35);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-chat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.45);
+    }
+
+    .chat-notification {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.85rem 1rem;
+        border-radius: 14px;
+        border: 1px solid #f888e9;
+        background: linear-gradient(180deg, rgba(248, 136, 233, 0.1) 0%, rgba(189, 135, 248, 0.05) 100%);
+        box-shadow: 0 6px 18px rgba(248, 136, 233, 0.18);
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .chat-notification-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .chat-notification-title {
+        font-weight: 800;
+        color: #c154d0;
+        letter-spacing: 0.02em;
+    }
+
+    .chat-notification-body {
+        color: #333;
+    }
+
+    .chat-notification-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-dismiss {
+        background: transparent;
+        border: 1px solid #f888e9;
+        color: #c154d0;
+        padding: 0.45rem 0.9rem;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-dismiss:hover {
+        background: rgba(248, 136, 233, 0.12);
+    }
+
     .not-logged-in {
         display: flex;
         flex-direction: column;
@@ -247,12 +554,325 @@
         .game-section {
             padding: 2rem 1.5rem;
         }
+
+        .chat-card {
+            grid-template-columns: 1fr;
+        }
+
+        .chat-card-meta {
+            align-items: flex-start;
+        }
     }
 </style>
 
 @code {
     private string statusMessage = "";
     private string friendMessage = "";
+
+    private bool chatLoading = true;
+    private string? chatError;
+    private int unreadCount;
+    private List<ChatContactSummary> contactSummaries = new();
+    private Dictionary<string, CompatibilitySnapshot> compatibilityByUser = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly JsonSerializerOptions messageJsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private DotNetObjectReference<Home>? dotNetRef;
+    private IncomingChatNotification? latestNotification;
+    private CancellationTokenSource? notificationHideCts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserService.IsAuthenticated)
+        {
+            await LoadContacts();
+        }
+        else
+        {
+            chatLoading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && UserService.IsAuthenticated)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", dotNetRef);
+            await EnsureChatConnection();
+        }
+    }
+
+    private async Task EnsureChatConnection()
+    {
+        try
+        {
+            var username = UserService.CurrentUser ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                await JSRuntime.InvokeAsync<bool>("ensureChatAndSetUsername", username);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to ensure chat connection: {ex.Message}");
+        }
+    }
+
+    private async Task LoadContacts()
+    {
+        chatLoading = true;
+        chatError = null;
+
+        try
+        {
+            var current = UserService.CurrentUser ?? string.Empty;
+            var normalizedCurrent = Normalize(current);
+
+            compatibilityByUser = BuildCompatibilityLookup(current);
+
+            var conversations = await MessageService.GetUserConversations(current);
+            var summaryMap = new Dictionary<string, ChatContactSummary>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var convo in conversations)
+            {
+                var partner = Normalize(convo.User1Username) == normalizedCurrent
+                    ? convo.User2Username
+                    : convo.User1Username;
+
+                var partnerNormalized = Normalize(partner);
+                var displayName = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
+                    ? snapshot.Username
+                    : partner;
+
+                var lastMessage = (convo.Messages ?? new List<Message>())
+                    .OrderByDescending(m => m.SentAt)
+                    .FirstOrDefault();
+
+                var summary = new ChatContactSummary
+                {
+                    Username = displayName,
+                    Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+                        ? comp.Score
+                        : (double?)null,
+                    LastMessageAt = lastMessage?.SentAt,
+                    LastMessagePreview = FormatPreview(lastMessage?.Content),
+                    HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent,
+                    HasMessages = lastMessage != null
+                };
+
+                summaryMap[partnerNormalized] = summary;
+            }
+
+            foreach (var kvp in compatibilityByUser)
+            {
+                if (!summaryMap.ContainsKey(kvp.Key))
+                {
+                    summaryMap[kvp.Key] = new ChatContactSummary
+                    {
+                        Username = kvp.Value.Username,
+                        Compatibility = kvp.Value.Score,
+                        LastMessagePreview = "No messages yet",
+                        HasMessages = false
+                    };
+                }
+            }
+
+            contactSummaries = summaryMap.Values
+                .OrderByDescending(c => c.HasUnread)
+                .ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
+                .ThenBy(c => c.Username)
+                .ToList();
+
+            unreadCount = contactSummaries.Count(c => c.HasUnread);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load chat contacts: {ex.Message}");
+            chatError = "We couldn't load your chats right now. Please try again in a moment.";
+        }
+        finally
+        {
+            chatLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable("OnChatMessageReceived")]
+    public async Task OnChatMessageReceived(string messageJson) => await HandleIncomingMessage(messageJson);
+
+    [JSInvokable("OnChatMessageSent")]
+    public async Task OnChatMessageSent(string messageJson) => await HandleIncomingMessage(messageJson);
+
+    private async Task HandleIncomingMessage(string messageJson)
+    {
+        try
+        {
+            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(messageJson, messageJsonOptions);
+            if (message == null)
+            {
+                return;
+            }
+
+            var normalizedCurrent = Normalize(UserService.CurrentUser);
+            var sender = Normalize(message.SenderId);
+            var receiver = Normalize(message.ReceiverId);
+
+            if (sender != normalizedCurrent && receiver != normalizedCurrent)
+            {
+                return;
+            }
+
+            var partnerUsername = sender == normalizedCurrent ? message.ReceiverId : message.SenderId;
+            var partnerNormalized = Normalize(partnerUsername);
+            var partnerDisplay = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
+                ? snapshot.Username
+                : partnerUsername;
+
+            var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == partnerNormalized);
+            if (summary == null)
+            {
+                summary = new ChatContactSummary
+                {
+                    Username = partnerDisplay,
+                    Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+                        ? comp.Score
+                        : (double?)null
+                };
+                contactSummaries.Add(summary);
+            }
+            else
+            {
+                summary.Username = partnerDisplay;
+            }
+
+            await RefreshContactSummary(partnerUsername, summary, normalizedCurrent);
+
+            if (receiver == normalizedCurrent)
+            {
+                ShowIncomingNotification(summary.Username, summary.LastMessagePreview);
+            }
+
+            contactSummaries = contactSummaries
+                .OrderByDescending(c => c.HasUnread)
+                .ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
+                .ThenBy(c => c.Username)
+                .ToList();
+
+            unreadCount = contactSummaries.Count(c => c.HasUnread);
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to handle incoming home chat message: {ex.Message}");
+        }
+    }
+
+    private async Task RefreshContactSummary(string partnerUsername, ChatContactSummary summary, string normalizedCurrent)
+    {
+        try
+        {
+            var conversation = await MessageService.GetConversation(UserService.CurrentUser ?? string.Empty, partnerUsername);
+
+            var lastMessage = (conversation ?? new List<Message>())
+                .OrderByDescending(m => m.SentAt)
+                .FirstOrDefault();
+
+            var partnerNormalized = Normalize(partnerUsername);
+
+            summary.Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+                ? comp.Score
+                : (double?)null;
+            summary.LastMessagePreview = FormatPreview(lastMessage?.Content);
+            summary.LastMessageAt = lastMessage?.SentAt;
+            summary.HasMessages = lastMessage != null;
+            summary.HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to refresh contact summary for {partnerUsername}: {ex.Message}");
+        }
+    }
+
+    private Dictionary<string, CompatibilitySnapshot> BuildCompatibilityLookup(string currentUser)
+    {
+        var normalizedCurrent = Normalize(currentUser);
+        var map = new Dictionary<string, CompatibilitySnapshot>(StringComparer.OrdinalIgnoreCase);
+
+        var history = CompatibilityService.GetPlayerHistory(currentUser) ?? new List<GameHistoryEntry>();
+        foreach (var entry in history)
+        {
+            if (entry.AllResults == null)
+            {
+                continue;
+            }
+
+            foreach (var result in entry.AllResults)
+            {
+                var p1 = Normalize(result.Player1);
+                var p2 = Normalize(result.Player2);
+
+                if (p1 != normalizedCurrent && p2 != normalizedCurrent)
+                {
+                    continue;
+                }
+
+                var partnerUsername = p1 == normalizedCurrent ? result.Player2 : result.Player1;
+                var normalizedPartner = Normalize(partnerUsername);
+                var percentage = result.Percentage;
+
+                if (!map.TryGetValue(normalizedPartner, out var snapshot) || percentage > snapshot.Score)
+                {
+                    map[normalizedPartner] = new CompatibilitySnapshot(partnerUsername, percentage);
+                }
+            }
+        }
+
+        return map;
+    }
+
+    private string FormatPreview(string? content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return "No messages yet";
+        }
+
+        var trimmed = content.Trim();
+        return trimmed.Length > 80 ? trimmed.Substring(0, 80) + "..." : trimmed;
+    }
+
+    private static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
+
+    private async Task OpenChat(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return;
+        }
+
+        try
+        {
+            await MessageService.MarkConversationAsRead(UserService.CurrentUser ?? string.Empty, username);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to mark conversation as read: {ex.Message}");
+        }
+
+        var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == Normalize(username));
+        if (summary != null)
+        {
+            summary.HasUnread = false;
+            unreadCount = contactSummaries.Count(c => c.HasUnread);
+        }
+
+        if (latestNotification?.Username != null && Normalize(latestNotification.Username) == Normalize(username))
+        {
+            DismissNotification();
+        }
+
+        Navigation.NavigateTo($"/chat/{username}");
+    }
 
     private void Logout()
     {
@@ -261,4 +881,61 @@
         friendMessage = "";
         Navigation.NavigateTo("/", forceLoad: true);
     }
+
+    public void Dispose()
+    {
+        JSRuntime.InvokeVoidAsync("setBlazorGameComponent", (object?)null);
+        dotNetRef?.Dispose();
+        notificationHideCts?.Cancel();
+    }
+
+    private void ShowIncomingNotification(string username, string preview)
+    {
+        notificationHideCts?.Cancel();
+        notificationHideCts = new CancellationTokenSource();
+
+        latestNotification = new IncomingChatNotification(username, preview);
+        StateHasChanged();
+
+        _ = AutoDismissNotification(notificationHideCts.Token);
+    }
+
+    private async Task AutoDismissNotification(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(8), token);
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            latestNotification = null;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (TaskCanceledException)
+        {
+            // ignored
+        }
+    }
+
+    private void DismissNotification()
+    {
+        notificationHideCts?.Cancel();
+        latestNotification = null;
+        StateHasChanged();
+    }
+
+    private class ChatContactSummary
+    {
+        public string Username { get; set; } = string.Empty;
+        public double? Compatibility { get; set; }
+        public string LastMessagePreview { get; set; } = "No messages yet";
+        public DateTime? LastMessageAt { get; set; }
+        public bool HasUnread { get; set; }
+        public bool HasMessages { get; set; }
+    }
+
+    private record CompatibilitySnapshot(string Username, double Score);
+    private record IncomingChatNotification(string Username, string Preview);
 }

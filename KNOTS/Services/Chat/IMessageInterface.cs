@@ -9,4 +9,5 @@ public interface IMessageService
     Task<int> GetUnreadCount(string username);
     Task SendMessage(Message message);
     Task MarkAsRead(int messageId);
+    Task MarkConversationAsRead(string username1, string username2);
 }

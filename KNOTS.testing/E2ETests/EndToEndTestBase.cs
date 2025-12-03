@@ -71,7 +71,7 @@ public abstract class EndToEndTestBase : IDisposable
         
         CompatibilityService = new CompatibilityService(Context, UserService, SwipeRepository, Calculator, Logger);
 
-        Console.WriteLine("[E2E Setup] In-memory environment initialized.");
+        ResetDatabase();
     }
 
     /// <summary>
@@ -83,10 +83,10 @@ public abstract class EndToEndTestBase : IDisposable
         {
             var result = UserService.RegisterUser(username, "testpass");
             if (!result.Success)
-                Console.WriteLine($"⚠️ Failed to register {username}: {result.Message}");
+                Console.WriteLine($" Failed to register {username}: {result.Message}");
         }
 
-        Console.WriteLine($"✅ Registered {usernames.Length} test users.");
+        Console.WriteLine($" Registered {usernames.Length} test users.");
     }
 
     /// <summary>
@@ -113,7 +113,22 @@ public abstract class EndToEndTestBase : IDisposable
 
         ResetRoomStatementCache();
     }
+    /// <summary>
+    /// Delete all data before each test runs
+    /// </summary>
+    protected void ResetDatabase()
+    {
+        
 
+        Context.GameHistory.RemoveRange(Context.GameHistory);
+        Context.PlayerSwipes.RemoveRange(Context.PlayerSwipes);
+        Context.Users.RemoveRange(Context.Users);
+        Context.Statements.RemoveRange(Context.Statements);
+
+        
+
+        Context.SaveChanges();
+    }
     /// <summary>
     /// Resets the static room statement cache on the CompatibilityService to ensure
     /// deterministic behaviour between tests.
