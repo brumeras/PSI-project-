@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KNOTS.Models;
 using KNOTS.Services.Chat;
@@ -10,7 +11,8 @@ namespace KNOTS.Hubs
 {
     public class ChatHub : Hub
     {
-        // normalizedUsername -> connectionIds
+        // Use a normalized key for routing (trim + lowercase).
+        // Map normalizedUsername -> set of connectionIds
         private static readonly ConcurrentDictionary<string, HashSet<string>> UserToConnections = new();
         private readonly IMessageService _messageService;
 
@@ -21,7 +23,7 @@ namespace KNOTS.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            Console.WriteLine($"[ChatHub] Connected: conn={Context.ConnectionId}, principalName={Context.User?.Identity?.Name ?? "(null)"}");
+            Console.WriteLine($"[ChatHub] Connected: conn={Context.ConnectionId}, principalName={Context.User?.Identity?.Name}");
             await base.OnConnectedAsync();
         }
 
@@ -41,7 +43,9 @@ namespace KNOTS.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
+        // Normalize: trim and lowercase to keep group keys consistent.
         private static string Normalize(string? username) => (username ?? string.Empty).Trim().ToLowerInvariant();
+
         private static string GetUserGroupName(string normalizedUsername) => $"user:{normalizedUsername}";
 
         public async Task SetUsername(string username)
@@ -49,28 +53,26 @@ namespace KNOTS.Hubs
             if (string.IsNullOrWhiteSpace(username))
             {
                 Console.WriteLine($"[ChatHub] SetUsername called with empty username for conn {Context.ConnectionId}");
-                await Clients.Caller.SendAsync("Error", "Username cannot be empty.");
                 return;
             }
 
             var normalized = Normalize(username);
             var groupName = GetUserGroupName(normalized);
-
+    
+            // Add to group FIRST (idempotent)
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+    
+            // Then track connection
+            AddConnection(normalized, Context.ConnectionId);
 
-            var set = UserToConnections.GetOrAdd(normalized, _ => new HashSet<string>());
-            lock (set) { set.Add(Context.ConnectionId); }
-
-            Console.WriteLine($"[ChatHub] SetUsername: conn={Context.ConnectionId} -> username='{username}' normalized='{normalized}'. Group={groupName}. ConnectionCount={set.Count}");
-
-            // Optional confirmation
-            await Clients.Caller.SendAsync("UsernameConfirmed", new { username, normalized });
+            Console.WriteLine($"[ChatHub] SetUsername: conn={Context.ConnectionId} -> username='{username}' normalized='{normalized}'. Added to group {groupName}. ConnectionCount={GetConnectionCount(normalized)}");
         }
 
+        // Debug helper for client to confirm what server thinks about this connection
         public Task<string> WhoAmI()
         {
             var normalized = GetUsernameByConnection(Context.ConnectionId);
-            Console.WriteLine($"[ChatHub] WhoAmI: conn={Context.ConnectionId} returning '{normalized ?? "(none)"}'");
+            Console.WriteLine($"[ChatHub] WhoAmI: conn={Context.ConnectionId} returning normalized='{normalized ?? "(none)"}'");
             return Task.FromResult(normalized ?? string.Empty);
         }
 
@@ -79,15 +81,15 @@ namespace KNOTS.Hubs
             if (string.IsNullOrWhiteSpace(receiverId) || string.IsNullOrWhiteSpace(content))
             {
                 Console.WriteLine($"[ChatHub] SendChatMessage invalid args: receiver='{receiverId}', contentLength={(content?.Length ?? 0)}");
-                await Clients.Caller.SendAsync("Error", "Receiver and content required.");
                 return;
             }
 
+            // STRICT: Must have called SetUsername first
             var senderNormalized = GetUsernameByConnection(Context.ConnectionId);
             if (string.IsNullOrWhiteSpace(senderNormalized))
             {
-                Console.WriteLine($"[ChatHub] SendChatMessage: ERROR - No username set for conn {Context.ConnectionId}. Call SetUsername first.");
-                await Clients.Caller.SendAsync("Error", "Set username before sending messages.");
+                Console.WriteLine($"[ChatHub] SendChatMessage: ERROR - No username set for conn {Context.ConnectionId}. Call SetUsername first!");
+                await Clients.Caller.SendAsync("Error", "Username not set. Please set username before sending messages.");
                 return;
             }
 
@@ -102,16 +104,35 @@ namespace KNOTS.Hubs
                 IsRead = false
             };
 
-            Console.WriteLine($"[ChatHub] SendChatMessage: sender='{senderNormalized}' -> receiver='{receiverNormalized}' preview='{(content.Length > 80 ? content[..80] + "..." : content)}'");
+            Console.WriteLine($"[ChatHub] SendChatMessage: conn={Context.ConnectionId} sender='{senderNormalized}' -> receiver='{receiverNormalized}', contentPreview='{(content.Length > 80 ? content.Substring(0, 80) + "..." : content)}'");
 
-            try
+            await _messageService.SendMessage(message);
+
+            Console.WriteLine($"[ChatHub] SendChatMessage: persisted and broadcast attempted to groups '{GetUserGroupName(receiverNormalized)}' and '{GetUserGroupName(senderNormalized)}'");
+        }
+
+        // ----- helpers for connection tracking -----
+        private static void AddConnection(string normalizedUsername, string connectionId)
+        {
+            var set = UserToConnections.GetOrAdd(normalizedUsername, _ => new HashSet<string>());
+            lock (set)
             {
-                await _messageService.SendMessage(message);
+                set.Add(connectionId);
             }
-            catch (Exception ex)
+        }
+
+// Add explicit removal (not just in OnDisconnected)
+        private static void RemoveUserIfEmpty(string normalizedUsername)
+        {
+            if (UserToConnections.TryGetValue(normalizedUsername, out var set))
             {
-                Console.WriteLine($"[ChatHub] SendChatMessage: EXCEPTION while persisting/broadcasting: {ex}");
-                await Clients.Caller.SendAsync("Error", "Failed to send message.");
+                lock (set)
+                {
+                    if (set.Count == 0)
+                    {
+                        UserToConnections.TryRemove(normalizedUsername, out _);
+                    }
+                }
             }
         }
 
@@ -125,9 +146,11 @@ namespace KNOTS.Hubs
                 {
                     if (set.Remove(connectionId))
                     {
-                        if (set.Count == 0)
-                            UserToConnections.TryRemove(kv.Key, out _);
                         normalizedUsername = kv.Key;
+                        if (set.Count == 0)
+                        {
+                            UserToConnections.TryRemove(kv.Key, out _);
+                        }
                         return true;
                     }
                 }
@@ -143,10 +166,21 @@ namespace KNOTS.Hubs
                 lock (set)
                 {
                     if (set.Contains(connectionId))
+                    {
                         return kv.Key;
+                    }
                 }
             }
             return null;
+        }
+
+        private static int GetConnectionCount(string normalizedUsername)
+        {
+            if (UserToConnections.TryGetValue(normalizedUsername, out var set))
+            {
+                lock (set) { return set.Count; }
+            }
+            return 0;
         }
     }
 }
