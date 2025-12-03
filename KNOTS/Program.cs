@@ -73,3 +73,4 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapHub<GameHub>("/gamehub");
 app.MapHub<ChatHub>("/chathub");
 app.Run();
+

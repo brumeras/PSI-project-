@@ -21,6 +21,7 @@ public class UserService : InterfaceUserService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
     
+
     public (bool Success, string Message) RegisterUser(string username, string password)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
