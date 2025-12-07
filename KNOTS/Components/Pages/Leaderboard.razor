@@ -9,201 +9,506 @@
 
 <PageTitle>Leaderboard - KNOTS</PageTitle>
 
-<div class="leaderboard-container">
+<div class="leaderboard-container" id="leaderboardContainer">
+    <!-- Animuotas fonas su krintančiais riestainiukais -->
+    <div class="background-animation">
+        <div class="falling-ropes">
+            @for (int i = 0; i < 15; i++)
+            {
+            <div class="falling-rope" style="left: @(i * 7)%; animation-delay: @(i * -1.5)s;">🥨</div>
+            }
+        </div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+
+        @for (int i = 0; i < 30; i++)
+        {
+        <div class="particle"></div>
+        }
+
+        <div class="mouse-glow" id="mouseGlowLeader"></div>
+    </div>
+
     <div class="leaderboard-header">
         <div class="leaderboard-header-top">
-            <h1>Top Knotters</h1>
-            <a href="/Home" class="btn-gradient btn-home">Home</a>
+            <div class="header-icon-container">
+                <i class="bi bi-trophy-fill header-trophy"></i>
+                <div class="trophy-glow"></div>
+            </div>
+            <div>
+                <h1>Top Knotters</h1>
+                <p>Rankings based on best matches and compatibility scores</p>
+            </div>
         </div>
-        <p>Rankings based on best matches and compatibility scores</p>
+        <a href="/Home" class="btn-gradient btn-home">
+            <i class="bi bi-house-door-fill"></i>
+            <span>Home</span>
+        </a>
     </div>
 
     @if (!UserService.IsAuthenticated)
     {
-        <div class="auth-warning">
-            <i class="bi bi-lock-fill"></i>
-            <h3>Authentication Required</h3>
-            <p>Please login to view the leaderboard.</p>
-            <a href="/" class="btn-gradient btn-login-link">Go to Login</a>
-        </div>
+    <div class="auth-warning">
+        <div class="card-shine"></div>
+        <i class="bi bi-lock-fill"></i>
+        <h3>Authentication Required</h3>
+        <p>Please login to view the leaderboard.</p>
+        <a href="/" class="btn-gradient btn-login-link">Go to Login</a>
+    </div>
     }
     else if (isLoading)
     {
-        <div class="loading-card">
-            <div class="spinner-border" style="color: #f888e9;" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-3">Loading leaderboard...</p>
+    <div class="loading-card">
+        <div class="card-shine"></div>
+        <div class="spinner-border" style="color: #f888e9;" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
+        <p class="mt-3">Loading leaderboard...</p>
+    </div>
     }
     else if (leaderboard != null && leaderboard.Any())
     {
-        <div class="leaderboard-card">
-            <div class="table-responsive">
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Username</th>
-                            <th>Games Played</th>
-                            <th>Best Matches</th>
-                            <th>Avg Compatibility</th>
-                            <th>Member Since</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            int rank = 1;
-                        }
-                        @foreach (var user in leaderboard)
-                        {
-                            <tr class="@(user.Username == UserService.CurrentUser ? "current-user-row" : "")">
-                                <td>
-                                    <span class="rank-number @(rank <= 3 ? "top-rank" : string.Empty)">@rank</span>
-                                </td>
-                                <td>
-                                    <strong>@user.Username</strong>
-                                    @if (user.Username == UserService.CurrentUser)
-                                    {
-                                        <span class="you-badge">You</span>
-                                    }
-                                </td>
-                                <td>@user.TotalGamesPlayed</td>
-                                <td>
-                                    <span class="match-badge">@user.BestMatchesCount</span>
-                                </td>
-                                <td>
-                                    <span class="compatibility-score">@user.AverageCompatibilityScore.ToString("F1")%</span>
-                                </td>
-                                <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
-                            </tr>
-                            rank++;
-                        }
-                    </tbody>
-                </table>
-            </div>
+    <div class="leaderboard-card">
+        <div class="card-shine"></div>
+        <span class="card-rope top-left">🥨</span>
+        <span class="card-rope top-right">🥨</span>
 
-            @if (UserService.IsAuthenticated && currentUserRank > 0)
-            {
-                <div class="user-rank-info">
-                    <strong>Your Rank:</strong> #@currentUserRank out of @totalUsers players
-                </div>
-            }
+        <div class="table-responsive">
+            <table class="leaderboard-table">
+                <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Username</th>
+                    <th>Games Played</th>
+                    <th>Best Matches</th>
+                    <th>Avg Compatibility</th>
+                    <th>Member Since</th>
+                </tr>
+                </thead>
+                <tbody>
+                @{
+                int rank = 1;
+                }
+                @foreach (var user in leaderboard)
+                {
+                <tr class="@(user.Username == UserService.CurrentUser ? "current-user-row" : "") @GetRankClass(rank)">
+                    <td>
+                                    <span class="rank-number @GetRankClass(rank)">
+                                        @if (rank <= 3)
+                                        {
+                                        <i class="bi @GetRankIcon(rank) rank-icon"></i>
+                                        }
+                                        #@rank
+                                    </span>
+                    </td>
+                    <td>
+                        <strong>@user.Username</strong>
+                        @if (user.Username == UserService.CurrentUser)
+                        {
+                        <span class="you-badge">You</span>
+                        }
+                    </td>
+                    <td>@user.TotalGamesPlayed</td>
+                    <td>
+                        <span class="match-badge">@user.BestMatchesCount</span>
+                    </td>
+                    <td>
+                        <span class="compatibility-score">@user.AverageCompatibilityScore.ToString("F1")%</span>
+                    </td>
+                    <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+                </tr>
+                rank++;
+                }
+                </tbody>
+            </table>
         </div>
+
+        @if (UserService.IsAuthenticated && currentUserRank > 0)
+        {
+        <div class="user-rank-info">
+            <strong>Your Rank:</strong> #@currentUserRank out of @totalUsers players
+        </div>
+        }
+    </div>
     }
     else
     {
-        <div class="no-data-card">
-            <i class="bi bi-trophy" style="font-size: 3rem; color: #f888e9;"></i>
-            <h3>No Rankings Yet</h3>
-            <p>No players have completed games yet. Be the first to play!</p>
-            <a href="/game" class="btn-gradient btn-play">Start Playing</a>
-        </div>
+    <div class="no-data-card">
+        <div class="card-shine"></div>
+        <i class="bi bi-trophy" style="font-size: 3rem; color: #f888e9;"></i>
+        <h3>No Rankings Yet</h3>
+        <p>No players have completed games yet. Be the first to play!</p>
+        <a href="/game" class="btn-gradient btn-play">Start Playing</a>
+    </div>
     }
 </div>
 
-<style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('leaderboardContainer');
+        const mouseGlow = document.getElementById('mouseGlowLeader');
 
+        if (container && mouseGlow) {
+            container.addEventListener('mousemove', function(e) {
+                const rect = container.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                mouseGlow.style.left = x + '%';
+                mouseGlow.style.top = y + '%';
+            });
+        }
+
+        const particles = document.querySelectorAll('.particle');
+        particles.forEach((particle, i) => {
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.width = (Math.random() * 3 + 1.5) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.opacity = Math.random() * 0.4 + 0.2;
+            particle.style.animationDelay = (Math.random() * 5) + 's';
+        });
+    });
+</script>
+
+<style>
     .btn-gradient {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
         padding: 0.75rem 1.6rem;
-        border-radius: 10px;
+        border-radius: 15px;
         text-decoration: none;
-        font-weight: bold;
+        font-weight: 700;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        box-shadow: 0 8px 25px rgba(248, 136, 233, 0.4);
+        position: relative;
+        overflow: hidden;
     }
 
     .btn-gradient:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(248, 136, 233, 0.6);
         color: white;
     }
 
     .leaderboard-container {
-        max-width: 1200px;
-        margin: 0 auto;
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
         padding: 2rem 1rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .leaderboard-header {
-        text-align: center;
-        margin-bottom: 2rem;
+    /* Background Animation */
+    .background-animation {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #ffc4e1 0%, #f888e9 50%, #bd87f8 100%);
+        animation: gradientShift 15s ease infinite;
+        pointer-events: none;
     }
-    
+
+    @@keyframes gradientShift {
+        0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+        50% { filter: hue-rotate(15deg) brightness(1.08); }
+    }
+
+    .falling-ropes {
+        position: absolute;
+        inset: 0;
+    }
+
+    .falling-rope {
+        position: absolute;
+        top: -100px;
+        font-size: 40px;
+        opacity: 0.25;
+        animation: fall 12s linear infinite;
+        filter: drop-shadow(0 2px 8px rgba(248, 136, 233, 0.4));
+    }
+
+    @@keyframes fall {
+        0% {
+            top: -100px;
+            transform: translateX(0) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.25;
+        }
+        90% {
+            opacity: 0.25;
+        }
+        100% {
+            top: 110vh;
+            transform: translateX(100px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.5;
+        animation: float 25s ease-in-out infinite;
+    }
+
+    .orb-1 {
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, #ff69b4 0%, transparent 70%);
+        top: -15%;
+        left: -15%;
+        animation-duration: 28s;
+    }
+
+    .orb-2 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, #f888e9 0%, transparent 70%);
+        bottom: -15%;
+        right: -15%;
+        animation-duration: 22s;
+        animation-delay: -8s;
+    }
+
+    .orb-3 {
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, #bd87f8 0%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-duration: 32s;
+        animation-delay: -15s;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translate(0, 0); }
+        33% { transform: translate(30px, -40px); }
+        66% { transform: translate(-25px, 35px); }
+    }
+
+    .particle {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        animation: particleFloat 10s infinite linear;
+    }
+
+    @@keyframes particleFloat {
+        0% { transform: translateY(0); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { transform: translateY(-30px); opacity: 0; }
+    }
+
+    .mouse-glow {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+    }
+
+    /* Header */
+    .leaderboard-header {
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto 3rem;
+        text-align: center;
+        z-index: 1;
+        animation: fadeInDown 0.8s ease;
+    }
+
+    @@keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-25px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     .leaderboard-header-top {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .header-icon-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .header-trophy {
+        font-size: 4rem;
+        color: #FFD700;
+        animation: trophyFloat 3.5s ease-in-out infinite;
+        filter: drop-shadow(0 6px 25px rgba(255, 215, 0, 0.6));
+    }
+
+    @@keyframes trophyFloat {
+        0%, 100% { transform: translateY(0) rotate(-8deg); }
+        50% { transform: translateY(-12px) rotate(8deg); }
+    }
+
+    .trophy-glow {
+        position: absolute;
+        inset: -25px;
+        background: radial-gradient(circle, rgba(255, 215, 0, 0.35) 0%, transparent 70%);
+        animation: glowPulse 2.5s ease-in-out infinite;
+    }
+
+    @@keyframes glowPulse {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.25); }
     }
 
     .leaderboard-header h1 {
         color: white;
-        font-size: 2.5rem;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        margin-bottom: 0.5rem;
+        font-size: 3rem;
+        font-weight: 800;
+        text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.25);
+        margin: 0;
     }
 
     .leaderboard-header p {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.15rem;
+        margin: 0.5rem 0 0 0;
     }
 
-    .auth-warning, .loading-card {
+    .btn-home {
+        margin-top: 1rem;
+    }
+
+    /* Cards */
+    .auth-warning, .loading-card, .no-data-card {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
         background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
+        backdrop-filter: blur(25px) saturate(180%);
+        border-radius: 25px;
         padding: 4rem 2rem;
         text-align: center;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 15px 50px rgba(248, 136, 233, 0.2);
+        overflow: hidden;
+        z-index: 1;
+        animation: fadeInUp 0.8s ease;
     }
 
-    .auth-warning i {
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(25px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shine 3.5s infinite;
+    }
+
+    @@keyframes shine {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    .auth-warning i, .no-data-card i {
         font-size: 4rem;
         color: #f888e9;
         margin-bottom: 1rem;
+        animation: iconBounce 2.5s ease-in-out infinite;
     }
 
-    .auth-warning h3 {
+    @@keyframes iconBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .auth-warning h3, .no-data-card h3 {
         color: #333;
         font-size: 2rem;
+        font-weight: 800;
         margin: 1rem 0;
     }
 
-    .auth-warning p, .loading-card p {
+    .auth-warning p, .loading-card p, .no-data-card p {
         color: #666;
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
 
-    .btn-login-link {
-        padding: 1rem 2rem;
+    .btn-login-link, .btn-play {
+        padding: 1.2rem 2.5rem;
+        font-size: 1.1rem;
     }
 
-    .btn-login-link:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
-        color: white;
-    }
-
+    /* Leaderboard Card */
     .leaderboard-card {
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto;
         background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(25px) saturate(180%);
+        border-radius: 25px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(248, 136, 233, 0.25);
+        overflow: hidden;
+        z-index: 1;
+        animation: fadeInUp 0.8s ease 0.2s both;
     }
 
+    .card-rope {
+        position: absolute;
+        font-size: 35px;
+        opacity: 0.3;
+        animation: cardRopeFloat 3.5s ease-in-out infinite;
+        transition: all 0.3s ease;
+        filter: drop-shadow(0 2px 8px rgba(248, 136, 233, 0.3));
+    }
+
+    .card-rope.top-left {
+        top: 20px;
+        left: 20px;
+    }
+
+    .card-rope.top-right {
+        top: 20px;
+        right: 20px;
+        animation-delay: 0.7s;
+    }
+
+    @@keyframes cardRopeFloat {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-9px) rotate(14deg); }
+    }
+
+    .leaderboard-card:hover .card-rope {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
+
+    /* Table */
     .table-responsive {
         overflow-x: auto;
+        margin-bottom: 2rem;
     }
 
     .leaderboard-table {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 0 0.5rem;
+        border-spacing: 0 0.6rem;
     }
 
     .leaderboard-table thead tr {
@@ -212,199 +517,213 @@
     }
 
     .leaderboard-table th {
-        padding: 1rem;
+        padding: 1.3rem 1rem;
         text-align: left;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.95rem;
     }
 
     .leaderboard-table th:first-child {
-        border-top-left-radius: 10px;
-        border-bottom-left-radius: 10px;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
     }
 
     .leaderboard-table th:last-child {
-        border-top-right-radius: 10px;
-        border-bottom-right-radius: 10px;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
     }
 
     .leaderboard-table tbody tr {
         background: white;
-        transition: all 0.3s ease;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: rowSlide 0.5s ease;
+    }
+
+    .leaderboard-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    .leaderboard-table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+    .leaderboard-table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+    .leaderboard-table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+    .leaderboard-table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+    @@keyframes rowSlide {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
     }
 
     .leaderboard-table tbody tr:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(248, 136, 233, 0.2);
     }
 
     .leaderboard-table td {
-        padding: 1rem;
+        padding: 1.3rem 1rem;
         border-top: 1px solid #f0f0f0;
         border-bottom: 1px solid #f0f0f0;
     }
 
     .leaderboard-table tbody tr td:first-child {
         border-left: 1px solid #f0f0f0;
-        border-top-left-radius: 10px;
-        border-bottom-left-radius: 10px;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
     }
 
     .leaderboard-table tbody tr td:last-child {
         border-right: 1px solid #f0f0f0;
-        border-top-right-radius: 10px;
-        border-bottom-right-radius: 10px;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
     }
 
     .current-user-row td {
-        border-color: #bd87f8 !important;
+        border-color: #f888e9 !important;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.08) 0%, white 100%) !important;
+        box-shadow: 0 0 0 2px rgba(248, 136, 233, 0.3);
     }
 
     .rank-number {
-        font-weight: bold;
+        font-weight: 800;
+        font-size: 1.15rem;
         color: #666;
-        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .top-rank {
-        color: #d4af37;
+    .rank-icon {
+        font-size: 1.4rem;
     }
-    
+
+    .rank-number.rank-1 {
+        color: #FFD700;
+    }
+
+    .rank-number.rank-2 {
+        color: #C0C0C0;
+    }
+
+    .rank-number.rank-3 {
+        color: #CD7F32;
+    }
+
     .you-badge {
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
-        padding: 0.25rem 0.75rem;
+        padding: 0.3rem 0.9rem;
         border-radius: 20px;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-left: 0.5rem;
     }
 
     .match-badge {
-        background-color: #4caf50;
+        background: #4caf50;
         color: white;
-        padding: 0.25rem 0.75rem;
+        padding: 0.4rem 0.9rem;
         border-radius: 20px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.9rem;
     }
 
     .compatibility-score {
         color: #f888e9;
-        font-weight: bold;
-        font-size: 1.1rem;
+        font-weight: 800;
+        font-size: 1.15rem;
     }
 
+    /* User Rank Info */
     .user-rank-info {
-        background: linear-gradient(135deg, #e7f3ff 0%, #f0e7ff 100%);
-        padding: 1rem 1.5rem;
-        border-radius: 10px;
-        margin-top: 1.5rem;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.12), rgba(189, 135, 248, 0.12));
+        padding: 1.4rem 2rem;
+        border-radius: 15px;
         text-align: center;
-        border: 2px solid #bd87f8;
-        font-size: 1.1rem;
+        border: 2px solid rgba(248, 136, 233, 0.3);
+        font-size: 1.15rem;
         color: #333;
+        font-weight: 600;
+        animation: fadeInUp 0.8s ease 0.8s both;
     }
 
-    .no-data-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        padding: 4rem 2rem;
-        text-align: center;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    }
-
-    .no-data-card h3 {
-        color: #333;
-        margin: 1rem 0;
-        font-size: 1.8rem;
-    }
-
-    .no-data-card p {
-        color: #666;
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-    }
-
-    .btn-home {
-        padding: 0.7rem 1.6rem;
-    }
-
-    .btn-play {
-        padding: 1rem 2rem;
-    }
-
+    /* Responsive */
     @@media (max-width: 768px) {
         .leaderboard-header h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
+        }
+
+        .header-trophy {
+            font-size: 3rem;
+        }
+
+        .leaderboard-header-top {
+            flex-direction: column;
         }
 
         .leaderboard-card {
-            padding: 1rem;
+            padding: 1.5rem;
         }
 
         .leaderboard-table th,
         .leaderboard-table td {
-            padding: 0.75rem 0.5rem;
+            padding: 0.8rem 0.5rem;
             font-size: 0.85rem;
         }
-        
+
+        .card-rope {
+            font-size: 25px;
+        }
     }
 </style>
 
 @code {
-    private List<User>? leaderboard = new List<User>();
-    private int currentUserRank = 0;
-    private int totalUsers = 0;
-    private bool isLoading = true;
+private List<User>? leaderboard = new List<User>();
+private int currentUserRank = 0;
+private int totalUsers = 0;
+private bool isLoading = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        Console.WriteLine("=== LEADERBOARD PAGE LOADING ===");
-        await Task.Delay(300);
-        LoadLeaderboard();
-        isLoading = false;
-        StateHasChanged();
-    }
+protected override async Task OnInitializedAsync()
+{
+await Task.Delay(300);
+LoadLeaderboard();
+isLoading = false;
+StateHasChanged();
+}
 
-    private void LoadLeaderboard()
-    {
-        try
-        {
-            Console.WriteLine("=== LoadLeaderboard START ===");
-            
-            totalUsers = UserService.GetTotalUsersCount();
-            Console.WriteLine($"Total users count: {totalUsers}");
-            
-            leaderboard = UserService.GetLeaderboard(10);
-            Console.WriteLine($"Leaderboard returned: {leaderboard?.Count ?? 0} users");
-            
-            if (leaderboard != null && leaderboard.Any())
-            {
-                Console.WriteLine("=== USERS IN LEADERBOARD: ===");
-                foreach (var user in leaderboard)
-                {
-                    Console.WriteLine($"  - {user.Username}: Games={user.TotalGamesPlayed}, Avg={user.AverageCompatibilityScore:F2}, Best={user.BestMatchesCount}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("!!! LEADERBOARD IS EMPTY OR NULL !!!");
-            }
-        
-            if (UserService.IsAuthenticated && !string.IsNullOrEmpty(UserService.CurrentUser))
-            {
-                currentUserRank = UserService.GetUserRank(UserService.CurrentUser);
-                Console.WriteLine($"Current user rank: {currentUserRank}");
-            }
-            
-            Console.WriteLine("=== LoadLeaderboard END ===");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"!!! ERROR loading leaderboard: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            leaderboard = new List<User>();
-        }
-    }
+private void LoadLeaderboard()
+{
+try
+{
+totalUsers = UserService.GetTotalUsersCount();
+leaderboard = UserService.GetLeaderboard(10);
+
+if (UserService.IsAuthenticated && !string.IsNullOrEmpty(UserService.CurrentUser))
+{
+currentUserRank = UserService.GetUserRank(UserService.CurrentUser);
+}
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Error loading leaderboard: {ex.Message}");
+leaderboard = new List<User>();
+}
+}
+
+private string GetRankClass(int rank)
+{
+return rank switch
+{
+1 => "rank-1",
+2 => "rank-2",
+3 => "rank-3",
+_ => string.Empty
+};
+}
+
+private string GetRankIcon(int rank)
+{
+return rank switch
+{
+1 => "bi-trophy-fill",
+2 => "bi-award-fill",
+3 => "bi-star-fill",
+_ => string.Empty
+};
+}
 }
