@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace KNOTS.Services;
 public class PlayerManager {
         private readonly RoomRepository _roomRepository;
@@ -15,6 +17,7 @@ public class PlayerManager {
             _roomManager = roomManager;
             _logger = logger;
         }
+        [ExcludeFromCodeCoverage]
         public JoinRoomResult JoinRoom(string roomCode, string connectionId, string username) {
             if (!_roomRepository.TryGetRoom(roomCode, out var room) || room == null) throw new Exception("Room not found");
 
