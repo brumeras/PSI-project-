@@ -16,58 +16,81 @@
 
 <PageTitle>Home</PageTitle>
 
-<div class="full-screen-container">
-    @if (UserService.IsAuthenticated)
-    {
-        <nav class="top-navigation">
-            <div class="nav-brand">KNOTS</div>
-            <div class="nav-links">
-                <a href="/Home" class="nav-link active">Home</a>
-                <a href="/activity" class="nav-link">My Activity</a>
-                <a href="/leaderboard" class="nav-link">View Top Knotters</a>
+<div class="scene">
+    <div class="ambient-orbs"></div>
+    <div class="ambient-orbs ambient-orbs-2"></div>
+
+    <div class="full-screen-container">
+        @if (UserService.IsAuthenticated)
+        {
+        <nav class="top-navigation glass-nav">
+            <div class="nav-left">
+                <div class="nav-brand">
+                    <span class="brand-icon">✶</span>
+                    <span class="brand-text">KNOTS</span>
+                </div>
             </div>
-            <button class="btn-logout" @onclick="Logout">Logout</button>
+            <div class="nav-links">
+                <a href="/Home" class="nav-link active"><span>Home</span></a>
+                <a href="/activity" class="nav-link"><span>My Activity</span></a>
+                <a href="/leaderboard" class="nav-link"><span>View Top Knotters</span></a>
+            </div>
+            <button class="btn-logout glow-button" @onclick="Logout">
+                <span class="btn-inner">Logout</span>
+            </button>
         </nav>
 
         <div class="content-wrapper">
-            <div class="welcome-section">
-                <h1 class="welcome-title">Welcome, @UserService.CurrentUser!</h1>
+            <div class="welcome-section hero-card">
+                <div class="hero-header">
+                    <h1 class="welcome-title">
+                        Welcome, <span class="welcome-name">@UserService.CurrentUser</span>
+                    </h1>
+                    <p class="welcome-sub">
+                        Find your match. Keep the spark going. Make it unforgettable.
+                    </p>
+                </div>
 
                 @if (!string.IsNullOrEmpty(friendMessage))
                 {
-                    <div class="message-box">@friendMessage</div>
+                <div class="message-box pulse">@friendMessage</div>
                 }
             </div>
 
-            <div class="game-section">
-                <h2 class="section-title">Join a new game now!</h2>
-                <p class="section-description">
-                    You will be connected to an interactive server, where you can find your match based on your answers!
-                </p>
-
-                <a href="/game" class="btn-connect">Connect to game</a>
-
-                @if (!string.IsNullOrEmpty(statusMessage))
-                {
-                    <p class="status-message">@statusMessage</p>
-                }
-            </div>
-
-            <div class="chat-section">
-                <div class="chat-header-bar">
-                    <div>
-                        <h2 class="section-title">Messages</h2>
-                        <p class="chat-subtitle">Reconnect with players from previous games and pick up your conversations anytime.</p>
+            <div class="grid-sections">
+                <div class="game-section glass-card enter-up">
+                    <div class="section-header">
+                        <h2 class="section-title">Join a new game now</h2>
+                        <p class="section-description">
+                            Connect to our interactive server and get matched based on your answers.
+                        </p>
                     </div>
-                    @if (unreadCount > 0)
+
+                    <a href="/game" class="btn-connect shine">
+                        <span class="btn-inner">Connect to game</span>
+                    </a>
+
+                    @if (!string.IsNullOrEmpty(statusMessage))
                     {
-                        <span class="unread-chip">@unreadCount new</span>
+                    <p class="status-message">@statusMessage</p>
                     }
                 </div>
 
-                @if (latestNotification != null)
-                {
-                    <div class="chat-notification">
+                <div class="chat-section glass-card enter-up delay-1">
+                    <div class="chat-header-bar">
+                        <div>
+                            <h2 class="section-title">Messages</h2>
+                            <p class="chat-subtitle">Reconnect with players from previous games and pick up your conversations anytime.</p>
+                        </div>
+                        @if (unreadCount > 0)
+                        {
+                        <span class="unread-chip float-in">@unreadCount new</span>
+                        }
+                    </div>
+
+                    @if (latestNotification != null)
+                    {
+                    <div class="chat-notification glow-border">
                         <div class="chat-notification-text">
                             <div class="chat-notification-title">New message</div>
                             <div class="chat-notification-body">
@@ -75,230 +98,354 @@
                             </div>
                         </div>
                         <div class="chat-notification-actions">
-                            <button class="btn-chat" @onclick="() => OpenChat(latestNotification.Username)">Open chat</button>
+                            <button class="btn-chat micro-shift" @onclick="() => OpenChat(latestNotification.Username)">Open chat</button>
                             <button class="btn-dismiss" @onclick="DismissNotification">Dismiss</button>
                         </div>
                     </div>
-                }
+                    }
 
-                @if (chatLoading)
-                {
+                    @if (chatLoading)
+                    {
                     <div class="chat-loading">
-                        <div class="spinner-border" style="color: #f888e9;" role="status"></div>
+                        <div class="spinner-circle"></div>
                         <p>Loading your chats...</p>
                     </div>
-                }
-                else if (!string.IsNullOrWhiteSpace(chatError))
-                {
+                    }
+                    else if (!string.IsNullOrWhiteSpace(chatError))
+                    {
                     <div class="chat-error">@chatError</div>
-                }
-                else if (contactSummaries.Count == 0)
-                {
+                    }
+                    else if (contactSummaries.Count == 0)
+                    {
                     <div class="chat-empty">
                         <h3>No chats yet</h3>
                         <p>Play a game to meet new players and start messaging them directly from here.</p>
-                        <a href="/game" class="btn-connect">Find a match</a>
+                        <a href="/game" class="btn-connect shine"><span class="btn-inner">Find a match</span></a>
                     </div>
-                }
-                else
-                {
+                    }
+                    else
+                    {
                     <div class="chat-list">
                         @foreach (var contact in contactSummaries)
                         {
-                            <div class="chat-card @(contact.HasUnread ? "unread" : string.Empty)">
-                                <div class="chat-card-main">
-                                    <div class="chat-card-top">
-                                        <div class="chat-name">@contact.Username</div>
-                                        @if (contact.Compatibility.HasValue)
-                                        {
-                                            <span class="compat-chip">@contact.Compatibility.Value.ToString("F0")% match</span>
-                                        }
-                                    </div>
-                                    <div class="chat-preview">@contact.LastMessagePreview</div>
+                        <div class="chat-card @(contact.HasUnread ? "unread" : string.Empty) hover-rise">
+                            <div class="chat-card-main">
+                                <div class="chat-card-top">
+                                    <div class="chat-name">@contact.Username</div>
+                                    @if (contact.Compatibility.HasValue)
+                                    {
+                                    <span class="compat-chip">@contact.Compatibility.Value.ToString("F0")% match</span>
+                                    }
                                 </div>
-                                <div class="chat-card-meta">
-                                    <div class="chat-meta-top">
-                                        @if (contact.LastMessageAt.HasValue)
-                                        {
-                                            <span class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="timestamp muted">No messages yet</span>
-                                        }
-                                        @if (contact.HasUnread)
-                                        {
-                                            <span class="pill pill-new">New</span>
-                                        }
-                                    </div>
-                                    <button class="btn-chat" @onclick="() => OpenChat(contact.Username)">Open chat</button>
-                                </div>
+                                <div class="chat-preview">@contact.LastMessagePreview</div>
                             </div>
+                            <div class="chat-card-meta">
+                                <div class="chat-meta-top">
+                                    @if (contact.LastMessageAt.HasValue)
+                                    {
+                                    <span class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
+                                    }
+                                    else
+                                    {
+                                    <span class="timestamp muted">No messages yet</span>
+                                    }
+                                    @if (contact.HasUnread)
+                                    {
+                                    <span class="pill pill-new wave">New</span>
+                                    }
+                                </div>
+                                <button class="btn-chat micro-shift" @onclick="() => OpenChat(contact.Username)">Open chat</button>
+                            </div>
+                        </div>
                         }
                     </div>
-                }
+                    }
+                </div>
             </div>
         </div>
-    }
-    else
-    {
+        }
+        else
+        {
         <div class="not-logged-in">
-            <h3>You are not logged in.</h3>
-            <p><a href="/" class="link-login">Go to login page</a></p>
+            <div class="login-card glass-card enter-up">
+                <h3 class="login-title">You are not logged in</h3>
+                <p><a href="/" class="link-login shine"><span class="btn-inner">Go to login page</span></a></p>
+            </div>
         </div>
-    }
+        }
+    </div>
 </div>
 
 <style>
+    /* Base and animated background */
+    :root{
+        --accent-1: #f888e9;
+        --accent-2: #bd87f8;
+        --accent-3: #9ec2f3;
+        --text-strong: #1f1f1f;
+        --text-soft: #555;
+        --glass-bg: rgba(255,255,255,0.14);
+        --glass-bg-strong: rgba(255,255,255,0.22);
+        --border-soft: rgba(255,255,255,0.25);
+    }
+
+    .scene{
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        background: radial-gradient(1200px 600px at 10% 10%, rgba(248,136,233,0.25), transparent 50%),
+        radial-gradient(1000px 600px at 90% 90%, rgba(189,135,248,0.25), transparent 50%),
+        linear-gradient(135deg, #a8c5e8 0%, #b4d0ec 100%);
+        animation: bgShift 20s ease-in-out infinite alternate;
+    }
+
+    @@keyframes bgShift{
+        0%{ filter: hue-rotate(0deg) saturate(1); }
+        100%{ filter: hue-rotate(12deg) saturate(1.15); }
+    }
+
+    .ambient-orbs, .ambient-orbs-2{
+        position: absolute;
+        inset: -30% -30%;
+        background:
+            radial-gradient(600px 600px at 20% 30%, rgba(248,136,233,0.12), transparent 60%),
+            radial-gradient(450px 450px at 80% 70%, rgba(189,135,248,0.10), transparent 60%);
+        animation: floatOrbs 30s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .ambient-orbs-2{ animation-delay: 8s; opacity: 0.6; }
+
+    @@keyframes floatOrbs{
+        0%{ transform: translate3d(0,0,0) scale(1); }
+        50%{ transform: translate3d(1.5%, -1%, 0) scale(1.03); }
+        100%{ transform: translate3d(0,0,0) scale(1); }
+    }
+
+    /* Layout */
     .full-screen-container {
         min-height: 100vh;
-        background: linear-gradient(135deg, #b4d0ec 0%, #a8c5e8 100%);
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 1;
+    }
+
+    .glass-nav{
+        backdrop-filter: blur(14px) saturate(1.1);
+        background: linear-gradient(180deg, var(--glass-bg) 0%, rgba(255,255,255,0.08) 100%);
+        border-bottom: 1px solid var(--border-soft);
     }
 
     .top-navigation {
-        background: rgba(255, 255, 255, 0.95);
         padding: 1rem 2rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
-    .nav-brand {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #f888e9;
-        letter-spacing: 2px;
+    .nav-left{
+        display:flex; align-items:center; gap:.75rem;
+    }
+
+    .brand-icon{
+        display:inline-block;
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        box-shadow: 0 6px 14px rgba(189,135,248,0.35);
+        color: white; display:flex; align-items:center; justify-content:center;
+        font-size: 1rem; transform: rotate(-8deg);
+    }
+    .brand-text{
+        font-size: 1.4rem; font-weight: 800; letter-spacing: 2px;
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
     }
 
     .nav-links {
         display: flex;
-        gap: 2rem;
+        gap: 1rem;
         flex: 1;
         justify-content: center;
     }
 
     .nav-link {
-        color: #333;
+        position: relative;
+        color: #222;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
         padding: 0.5rem 1rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
+        border-radius: 12px;
+        transition: transform .2s ease, background .3s ease, color .3s ease;
+        overflow: hidden;
+    }
+    .nav-link span { position: relative; z-index: 1; }
+    .nav-link::before{
+        content:"";
+        position:absolute; inset:0;
+        background: linear-gradient(135deg, rgba(248,136,233,0.18), rgba(189,135,248,0.22));
+        opacity:0; transition: opacity .3s ease;
+        border-radius: 12px;
+    }
+    .nav-link:hover { transform: translateY(-2px); color:#111; }
+    .nav-link:hover::before{ opacity:1; }
+    .nav-link.active{
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        color: white; box-shadow: 0 8px 20px rgba(189,135,248,0.35);
     }
 
-    .nav-link:hover {
-        background-color: #f888e9;
-        color: white;
+    .glow-button{
+        position: relative; border: none; background: transparent; padding: 0;
     }
-
-    .nav-link.active {
-        background-color: #bd87f8;
-        color: white;
+    .glow-button .btn-inner{
+        display:inline-block; background: #222; color:white; font-weight:700;
+        padding:.6rem 1.2rem; border-radius: 12px;
+        box-shadow: 0 10px 26px rgba(0,0,0,0.25), 0 0 0 0 rgba(248,136,233,0.0);
+        transition: transform .2s ease, box-shadow .3s ease;
     }
-
-    .btn-logout {
-        background-color: #666;
-        color: white;
-        border: none;
-        padding: 0.5rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .btn-logout:hover {
-        background-color: #555;
+    .glow-button:hover .btn-inner{
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 14px 30px rgba(0,0,0,0.28), 0 0 16px 4px rgba(248,136,233,0.35);
     }
 
     .content-wrapper {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 3rem 2rem;
+        padding: 2.5rem 2rem 3rem;
     }
 
-    .welcome-section {
+    /* Hero */
+    .hero-card{
         text-align: center;
-        margin-bottom: 3rem;
+        margin: 1.5rem auto 2.25rem;
+        padding: 2rem 2rem 2.25rem;
+        backdrop-filter: blur(14px) saturate(1.1);
+        background: linear-gradient(180deg, var(--glass-bg-strong) 0%, rgba(255,255,255,0.12) 100%);
+        border-radius: 22px;
+        border: 1px solid var(--border-soft);
+        box-shadow: 0 14px 40px rgba(0,0,0,0.15);
     }
-
     .welcome-title {
-        color: white;
-        font-size: 2.5rem;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        margin-bottom: 1rem;
+        color: var(--text-strong);
+        font-size: 2.6rem;
+        font-weight: 900;
+        letter-spacing: .5px;
+        margin-bottom: .35rem;
     }
-
+    .welcome-name{
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .welcome-sub{
+        color: var(--text-soft);
+        font-size: 1.05rem;
+        margin: 0.25rem auto 0;
+        max-width: 560px;
+    }
     .message-box {
-        background: rgba(255, 255, 255, 0.9);
-        padding: 1rem 2rem;
-        border-radius: 12px;
-        color: #333;
-        font-weight: 600;
         display: inline-block;
         margin-top: 1rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background: rgba(255, 255, 255, 0.3);
+        padding: 0.85rem 1.25rem;
+        border-radius: 14px;
+        color: #222;
+        font-weight: 700;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     }
 
-    .game-section {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 3rem;
-        border-radius: 20px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-        text-align: center;
-        max-width: 700px;
-        margin: 0 auto;
+    /* Grid sections */
+    .grid-sections{
+        display:grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    @@media (max-width: 992px){
+    .grid-sections{ grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .glass-card{
+        backdrop-filter: blur(12px) saturate(1.1);
+        background: linear-gradient(180deg, var(--glass-bg) 0%, rgba(255,255,255,0.08) 100%);
+        border: 1px solid var(--border-soft);
+        border-radius: 22px;
+        box-shadow: 0 12px 34px rgba(0,0,0,0.18);
+        padding: 2rem;
+        transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+    }
+    .glass-card:hover{
+        transform: translateY(-6px);
+        box-shadow: 0 18px 48px rgba(0,0,0,0.22);
+        border-color: rgba(248,136,233,0.35);
     }
 
     .section-title {
-        color: #f888e9;
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
+        color: var(--text-strong);
+        font-size: 1.75rem;
+        font-weight: 900;
+        margin-bottom: 0.35rem;
     }
-
     .section-description {
-        color: #555;
-        font-size: 1.1rem;
+        color: var(--text-soft);
+        font-size: 1rem;
         line-height: 1.6;
-        margin-bottom: 2rem;
+        margin-bottom: 1.25rem;
     }
 
+    /* Buttons */
     .btn-connect {
         display: inline-block;
-        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        position: relative;
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
         color: white;
-        padding: 1rem 3rem;
-        border-radius: 12px;
+        padding: 1rem 2.6rem;
+        border-radius: 14px;
         text-decoration: none;
-        font-weight: bold;
-        font-size: 1.2rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        font-weight: 900;
+        font-size: 1.15rem;
+        box-shadow: 0 10px 26px rgba(189,135,248,0.35);
+        transition: transform .2s ease, box-shadow .35s ease;
+        overflow: hidden;
     }
-
-    .btn-connect:hover {
+    .btn-connect .btn-inner{ position: relative; z-index: 1; }
+    .btn-connect::after{
+        content:"";
+        position:absolute; top:0; left:-120%;
+        width:120%; height:100%;
+        background: linear-gradient(90deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.35) 48%, rgba(255,255,255,0.0) 100%);
+        transform: skewX(-12deg);
+        transition: left .6s ease;
+    }
+    .btn-connect:hover{
         transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
+        box-shadow: 0 16px 38px rgba(189,135,248,0.45);
+    }
+    .btn-connect:hover::after{ left: -5%; }
+
+    .btn-chat {
+        background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.1rem;
+        border-radius: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 22px rgba(189,135,248,0.35);
+        transition: transform .2s ease, box-shadow .3s ease;
+    }
+    .btn-chat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(189,135,248,0.45);
     }
 
+    /* Status and chips */
     .status-message {
-        margin-top: 1.5rem;
-        color: #666;
-        font-weight: 600;
-    }
-
-    .chat-section {
-        margin-top: 2.5rem;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        margin-top: 1rem;
+        color: #333;
+        font-weight: 700;
+        opacity: .9;
     }
 
     .chat-header-bar {
@@ -308,105 +455,121 @@
         gap: 1rem;
         margin-bottom: 1rem;
     }
-
     .chat-subtitle {
         margin: 0;
-        color: #555;
+        color: var(--text-soft);
         font-size: 0.95rem;
     }
-
     .unread-chip {
-        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);
         color: white;
-        padding: 0.4rem 0.8rem;
+        padding: 0.35rem 0.75rem;
         border-radius: 999px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        font-weight: 900;
+        font-size: 0.88rem;
+        box-shadow: 0 8px 22px rgba(189,135,248,0.35);
     }
 
-    .chat-loading,
-    .chat-empty {
-        text-align: center;
-        padding: 2rem;
-        color: #555;
+    /* Notification */
+    .chat-notification {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.85rem 1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(248, 136, 233, 0.5);
+        background: linear-gradient(180deg, rgba(248, 136, 233, 0.12) 0%, rgba(189, 135, 248, 0.07) 100%);
+        box-shadow: 0 12px 30px rgba(189,135,248,0.25);
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        position: relative;
+    }
+    .glow-border::before{
+        content:"";
+        position:absolute; inset:-2px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(248,136,233,0.25), rgba(189,135,248,0.25));
+        filter: blur(12px);
+        z-index:-1; opacity:.6;
+    }
+    .chat-notification-title {
+        font-weight: 900;
+        color: #a14ac0;
+        letter-spacing: 0.02em;
+    }
+    .chat-notification-body {
+        color: #222;
+    }
+    .btn-dismiss {
+        background: transparent;
+        border: 1px solid var(--accent-1);
+        color: #a14ac0;
+        padding: 0.45rem 0.9rem;
+        border-radius: 10px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .btn-dismiss:hover {
+        background: rgba(248, 136, 233, 0.12);
+        transform: translateY(-1px);
     }
 
-    .chat-error {
-        background: #ffe3e3;
-        color: #b71c1c;
-        padding: 1rem;
-        border-radius: 12px;
-        font-weight: 600;
-    }
-
+    /* Chat list and cards */
     .chat-list {
         display: flex;
         flex-direction: column;
         gap: 1rem;
     }
-
     .chat-card {
         display: grid;
         grid-template-columns: 1fr auto;
         gap: 1rem;
         padding: 1rem 1.25rem;
-        border: 1px solid #e6e6e6;
-        border-radius: 14px;
-        background: #fafafa;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid rgba(230, 230, 230, 0.6);
+        border-radius: 16px;
+        background: rgba(255,255,255,0.6);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+        backdrop-filter: blur(6px);
     }
-
     .chat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        transform: translateY(-3px);
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+        border-color: rgba(248,136,233,0.35);
+        background: rgba(255,255,255,0.75);
     }
-
     .chat-card.unread {
-        border-color: #f888e9;
-        background: linear-gradient(180deg, rgba(248, 136, 233, 0.08) 0%, #fafafa 100%);
+        border-color: var(--accent-1);
+        background: linear-gradient(180deg, rgba(248, 136, 233, 0.10) 0%, rgba(255,255,255,0.8) 100%);
     }
-
-    .chat-card-main {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-    }
-
-    .chat-card-top {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
+    .chat-card-main { display: flex; flex-direction: column; gap: 0.35rem; }
+    .chat-card-top { display: flex; align-items: center; gap: 0.5rem; }
     .chat-name {
-        font-weight: 700;
+        font-weight: 900;
         font-size: 1.05rem;
-        color: #2f2f2f;
+        color: #1f1f1f;
     }
-
     .compat-chip {
         background: #eef2ff;
         color: #4b4db5;
         padding: 0.25rem 0.65rem;
         border-radius: 10px;
-        font-weight: 700;
+        font-weight: 800;
         font-size: 0.85rem;
+        border: 1px solid rgba(75,77,181,0.25);
     }
-
     .chat-preview {
-        color: #555;
+        color: var(--text-soft);
         font-size: 0.95rem;
         line-height: 1.4;
     }
-
     .chat-card-meta {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
         gap: 0.5rem;
     }
-
     .chat-meta-top {
         display: flex;
         align-items: center;
@@ -414,528 +577,512 @@
         color: #777;
         font-size: 0.9rem;
     }
-
     .timestamp {
-        color: #777;
-        font-weight: 600;
+        color: #666;
+        font-weight: 800;
     }
-
-    .timestamp.muted {
-        color: #aaa;
-    }
-
+    .timestamp.muted { color: #aaa; }
     .pill {
         padding: 0.2rem 0.65rem;
         border-radius: 999px;
-        font-weight: 700;
+        font-weight: 900;
         font-size: 0.85rem;
-        border: 1px solid #f888e9;
+        border: 1px solid var(--accent-1);
     }
-
     .pill-new {
         background: #fff;
-        color: #f888e9;
+        color: var(--accent-1);
+        box-shadow: 0 8px 20px rgba(248,136,233,0.25);
     }
 
-    .btn-chat {
-        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
-        color: white;
-        border: none;
-        padding: 0.55rem 1.15rem;
-        border-radius: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.35);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Loading and empty states */
+    .chat-loading,
+    .chat-empty {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-soft);
     }
-
-    .btn-chat:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.45);
+    .spinner-circle{
+        width: 34px; height:34px; border-radius:50%;
+        border: 3px solid rgba(248,136,233,0.25);
+        border-top-color: var(--accent-1);
+        animation: spin 1s linear infinite;
+        margin: 0 auto .75rem;
     }
+    @@keyframes spin { to { transform: rotate(360deg); } }
 
-    .chat-notification {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0.85rem 1rem;
-        border-radius: 14px;
-        border: 1px solid #f888e9;
-        background: linear-gradient(180deg, rgba(248, 136, 233, 0.1) 0%, rgba(189, 135, 248, 0.05) 100%);
-        box-shadow: 0 6px 18px rgba(248, 136, 233, 0.18);
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .chat-notification-text {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-    }
-
-    .chat-notification-title {
-        font-weight: 800;
-        color: #c154d0;
-        letter-spacing: 0.02em;
-    }
-
-    .chat-notification-body {
-        color: #333;
-    }
-
-    .chat-notification-actions {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
-    .btn-dismiss {
-        background: transparent;
-        border: 1px solid #f888e9;
-        color: #c154d0;
-        padding: 0.45rem 0.9rem;
-        border-radius: 10px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-dismiss:hover {
-        background: rgba(248, 136, 233, 0.12);
-    }
-
+    /* Not logged in */
     .not-logged-in {
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
-        color: white;
+        min-height: calc(100vh - 80px);
+        color: #111;
+        text-align: center;
+        padding: 2rem;
+    }
+    .login-card{
+        max-width: 520px;
+        width: 100%;
         text-align: center;
     }
-
-    .not-logged-in h3 {
+    .login-title{
         font-size: 2rem;
         margin-bottom: 1rem;
+        font-weight: 900;
+        color: var(--text-strong);
     }
-
-    .link-login {
-        color: #f888e9;
-        font-weight: bold;
+    .link-login{
+        display:inline-block;
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        color: white;
+        padding: .85rem 1.4rem;
+        border-radius: 12px;
+        font-weight: 900;
         text-decoration: none;
-        font-size: 1.2rem;
+        box-shadow: 0 10px 26px rgba(189,135,248,0.35);
+        transition: transform .2s ease, box-shadow .3s ease;
+        position: relative; overflow:hidden;
+    }
+    .link-login .btn-inner{ position:relative; z-index:1; }
+    .link-login::after{
+        content:""; position:absolute; top:0; left:-120%;
+        width:120%; height:100%;
+        background: linear-gradient(90deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.35) 48%, rgba(255,255,255,0.0) 100%);
+        transform: skewX(-12deg); transition:left .6s ease;
+    }
+    .link-login:hover{ transform: translateY(-2px); box-shadow: 0 16px 36px rgba(189,135,248,0.45); }
+    .link-login:hover::after{ left: -5%; }
+
+    /* Micro-animations utility classes */
+    .pulse{ animation: pulse 2.2s ease-in-out infinite; }
+    @@keyframes pulse{
+        0%{ transform: scale(1); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        50%{ transform: scale(1.02); box-shadow: 0 12px 30px rgba(0,0,0,0.18); }
+        100%{ transform: scale(1); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
     }
 
-    .link-login:hover {
-        color: #bd87f8;
-        text-decoration: underline;
+    .hover-rise:hover{ transform: translateY(-3px); }
+    .micro-shift:hover{ transform: translateY(-2px); }
+
+    .enter-up{
+        opacity: 0; transform: translateY(12px);
+        animation: enterUp .6s ease forwards;
+    }
+    .delay-1{ animation-delay: .12s; }
+    @@keyframes enterUp{
+        to{ opacity: 1; transform: translateY(0); }
     }
 
+    .float-in{
+        animation: floatIn .6s ease forwards;
+        transform: translateY(6px);
+    }
+    @@keyframes floatIn{
+        to{ transform: translateY(0); }
+    }
+
+    /* Responsive tweaks */
     @@media (max-width: 768px) {
-        .top-navigation {
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .nav-links {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .welcome-title {
-            font-size: 1.8rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-        }
-
-        .game-section {
-            padding: 2rem 1.5rem;
-        }
-
-        .chat-card {
-            grid-template-columns: 1fr;
-        }
-
-        .chat-card-meta {
-            align-items: flex-start;
-        }
+    .top-navigation {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .nav-links {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    .welcome-title {
+        font-size: 2rem;
+    }
+    .section-title {
+        font-size: 1.45rem;
+    }
+    .game-section {
+        padding: 1.6rem 1.4rem;
+    }
+    .chat-card {
+        grid-template-columns: 1fr;
+    }
+    .chat-card-meta {
+        align-items: flex-start;
+    }
     }
 </style>
 
 @code {
-    private string statusMessage = "";
-    private string friendMessage = "";
+private string statusMessage = "";
+private string friendMessage = "";
 
-    private bool chatLoading = true;
-    private string? chatError;
-    private int unreadCount;
-    private List<ChatContactSummary> contactSummaries = new();
-    private Dictionary<string, CompatibilitySnapshot> compatibilityByUser = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly JsonSerializerOptions messageJsonOptions = new() { PropertyNameCaseInsensitive = true };
-    private DotNetObjectReference<Home>? dotNetRef;
-    private IncomingChatNotification? latestNotification;
-    private CancellationTokenSource? notificationHideCts;
+private bool chatLoading = true;
+private string? chatError;
+private int unreadCount;
+private List<ChatContactSummary> contactSummaries = new();
+private Dictionary<string, CompatibilitySnapshot> compatibilityByUser = new(StringComparer.OrdinalIgnoreCase);
+private static readonly JsonSerializerOptions messageJsonOptions = new() { PropertyNameCaseInsensitive = true };
+private DotNetObjectReference<Home>? dotNetRef;
+private IncomingChatNotification? latestNotification;
+private CancellationTokenSource? notificationHideCts;
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (UserService.IsAuthenticated)
-        {
-            await LoadContacts();
-        }
-        else
-        {
-            chatLoading = false;
-        }
-    }
+protected override async Task OnInitializedAsync()
+{
+if (UserService.IsAuthenticated)
+{
+await LoadContacts();
+}
+else
+{
+chatLoading = false;
+}
+}
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && UserService.IsAuthenticated)
-        {
-            dotNetRef = DotNetObjectReference.Create(this);
-            await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", dotNetRef);
-            await EnsureChatConnection();
-        }
-    }
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+if (firstRender && UserService.IsAuthenticated)
+{
+dotNetRef = DotNetObjectReference.Create(this);
+await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", dotNetRef);
+await EnsureChatConnection();
+}
+}
 
-    private async Task EnsureChatConnection()
-    {
-        try
-        {
-            var username = UserService.CurrentUser ?? string.Empty;
-            if (!string.IsNullOrWhiteSpace(username))
-            {
-                await JSRuntime.InvokeAsync<bool>("ensureChatAndSetUsername", username);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to ensure chat connection: {ex.Message}");
-        }
-    }
+private async Task EnsureChatConnection()
+{
+try
+{
+var username = UserService.CurrentUser ?? string.Empty;
+if (!string.IsNullOrWhiteSpace(username))
+{
+await JSRuntime.InvokeAsync<bool>("ensureChatAndSetUsername", username);
+}
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Failed to ensure chat connection: {ex.Message}");
+}
+}
 
-    private async Task LoadContacts()
-    {
-        chatLoading = true;
-        chatError = null;
+private async Task LoadContacts()
+{
+chatLoading = true;
+chatError = null;
 
-        try
-        {
-            var current = UserService.CurrentUser ?? string.Empty;
-            var normalizedCurrent = Normalize(current);
+try
+{
+var current = UserService.CurrentUser ?? string.Empty;
+var normalizedCurrent = Normalize(current);
 
-            compatibilityByUser = BuildCompatibilityLookup(current);
+compatibilityByUser = BuildCompatibilityLookup(current);
 
-            var conversations = await MessageService.GetUserConversations(current);
-            var summaryMap = new Dictionary<string, ChatContactSummary>(StringComparer.OrdinalIgnoreCase);
+var conversations = await MessageService.GetUserConversations(current);
+var summaryMap = new Dictionary<string, ChatContactSummary>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var convo in conversations)
-            {
-                var partner = Normalize(convo.User1Username) == normalizedCurrent
-                    ? convo.User2Username
-                    : convo.User1Username;
+foreach (var convo in conversations)
+{
+var partner = Normalize(convo.User1Username) == normalizedCurrent
+? convo.User2Username
+: convo.User1Username;
 
-                var partnerNormalized = Normalize(partner);
-                var displayName = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
-                    ? snapshot.Username
-                    : partner;
+var partnerNormalized = Normalize(partner);
+var displayName = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
+? snapshot.Username
+: partner;
 
-                var lastMessage = (convo.Messages ?? new List<Message>())
-                    .OrderByDescending(m => m.SentAt)
-                    .FirstOrDefault();
+var lastMessage = (convo.Messages ?? new List<Message>())
+.OrderByDescending(m => m.SentAt)
+.FirstOrDefault();
 
-                var summary = new ChatContactSummary
-                {
-                    Username = displayName,
-                    Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
-                        ? comp.Score
-                        : (double?)null,
-                    LastMessageAt = lastMessage?.SentAt,
-                    LastMessagePreview = FormatPreview(lastMessage?.Content),
-                    HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent,
-                    HasMessages = lastMessage != null
-                };
+var summary = new ChatContactSummary
+{
+Username = displayName,
+Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+? comp.Score
+: (double?)null,
+LastMessageAt = lastMessage?.SentAt,
+LastMessagePreview = FormatPreview(lastMessage?.Content),
+HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent,
+HasMessages = lastMessage != null
+};
 
-                summaryMap[partnerNormalized] = summary;
-            }
+summaryMap[partnerNormalized] = summary;
+}
 
-            foreach (var kvp in compatibilityByUser)
-            {
-                if (!summaryMap.ContainsKey(kvp.Key))
-                {
-                    summaryMap[kvp.Key] = new ChatContactSummary
-                    {
-                        Username = kvp.Value.Username,
-                        Compatibility = kvp.Value.Score,
-                        LastMessagePreview = "No messages yet",
-                        HasMessages = false
-                    };
-                }
-            }
+foreach (var kvp in compatibilityByUser)
+{
+if (!summaryMap.ContainsKey(kvp.Key))
+{
+summaryMap[kvp.Key] = new ChatContactSummary
+{
+Username = kvp.Value.Username,
+Compatibility = kvp.Value.Score,
+LastMessagePreview = "No messages yet",
+HasMessages = false
+};
+}
+}
 
-            contactSummaries = summaryMap.Values
-                .OrderByDescending(c => c.HasUnread)
-                .ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
-                .ThenBy(c => c.Username)
-                .ToList();
+contactSummaries = summaryMap.Values
+.OrderByDescending(c => c.HasUnread)
+.ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
+.ThenBy(c => c.Username)
+.ToList();
 
-            unreadCount = contactSummaries.Count(c => c.HasUnread);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to load chat contacts: {ex.Message}");
-            chatError = "We couldn't load your chats right now. Please try again in a moment.";
-        }
-        finally
-        {
-            chatLoading = false;
-            StateHasChanged();
-        }
-    }
+unreadCount = contactSummaries.Count(c => c.HasUnread);
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Failed to load chat contacts: {ex.Message}");
+chatError = "We couldn't load your chats right now. Please try again in a moment.";
+}
+finally
+{
+chatLoading = false;
+StateHasChanged();
+}
+}
 
-    [JSInvokable("OnChatMessageReceived")]
-    public async Task OnChatMessageReceived(string messageJson) => await HandleIncomingMessage(messageJson);
+[JSInvokable("OnChatMessageReceived")]
+public async Task OnChatMessageReceived(string messageJson) => await HandleIncomingMessage(messageJson);
 
-    [JSInvokable("OnChatMessageSent")]
-    public async Task OnChatMessageSent(string messageJson) => await HandleIncomingMessage(messageJson);
+[JSInvokable("OnChatMessageSent")]
+public async Task OnChatMessageSent(string messageJson) => await HandleIncomingMessage(messageJson);
 
-    private async Task HandleIncomingMessage(string messageJson)
-    {
-        try
-        {
-            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(messageJson, messageJsonOptions);
-            if (message == null)
-            {
-                return;
-            }
+private async Task HandleIncomingMessage(string messageJson)
+{
+try
+{
+var message = System.Text.Json.JsonSerializer.Deserialize<Message>(messageJson, messageJsonOptions);
+if (message == null)
+{
+return;
+}
 
-            var normalizedCurrent = Normalize(UserService.CurrentUser);
-            var sender = Normalize(message.SenderId);
-            var receiver = Normalize(message.ReceiverId);
+var normalizedCurrent = Normalize(UserService.CurrentUser);
+var sender = Normalize(message.SenderId);
+var receiver = Normalize(message.ReceiverId);
 
-            if (sender != normalizedCurrent && receiver != normalizedCurrent)
-            {
-                return;
-            }
+if (sender != normalizedCurrent && receiver != normalizedCurrent)
+{
+return;
+}
 
-            var partnerUsername = sender == normalizedCurrent ? message.ReceiverId : message.SenderId;
-            var partnerNormalized = Normalize(partnerUsername);
-            var partnerDisplay = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
-                ? snapshot.Username
-                : partnerUsername;
+var partnerUsername = sender == normalizedCurrent ? message.ReceiverId : message.SenderId;
+var partnerNormalized = Normalize(partnerUsername);
+var partnerDisplay = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
+? snapshot.Username
+: partnerUsername;
 
-            var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == partnerNormalized);
-            if (summary == null)
-            {
-                summary = new ChatContactSummary
-                {
-                    Username = partnerDisplay,
-                    Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
-                        ? comp.Score
-                        : (double?)null
-                };
-                contactSummaries.Add(summary);
-            }
-            else
-            {
-                summary.Username = partnerDisplay;
-            }
+var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == partnerNormalized);
+if (summary == null)
+{
+summary = new ChatContactSummary
+{
+Username = partnerDisplay,
+Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+? comp.Score
+: (double?)null
+};
+contactSummaries.Add(summary);
+}
+else
+{
+summary.Username = partnerDisplay;
+}
 
-            await RefreshContactSummary(partnerUsername, summary, normalizedCurrent);
+await RefreshContactSummary(partnerUsername, summary, normalizedCurrent);
 
-            if (receiver == normalizedCurrent)
-            {
-                ShowIncomingNotification(summary.Username, summary.LastMessagePreview);
-            }
+if (receiver == normalizedCurrent)
+{
+ShowIncomingNotification(summary.Username, summary.LastMessagePreview);
+}
 
-            contactSummaries = contactSummaries
-                .OrderByDescending(c => c.HasUnread)
-                .ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
-                .ThenBy(c => c.Username)
-                .ToList();
+contactSummaries = contactSummaries
+.OrderByDescending(c => c.HasUnread)
+.ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
+.ThenBy(c => c.Username)
+.ToList();
 
-            unreadCount = contactSummaries.Count(c => c.HasUnread);
+unreadCount = contactSummaries.Count(c => c.HasUnread);
 
-            await InvokeAsync(StateHasChanged);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to handle incoming home chat message: {ex.Message}");
-        }
-    }
+await InvokeAsync(StateHasChanged);
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Failed to handle incoming home chat message: {ex.Message}");
+}
+}
 
-    private async Task RefreshContactSummary(string partnerUsername, ChatContactSummary summary, string normalizedCurrent)
-    {
-        try
-        {
-            var conversation = await MessageService.GetConversation(UserService.CurrentUser ?? string.Empty, partnerUsername);
+private async Task RefreshContactSummary(string partnerUsername, ChatContactSummary summary, string normalizedCurrent)
+{
+try
+{
+var conversation = await MessageService.GetConversation(UserService.CurrentUser ?? string.Empty, partnerUsername);
 
-            var lastMessage = (conversation ?? new List<Message>())
-                .OrderByDescending(m => m.SentAt)
-                .FirstOrDefault();
+var lastMessage = (conversation ?? new List<Message>())
+.OrderByDescending(m => m.SentAt)
+.FirstOrDefault();
 
-            var partnerNormalized = Normalize(partnerUsername);
+var partnerNormalized = Normalize(partnerUsername);
 
-            summary.Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
-                ? comp.Score
-                : (double?)null;
-            summary.LastMessagePreview = FormatPreview(lastMessage?.Content);
-            summary.LastMessageAt = lastMessage?.SentAt;
-            summary.HasMessages = lastMessage != null;
-            summary.HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to refresh contact summary for {partnerUsername}: {ex.Message}");
-        }
-    }
+summary.Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+? comp.Score
+: (double?)null;
+summary.LastMessagePreview = FormatPreview(lastMessage?.Content);
+summary.LastMessageAt = lastMessage?.SentAt;
+summary.HasMessages = lastMessage != null;
+summary.HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent;
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Failed to refresh contact summary for {partnerUsername}: {ex.Message}");
+}
+}
 
-    private Dictionary<string, CompatibilitySnapshot> BuildCompatibilityLookup(string currentUser)
-    {
-        var normalizedCurrent = Normalize(currentUser);
-        var map = new Dictionary<string, CompatibilitySnapshot>(StringComparer.OrdinalIgnoreCase);
+private Dictionary<string, CompatibilitySnapshot> BuildCompatibilityLookup(string currentUser)
+{
+var normalizedCurrent = Normalize(currentUser);
+var map = new Dictionary<string, CompatibilitySnapshot>(StringComparer.OrdinalIgnoreCase);
 
-        var history = CompatibilityService.GetPlayerHistory(currentUser) ?? new List<GameHistoryEntry>();
-        foreach (var entry in history)
-        {
-            if (entry.AllResults == null)
-            {
-                continue;
-            }
+var history = CompatibilityService.GetPlayerHistory(currentUser) ?? new List<GameHistoryEntry>();
+foreach (var entry in history)
+{
+if (entry.AllResults == null)
+{
+continue;
+}
 
-            foreach (var result in entry.AllResults)
-            {
-                var p1 = Normalize(result.Player1);
-                var p2 = Normalize(result.Player2);
+foreach (var result in entry.AllResults)
+{
+var p1 = Normalize(result.Player1);
+var p2 = Normalize(result.Player2);
 
-                if (p1 != normalizedCurrent && p2 != normalizedCurrent)
-                {
-                    continue;
-                }
+if (p1 != normalizedCurrent && p2 != normalizedCurrent)
+{
+continue;
+}
 
-                var partnerUsername = p1 == normalizedCurrent ? result.Player2 : result.Player1;
-                var normalizedPartner = Normalize(partnerUsername);
-                var percentage = result.Percentage;
+var partnerUsername = p1 == normalizedCurrent ? result.Player2 : result.Player1;
+var normalizedPartner = Normalize(partnerUsername);
+var percentage = result.Percentage;
 
-                if (!map.TryGetValue(normalizedPartner, out var snapshot) || percentage > snapshot.Score)
-                {
-                    map[normalizedPartner] = new CompatibilitySnapshot(partnerUsername, percentage);
-                }
-            }
-        }
+if (!map.TryGetValue(normalizedPartner, out var snapshot) || percentage > snapshot.Score)
+{
+map[normalizedPartner] = new CompatibilitySnapshot(partnerUsername, percentage);
+}
+}
+}
 
-        return map;
-    }
+return map;
+}
 
-    private string FormatPreview(string? content)
-    {
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            return "No messages yet";
-        }
+private string FormatPreview(string? content)
+{
+if (string.IsNullOrWhiteSpace(content))
+{
+return "No messages yet";
+}
 
-        var trimmed = content.Trim();
-        return trimmed.Length > 80 ? trimmed.Substring(0, 80) + "..." : trimmed;
-    }
+var trimmed = content.Trim();
+return trimmed.Length > 80 ? trimmed.Substring(0, 80) + "..." : trimmed;
+}
 
-    private static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
+private static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
 
-    private async Task OpenChat(string username)
-    {
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            return;
-        }
+private async Task OpenChat(string username)
+{
+if (string.IsNullOrWhiteSpace(username))
+{
+return;
+}
 
-        try
-        {
-            await MessageService.MarkConversationAsRead(UserService.CurrentUser ?? string.Empty, username);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to mark conversation as read: {ex.Message}");
-        }
+try
+{
+await MessageService.MarkConversationAsRead(UserService.CurrentUser ?? string.Empty, username);
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Failed to mark conversation as read: {ex.Message}");
+}
 
-        var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == Normalize(username));
-        if (summary != null)
-        {
-            summary.HasUnread = false;
-            unreadCount = contactSummaries.Count(c => c.HasUnread);
-        }
+var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == Normalize(username));
+if (summary != null)
+{
+summary.HasUnread = false;
+unreadCount = contactSummaries.Count(c => c.HasUnread);
+}
 
-        if (latestNotification?.Username != null && Normalize(latestNotification.Username) == Normalize(username))
-        {
-            DismissNotification();
-        }
+if (latestNotification?.Username != null && Normalize(latestNotification.Username) == Normalize(username))
+{
+DismissNotification();
+}
 
-        Navigation.NavigateTo($"/chat/{username}");
-    }
+Navigation.NavigateTo($"/chat/{username}");
+}
 
-    private void Logout()
-    {
-        UserService.LogoutUser();
-        statusMessage = "";
-        friendMessage = "";
-        Navigation.NavigateTo("/", forceLoad: true);
-    }
+private void Logout()
+{
+UserService.LogoutUser();
+statusMessage = "";
+friendMessage = "";
+Navigation.NavigateTo("/", forceLoad: true);
+}
 
-    public void Dispose()
-    {
-        JSRuntime.InvokeVoidAsync("setBlazorGameComponent", (object?)null);
-        dotNetRef?.Dispose();
-        notificationHideCts?.Cancel();
-    }
+public void Dispose()
+{
+JSRuntime.InvokeVoidAsync("setBlazorGameComponent", (object?)null);
+dotNetRef?.Dispose();
+notificationHideCts?.Cancel();
+}
 
-    private void ShowIncomingNotification(string username, string preview)
-    {
-        notificationHideCts?.Cancel();
-        notificationHideCts = new CancellationTokenSource();
+private void ShowIncomingNotification(string username, string preview)
+{
+notificationHideCts?.Cancel();
+notificationHideCts = new CancellationTokenSource();
 
-        latestNotification = new IncomingChatNotification(username, preview);
-        StateHasChanged();
+latestNotification = new IncomingChatNotification(username, preview);
+StateHasChanged();
 
-        _ = AutoDismissNotification(notificationHideCts.Token);
-    }
+_ = AutoDismissNotification(notificationHideCts.Token);
+}
 
-    private async Task AutoDismissNotification(CancellationToken token)
-    {
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(8), token);
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
+private async Task AutoDismissNotification(CancellationToken token)
+{
+try
+{
+await Task.Delay(TimeSpan.FromSeconds(8), token);
+if (token.IsCancellationRequested)
+{
+return;
+}
 
-            latestNotification = null;
-            await InvokeAsync(StateHasChanged);
-        }
-        catch (TaskCanceledException)
-        {
-            // ignored
-        }
-    }
+latestNotification = null;
+await InvokeAsync(StateHasChanged);
+}
+catch (TaskCanceledException)
+{
+// ignored
+}
+}
 
-    private void DismissNotification()
-    {
-        notificationHideCts?.Cancel();
-        latestNotification = null;
-        StateHasChanged();
-    }
+private void DismissNotification()
+{
+notificationHideCts?.Cancel();
+latestNotification = null;
+StateHasChanged();
+}
 
-    private class ChatContactSummary
-    {
-        public string Username { get; set; } = string.Empty;
-        public double? Compatibility { get; set; }
-        public string LastMessagePreview { get; set; } = "No messages yet";
-        public DateTime? LastMessageAt { get; set; }
-        public bool HasUnread { get; set; }
-        public bool HasMessages { get; set; }
-    }
+private class ChatContactSummary
+{
+public string Username { get; set; } = string.Empty;
+public double? Compatibility { get; set; }
+public string LastMessagePreview { get; set; } = "No messages yet";
+public DateTime? LastMessageAt { get; set; }
+public bool HasUnread { get; set; }
+public bool HasMessages { get; set; }
+}
 
-    private record CompatibilitySnapshot(string Username, double Score);
-    private record IncomingChatNotification(string Username, string Preview);
+private record CompatibilitySnapshot(string Username, double Score);
+private record IncomingChatNotification(string Username, string Preview);
 }

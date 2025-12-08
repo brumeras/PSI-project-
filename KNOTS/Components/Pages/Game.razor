@@ -25,146 +25,146 @@
 <div class="game-container">
     @if (!UserService.IsAuthenticated)
     {
-        <div class="auth-warning">
-            <i class="bi bi-lock-fill"></i>
-            <h3>Authentication Required</h3>
-            <p>In order to connect to a game, you have to login.</p>
-            <a href="/" class="btn-login-link">Go to Login</a>
-        </div>
+    <div class="auth-warning">
+        <i class="bi bi-lock-fill"></i>
+        <h3>Authentication Required</h3>
+        <p>In order to connect to a game, you have to login.</p>
+        <a href="/" class="btn-login-link">Go to Login</a>
+    </div>
     }
     else
     {
-        <div class="game-content">
-            @if (string.IsNullOrEmpty(currentRoomCode))
+    <div class="game-content">
+        @if (string.IsNullOrEmpty(currentRoomCode))
+        {
+        <div class="lobby-section">
+            <h2 class="section-title">Game Lobby</h2>
+            <p class="welcome-text">Hello, <strong>@UserService.CurrentUser</strong>!</p>
+            @if (!string.IsNullOrEmpty(playerId))
             {
-                <div class="lobby-section">
-                    <h2 class="section-title">Game Lobby</h2>
-                    <p class="welcome-text">Hello, <strong>@UserService.CurrentUser</strong>!</p>
-                    @if (!string.IsNullOrEmpty(playerId))
-                    {
-                        <p class="player-id">Your game ID: <span>@playerId</span></p>
-                    }
+            <p class="player-id">Your game ID: <span>@playerId</span></p>
+            }
 
-                    <div class="lobby-options">
-                        <div class="option-card">
-                            <i class="bi bi-plus-circle" style="font-size: 3rem; color: #f888e9;"></i>
-                            <h4>Create New Room</h4>
-                            <p>Start a new game and invite friends</p>
-                            <button class="btn-create" @onclick="CreateRoom" disabled="@isConnecting">
-                                <i class="bi bi-plus-lg"></i> Create Room
-                            </button>
-                            <div class="topic-selection">
-                                <strong>Select Topic(s):</strong>
-                                @foreach (var topic in availableTopics)
-                                {
-                                    <div class="topic-checkbox">
-                                        <input type="checkbox" @bind="topicSelections[topic]" />
-                                        <label>@topic</label>
-                                    </div>
-                                }
-                            </div>
-
+            <div class="lobby-options">
+                <div class="option-card">
+                    <i class="bi bi-plus-circle" style="font-size: 3rem; color: #f888e9;"></i>
+                    <h4>Create New Room</h4>
+                    <p>Start a new game and invite friends</p>
+                    <button class="btn-create" @onclick="CreateRoom" disabled="@isConnecting">
+                        <i class="bi bi-plus-lg"></i> Create Room
+                    </button>
+                    <div class="topic-selection">
+                        <strong>Select Topic(s):</strong>
+                        @foreach (var topic in availableTopics)
+                        {
+                        <div class="topic-checkbox">
+                            <input type="checkbox" @bind="topicSelections[topic]" />
+                            <label>@topic</label>
                         </div>
+                        }
+                    </div>
 
-                        <div class="option-card">
-                            <i class="bi bi-door-open" style="font-size: 3rem; color: #bd87f8;"></i>
-                            <h4>Join Existing Room</h4>
-                            <p>Enter a room code to join friends</p>
-                            <div class="join-input-group">
-                                <input type="text" 
-                                       class="room-code-input" 
-                                       @bind="roomCodeToJoin" 
-                                       placeholder="Enter 4-digit code" 
-                                       maxlength="4">
-                                <button class="btn-join" 
-                                        @onclick="JoinRoom" 
-                                        disabled="@(isConnecting || string.IsNullOrEmpty(roomCodeToJoin))">
-                                    <i class="bi bi-box-arrow-in-right"></i> Join
-                                </button>
-                            </div>
-                        </div>
+                </div>
+
+                <div class="option-card">
+                    <i class="bi bi-door-open" style="font-size: 3rem; color: #bd87f8;"></i>
+                    <h4>Join Existing Room</h4>
+                    <p>Enter a room code to join friends</p>
+                    <div class="join-input-group">
+                        <input type="text"
+                               class="room-code-input"
+                               @bind="roomCodeToJoin"
+                               placeholder="Enter 4-digit code"
+                               maxlength="4">
+                        <button class="btn-join"
+                                @onclick="JoinRoom"
+                                disabled="@(isConnecting || string.IsNullOrEmpty(roomCodeToJoin))">
+                            <i class="bi bi-box-arrow-in-right"></i> Join
+                        </button>
                     </div>
                 </div>
-            }
-            else if (showResults)
-            {
-                <GameResults 
-                    RoomCode="@currentRoomCode" 
-                    CurrentUsername="@UserService.CurrentUser"
-                    OnResultsSaved="HandleResultsSaved" />
-            }
-            else
-            {
-                <div class="game-room-section">
-                    <div class="room-info-card">
-                        <div class="room-header">
-                            <div>
-                                <h3>Room Code: <span class="room-code">@currentRoomCode</span></h3>
-                                <p class="players-count"><i class="bi bi-people-fill"></i> @playersInRoom.Count player(s) connected</p>
-                            </div>
-                        </div>
-                        
-                        <div class="players-list">
-                            <strong>Connected Players:</strong>
-                            <div class="player-badges">
-                                @foreach (var player in playersInRoom)
-                                {
-                                    <span class="player-badge @(player == UserService.CurrentUser ? "current" : "")">
-                                        @player
-                                        @if (player == UserService.CurrentUser)
-                                        {
-                                            <span class="you-indicator">(You)</span>
-                                        }
-                                    </span>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    
-                    @if (newGameFormRef != null && newGameFormRef.IsComplete())
-                    {
-                        <div class="completion-card">
-                            <i class="bi bi-check-circle-fill" style="font-size: 3rem; color: #4caf50;"></i>
-                            <h4>You've Completed All Questions!</h4>
-                            @if (allPlayersFinished)
-                            {
-                                <p>All players have finished. Ready to see the results?</p>
-                                <button class="btn-results" @onclick="ShowResults">
-                                    <i class="bi bi-trophy-fill"></i> View Results
-                                </button>
-                            }
-                            else
-                            {
-                                <p>Waiting for other players to finish...</p>
-                                <div class="waiting-progress">
-                                    <div class="progress-text">
-                                        @GetPlayersFinishedCount() / @playersInRoom.Count players finished
-                                    </div>
-                                    <div class="progress-bar-wrapper">
-                                        <div class="progress-fill" style="width: @GetFinishedPercentage()%"></div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-
-                    <div class="game-form-section">
-                        <NewGame @ref="newGameFormRef" 
-                                 RoomCode="@currentRoomCode" 
-                                 Username="@UserService.CurrentUser"
-                                 SelectedTopics="@selectedTopics.ToList()" />
-                    </div>
-                </div>
-            }
-            
-            @if (!string.IsNullOrEmpty(statusMessage))
-            {
-                <div class="status-message @(statusMessage.Contains("Error") ? "error" : "info")">
-                    <i class="bi @(statusMessage.Contains("Error") ? "bi-exclamation-circle" : "bi-info-circle")"></i>
-                    @statusMessage
-                </div>
-            }
+            </div>
         </div>
+        }
+        else if (showResults)
+        {
+        <GameResults
+            RoomCode="@currentRoomCode"
+            CurrentUsername="@UserService.CurrentUser"
+            OnResultsSaved="HandleResultsSaved" />
+        }
+        else
+        {
+        <div class="game-room-section">
+            <div class="room-info-card">
+                <div class="room-header">
+                    <div>
+                        <h3>Room Code: <span class="room-code">@currentRoomCode</span></h3>
+                        <p class="players-count"><i class="bi bi-people-fill"></i> @playersInRoom.Count player(s) connected</p>
+                    </div>
+                </div>
+
+                <div class="players-list">
+                    <strong>Connected Players:</strong>
+                    <div class="player-badges">
+                        @foreach (var player in playersInRoom)
+                        {
+                        <span class="player-badge @(player == UserService.CurrentUser ? "current" : "")">
+                                        @player
+                            @if (player == UserService.CurrentUser)
+                            {
+                            <span class="you-indicator">(You)</span>
+                            }
+                                    </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (newGameFormRef != null && newGameFormRef.IsComplete())
+            {
+            <div class="completion-card">
+                <i class="bi bi-check-circle-fill" style="font-size: 3rem; color: #4caf50;"></i>
+                <h4>You've Completed All Questions!</h4>
+                @if (allPlayersFinished)
+                {
+                <p>All players have finished. Ready to see the results?</p>
+                <button class="btn-results" @onclick="ShowResults">
+                    <i class="bi bi-trophy-fill"></i> View Results
+                </button>
+                }
+                else
+                {
+                <p>Waiting for other players to finish...</p>
+                <div class="waiting-progress">
+                    <div class="progress-text">
+                        @GetPlayersFinishedCount() / @playersInRoom.Count players finished
+                    </div>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-fill" style="width: @GetFinishedPercentage()%"></div>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+
+            <div class="game-form-section">
+                <NewGame @ref="newGameFormRef"
+                         RoomCode="@currentRoomCode"
+                         Username="@UserService.CurrentUser"
+                         SelectedTopics="@selectedTopics.ToList()" />
+            </div>
+        </div>
+        }
+
+        @if (!string.IsNullOrEmpty(statusMessage))
+        {
+        <div class="status-message @(statusMessage.Contains("Error") ? "error" : "info")">
+            <i class="bi @(statusMessage.Contains("Error") ? "bi-exclamation-circle" : "bi-info-circle")"></i>
+            @statusMessage
+        </div>
+        }
+    </div>
     }
 </div>
 
@@ -619,57 +619,57 @@
 </style>
 
 @code {
-    private DotNetObjectReference<Game>? objectReference;
-    private string playerId = "";
-    public string currentRoomCode = "";
-    private string roomCodeToJoin = "";
-    public string statusMessage = "";
-    public bool isConnecting = false;
-    public bool showResults = false;
-    public bool allPlayersFinished = false;
-    public List<string> playersInRoom = new();
-    private List<string> gameMessages = new();
-    private NewGame? newGameFormRef;
-    private System.Threading.Timer? statusCheckTimer;
-    private Dictionary<string, bool> topicSelections = new();
-    public List<string> availableTopics = new() { "Science", "Movies", "Travel", "Hobbies" };
-    public HashSet<string> selectedTopics = new();
+private DotNetObjectReference<Game>? objectReference;
+private string playerId = "";
+public string currentRoomCode = "";
+private string roomCodeToJoin = "";
+public string statusMessage = "";
+public bool isConnecting = false;
+public bool showResults = false;
+public bool allPlayersFinished = false;
+public List<string> playersInRoom = new();
+private List<string> gameMessages = new();
+private NewGame? newGameFormRef;
+private System.Threading.Timer? statusCheckTimer;
+private Dictionary<string, bool> topicSelections = new();
+public List<string> availableTopics = new() { "Science", "Movies", "Travel", "Hobbies" };
+public HashSet<string> selectedTopics = new();
 
-    [Parameter]
-    public string? Username { get; set; }
-    
-    protected override void OnInitialized() {
-        topicSelections = new Dictionary<string, bool>();
-        foreach (var topic in availableTopics) {
-            topicSelections[topic] = selectedTopics.Contains(topic);
-        }
-        if (UserService.IsAuthenticated)
-        {
-            isConnecting = true;
-            statusMessage = "Connecting to server...";
-        }
-    
-        statusCheckTimer = new System.Threading.Timer(async _ => 
-        {
-            if (!string.IsNullOrEmpty(currentRoomCode) && !showResults)
-            {
-                await InvokeAsync(() => 
-                {
-                    CheckIfAllFinished();
-                    StateHasChanged();
-                });
-            }
-        }, null, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
-    }
+[Parameter]
+public string? Username { get; set; }
+
+protected override void OnInitialized() {
+topicSelections = new Dictionary<string, bool>();
+foreach (var topic in availableTopics) {
+topicSelections[topic] = selectedTopics.Contains(topic);
+}
+if (UserService.IsAuthenticated)
+{
+isConnecting = true;
+statusMessage = "Connecting to server...";
+}
+
+statusCheckTimer = new System.Threading.Timer(async _ =>
+{
+if (!string.IsNullOrEmpty(currentRoomCode) && !showResults)
+{
+await InvokeAsync(() =>
+{
+CheckIfAllFinished();
+StateHasChanged();
+});
+}
+}, null, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
+}
 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && UserService.IsAuthenticated)
-        {
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("eval", @"
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+if (firstRender && UserService.IsAuthenticated)
+{
+try
+{
+await JSRuntime.InvokeVoidAsync("eval", @"
                 if (!window.signalRLoaded) {
                     var script1 = document.createElement('script');
                     script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js';
@@ -682,227 +682,227 @@
                     window.signalRLoaded = true;
                 }
             ");
-                
-                await Task.Delay(1000);
 
-                objectReference = DotNetObjectReference.Create(this);
-                await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", objectReference);
-            
-                var connected = await JSRuntime.InvokeAsync<bool>("initializeGameConnection");
-                if (connected)
-                {
-                    await JSRuntime.InvokeVoidAsync("joinGame", UserService.CurrentUser);
-                    statusMessage = "Connected to server!";
-                }
-                else
-                {
-                    statusMessage = "Error: Unable to connect to server";
-                }
-            
-                isConnecting = false;
-                StateHasChanged();
-            }
-            catch (Exception ex)
-            {
-                statusMessage = $"Error: {ex.Message}";
-                isConnecting = false;
-                StateHasChanged();
-            }
-        }
-    }
+await Task.Delay(1000);
 
-    private void GoToHome()
-    {
-        NavigationManager.NavigateTo("/Home");
-    }
-    
-    private async Task CreateRoom()
-    {
-        ToggleTopicSelectionFromDict();
+objectReference = DotNetObjectReference.Create(this);
+await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", objectReference);
 
-        isConnecting = true;
-        statusMessage = $"Creating room with topics: {string.Join(", ", selectedTopics)}...";
-        StateHasChanged();
+var connected = await JSRuntime.InvokeAsync<bool>("initializeGameConnection");
+if (connected)
+{
+await JSRuntime.InvokeVoidAsync("joinGame", UserService.CurrentUser);
+statusMessage = "Connected to server!";
+}
+else
+{
+statusMessage = "Error: Unable to connect to server";
+}
 
-        await JSRuntime.InvokeVoidAsync("createRoom", UserService.CurrentUser, selectedTopics.ToArray());
-    }
+isConnecting = false;
+StateHasChanged();
+}
+catch (Exception ex)
+{
+statusMessage = $"Error: {ex.Message}";
+isConnecting = false;
+StateHasChanged();
+}
+}
+}
 
-    public void ToggleTopicSelectionFromDict()
-    {
-        selectedTopics.Clear();
-        foreach (var kvp in topicSelections)
-        {
-            if (kvp.Value)
-                selectedTopics.Add(kvp.Key);
-        }
-    }
-    
-    private async Task JoinRoom()
-    {
-        isConnecting = true;
-        statusMessage = $"Connecting to room {roomCodeToJoin}...";
-        StateHasChanged();
-        
-        await JSRuntime.InvokeVoidAsync("joinRoom", roomCodeToJoin, UserService.CurrentUser);
-    }
+private void GoToHome()
+{
+NavigationManager.NavigateTo("/Home");
+}
 
-    private void CheckIfAllFinished()
-    {
-        if (string.IsNullOrEmpty(currentRoomCode)) return;
-        
-        var players = GameRoomService.GetRoomPlayerUsernames(currentRoomCode);
-        if (players.Count == 0) return;
-        
-        allPlayersFinished = CompatibilityService.HaveAllPlayersFinished(
-            currentRoomCode, 
-            players, 
-            10
-        );
-        
-        if (allPlayersFinished)
-        {
-            statusMessage = "All players finished! You can now view results.";
-        }
-    }
-    
-    public int GetPlayersFinishedCount()
-    {
-        if (string.IsNullOrEmpty(currentRoomCode)) return 0;
-        
-        var players = GameRoomService.GetRoomPlayerUsernames(currentRoomCode);
-        int finishedCount = 0;
-        
-        foreach (var player in players)
-        {
-            var swipes = CompatibilityService.GetPlayerSwipes(currentRoomCode, player);
-            if (swipes.Count >= 10)
-            {
-                finishedCount++;
-            }
-        }
-        
-        return finishedCount;
-    }
+private async Task CreateRoom()
+{
+ToggleTopicSelectionFromDict();
 
-    public double GetFinishedPercentage()
-    {
-        if (playersInRoom.Count == 0) return 0;
-        return (double)GetPlayersFinishedCount() / playersInRoom.Count * 100;
-    }
-    
-    public void ShowResults()
-    {
-        CheckIfAllFinished();
-        
-        if (allPlayersFinished)
-        {
-            showResults = true;
-            statusMessage = "";
-            statusCheckTimer?.Dispose();
-        }
-        else
-        {
-            statusMessage = "Please wait for all players to finish before viewing results.";
-        }
-    }
-    
-    public void HandleResultsSaved()
-    {
-        statusMessage = "Results saved! You can view them in the Activity page.";
-        showResults = false;
-        currentRoomCode = "";
-        playersInRoom.Clear();
-        allPlayersFinished = false;
-        StateHasChanged();
-    }
-    
-    [JSInvokable]
-    public async Task OnPlayerIdAssigned(string id)
-    {
-        playerId = id;
-        await InvokeAsync(StateHasChanged);
-    }
+isConnecting = true;
+statusMessage = $"Creating room with topics: {string.Join(", ", selectedTopics)}...";
+StateHasChanged();
 
-    [JSInvokable]
-    public async Task OnRoomCreated(string roomCode)
-    {
-        currentRoomCode = roomCode;
-        statusMessage = $"Room created! Code: {roomCode}";
-        playersInRoom.Clear();
-        playersInRoom.Add(UserService.CurrentUser ?? "");
-        isConnecting = false;
-        Console.WriteLine($"[INFO] Room {roomCode} created with topics: {string.Join(", ", selectedTopics)}");
-        await InvokeAsync(StateHasChanged);
-    }
+await JSRuntime.InvokeVoidAsync("createRoom", UserService.CurrentUser, selectedTopics.ToArray());
+}
 
-    [JSInvokable]
-    public async Task OnJoinedRoom(string roomInfoJson)
-    {
-        var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson, new JsonSerializerOptions 
-        { 
-            PropertyNameCaseInsensitive = true 
-        });
-    
-        currentRoomCode = roomInfo?.RoomCode ?? "";
-        playersInRoom = roomInfo?.Players ?? new List<string>();
-        roomCodeToJoin = "";
-    
-        statusMessage = "Successfully connected to room!";
-        isConnecting = false;
-    
-        await InvokeAsync(StateHasChanged);
-    }
+public void ToggleTopicSelectionFromDict()
+{
+selectedTopics.Clear();
+foreach (var kvp in topicSelections)
+{
+if (kvp.Value)
+selectedTopics.Add(kvp.Key);
+}
+}
 
-    [JSInvokable]
-    public async Task OnJoinRoomFailed(string message)
-    {
-        statusMessage = $"Error: {message}";
-        isConnecting = false;
-        await InvokeAsync(StateHasChanged);
-    }
+private async Task JoinRoom()
+{
+isConnecting = true;
+statusMessage = $"Connecting to room {roomCodeToJoin}...";
+StateHasChanged();
 
-    [JSInvokable]
-    public async Task OnPlayerJoinedRoom(string username)
-    {
-        if (!playersInRoom.Contains(username))
-        {
-            playersInRoom.Add(username);
-        }
-        
-        CheckIfAllFinished();
-        await InvokeAsync(StateHasChanged);
-    }
+await JSRuntime.InvokeVoidAsync("joinRoom", roomCodeToJoin, UserService.CurrentUser);
+}
 
-    [JSInvokable]
-    public async Task OnPlayerLeft(string username)
-    {
-        playersInRoom.Remove(username);
-        await InvokeAsync(StateHasChanged);
-    }
+private void CheckIfAllFinished()
+{
+if (string.IsNullOrEmpty(currentRoomCode)) return;
 
-    [JSInvokable]
-    public async Task OnGameAction(string username, string action, string data)
-    {
-        if (username != UserService.CurrentUser)
-        {
-            await InvokeAsync(StateHasChanged);
-        }
-    }
+var players = GameRoomService.GetRoomPlayerUsernames(currentRoomCode);
+if (players.Count == 0) return;
 
-    public async ValueTask DisposeAsync()
-    {
-        statusCheckTimer?.Dispose();
-        
-        if (objectReference != null)
-        {
-            await JSRuntime.InvokeVoidAsync("disconnectFromGame");
-            objectReference.Dispose();
-        }
-    }
-    
-    public class RoomInfo
-    {
-        public string RoomCode { get; set; } = "";
-        public List<string> Players { get; set; } = new();
-    }
+allPlayersFinished = CompatibilityService.HaveAllPlayersFinished(
+currentRoomCode,
+players,
+10
+);
+
+if (allPlayersFinished)
+{
+statusMessage = "All players finished! You can now view results.";
+}
+}
+
+public int GetPlayersFinishedCount()
+{
+if (string.IsNullOrEmpty(currentRoomCode)) return 0;
+
+var players = GameRoomService.GetRoomPlayerUsernames(currentRoomCode);
+int finishedCount = 0;
+
+foreach (var player in players)
+{
+var swipes = CompatibilityService.GetPlayerSwipes(currentRoomCode, player);
+if (swipes.Count >= 10)
+{
+finishedCount++;
+}
+}
+
+return finishedCount;
+}
+
+public double GetFinishedPercentage()
+{
+if (playersInRoom.Count == 0) return 0;
+return (double)GetPlayersFinishedCount() / playersInRoom.Count * 100;
+}
+
+public void ShowResults()
+{
+CheckIfAllFinished();
+
+if (allPlayersFinished)
+{
+showResults = true;
+statusMessage = "";
+statusCheckTimer?.Dispose();
+}
+else
+{
+statusMessage = "Please wait for all players to finish before viewing results.";
+}
+}
+
+public void HandleResultsSaved()
+{
+statusMessage = "Results saved! You can view them in the Activity page.";
+showResults = false;
+currentRoomCode = "";
+playersInRoom.Clear();
+allPlayersFinished = false;
+StateHasChanged();
+}
+
+[JSInvokable]
+public async Task OnPlayerIdAssigned(string id)
+{
+playerId = id;
+await InvokeAsync(StateHasChanged);
+}
+
+[JSInvokable]
+public async Task OnRoomCreated(string roomCode)
+{
+currentRoomCode = roomCode;
+statusMessage = $"Room created! Code: {roomCode}";
+playersInRoom.Clear();
+playersInRoom.Add(UserService.CurrentUser ?? "");
+isConnecting = false;
+Console.WriteLine($"[INFO] Room {roomCode} created with topics: {string.Join(", ", selectedTopics)}");
+await InvokeAsync(StateHasChanged);
+}
+
+[JSInvokable]
+public async Task OnJoinedRoom(string roomInfoJson)
+{
+var roomInfo = JsonSerializer.Deserialize<RoomInfo>(roomInfoJson, new JsonSerializerOptions
+{
+PropertyNameCaseInsensitive = true
+});
+
+currentRoomCode = roomInfo?.RoomCode ?? "";
+playersInRoom = roomInfo?.Players ?? new List<string>();
+roomCodeToJoin = "";
+
+statusMessage = "Successfully connected to room!";
+isConnecting = false;
+
+await InvokeAsync(StateHasChanged);
+}
+
+[JSInvokable]
+public async Task OnJoinRoomFailed(string message)
+{
+statusMessage = $"Error: {message}";
+isConnecting = false;
+await InvokeAsync(StateHasChanged);
+}
+
+[JSInvokable]
+public async Task OnPlayerJoinedRoom(string username)
+{
+if (!playersInRoom.Contains(username))
+{
+playersInRoom.Add(username);
+}
+
+CheckIfAllFinished();
+await InvokeAsync(StateHasChanged);
+}
+
+[JSInvokable]
+public async Task OnPlayerLeft(string username)
+{
+playersInRoom.Remove(username);
+await InvokeAsync(StateHasChanged);
+}
+
+[JSInvokable]
+public async Task OnGameAction(string username, string action, string data)
+{
+if (username != UserService.CurrentUser)
+{
+await InvokeAsync(StateHasChanged);
+}
+}
+
+public async ValueTask DisposeAsync()
+{
+statusCheckTimer?.Dispose();
+
+if (objectReference != null)
+{
+await JSRuntime.InvokeVoidAsync("disconnectFromGame");
+objectReference.Dispose();
+}
+}
+
+public class RoomInfo
+{
+public string RoomCode { get; set; } = "";
+public List<string> Players { get; set; } = new();
+}
 }
