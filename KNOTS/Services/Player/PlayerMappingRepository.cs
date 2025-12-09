@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KNOTS.Services;
+[ExcludeFromCodeCoverage]
 public class PlayerMappingRepository {
     private readonly ConcurrentDictionary<string, (string Username, string RoomCode)> _playerMappings = new(); 
     public void AddPlayer(string connectionId, string username, string roomCode) {_playerMappings[connectionId] = (username, roomCode); }
