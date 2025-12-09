@@ -28,12 +28,12 @@
         <div class="gradient-orb orb-1"></div>
         <div class="gradient-orb orb-2"></div>
         <div class="gradient-orb orb-3"></div>
-        
+
         @for (int i = 0; i < 30; i++)
         {
             <div class="particle"></div>
         }
-        
+
         <div class="mouse-glow" id="mouseGlow"></div>
     </div>
 
@@ -81,24 +81,24 @@
                     <span class="corner-deco bottom-left">🥨</span>
                     <span class="corner-deco bottom-right">🥨</span>
                 </div>
-                
+
                 <div class="welcome-content">
                     <div class="sparkles">
                         @for (int i = 0; i < 3; i++)
                         {
                             <svg class="sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
+                                <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z"/>
                             </svg>
                         }
                     </div>
-                    
+
                     <h1 class="welcome-title">
                         Welcome back, <span class="username-highlight">@UserService.CurrentUser</span>
                     </h1>
                     <p class="welcome-subtitle">
                         Find your match • Keep the spark going • Make it unforgettable
                     </p>
-                    
+
                     @if (!string.IsNullOrEmpty(friendMessage))
                     {
                         <div class="message-box">
@@ -113,7 +113,7 @@
                 <!-- Game Section -->
                 <div class="game-section glass-card">
                     <div class="card-shine"></div>
-                    
+
                     <div class="section-icon">🎮</div>
                     <h2 class="section-title">Join New Game</h2>
                     <p class="section-description">
@@ -134,7 +134,7 @@
                 <!-- Chat Section -->
                 <div class="chat-section glass-card">
                     <div class="card-shine"></div>
-                    
+
                     <div class="chat-header">
                         <div class="chat-header-left">
                             <div class="section-icon">💬</div>
@@ -213,7 +213,8 @@
                                             <div class="chat-meta">
                                                 @if (contact.LastMessageAt.HasValue)
                                                 {
-                                                    <span class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
+                                                    <span
+                                                        class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
                                                 }
                                                 @if (contact.HasUnread)
                                                 {
@@ -253,12 +254,12 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const container = document.querySelector('.home-container');
         const mouseGlow = document.getElementById('mouseGlow');
-        
+
         if (container && mouseGlow) {
-            container.addEventListener('mousemove', function(e) {
+            container.addEventListener('mousemove', function (e) {
                 const rect = container.getBoundingClientRect();
                 const x = ((e.clientX - rect.left) / rect.width) * 100;
                 const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -266,7 +267,7 @@
                 mouseGlow.style.top = y + '%';
             });
         }
-        
+
         const particles = document.querySelectorAll('.particle');
         particles.forEach((particle) => {
             particle.style.left = Math.random() * 100 + '%';
@@ -276,7 +277,7 @@
             particle.style.opacity = Math.random() * 0.4 + 0.2;
             particle.style.animationDelay = (Math.random() * 5) + 's';
         });
-        
+
         const floatingElements = document.querySelectorAll('.floating-element');
         floatingElements.forEach((element) => {
             element.style.left = Math.random() * 100 + '%';
@@ -293,14 +294,16 @@
         box-sizing: border-box;
     }
 
+
     .home-container {
         min-height: 100vh;
-        width: 100vw;
+        width: 100%;
         position: relative;
-        overflow-x: hidden;
+        overflow-x: visible;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background: linear-gradient(135deg, #b4d0ec 0%, #a8c5e8 100%);
     }
+
 
     /* Background Animation */
     .background-animation {
@@ -312,8 +315,12 @@
     }
 
     @@keyframes gradientShift {
-        0%, 100% { filter: hue-rotate(0deg) brightness(1); }
-        50% { filter: hue-rotate(10deg) brightness(1.05); }
+        0%, 100% {
+            filter: hue-rotate(0deg) brightness(1);
+        }
+        50% {
+            filter: hue-rotate(10deg) brightness(1.05);
+        }
     }
 
     .floating-elements {
@@ -329,19 +336,19 @@
     }
 
     @@keyframes floatElement {
-        0%, 100% { 
+        0%, 100% {
             transform: translate(0, 0) rotate(0deg) scale(1);
             opacity: 0.1;
         }
-        25% { 
+        25% {
             transform: translate(20px, -30px) rotate(90deg) scale(1.2);
             opacity: 0.2;
         }
-        50% { 
+        50% {
             transform: translate(-15px, 25px) rotate(180deg) scale(0.9);
             opacity: 0.15;
         }
-        75% { 
+        75% {
             transform: translate(25px, 15px) rotate(270deg) scale(1.1);
             opacity: 0.18;
         }
@@ -386,10 +393,18 @@
     }
 
     @@keyframes floatOrb {
-        0%, 100% { transform: translate(0, 0); }
-        25% { transform: translate(30px, -30px); }
-        50% { transform: translate(-20px, 20px); }
-        75% { transform: translate(20px, 30px); }
+        0%, 100% {
+            transform: translate(0, 0);
+        }
+        25% {
+            transform: translate(30px, -30px);
+        }
+        50% {
+            transform: translate(-20px, 20px);
+        }
+        75% {
+            transform: translate(20px, 30px);
+        }
     }
 
     .particle {
@@ -401,8 +416,12 @@
     }
 
     @@keyframes particleFloat {
-        0% { transform: translateY(0); }
-        100% { transform: translateY(-20px); }
+        0% {
+            transform: translateY(0);
+        }
+        100% {
+            transform: translateY(-20px);
+        }
     }
 
     .mouse-glow {
@@ -421,9 +440,8 @@
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(20px) saturate(180%);
         border-radius: 30px;
-        box-shadow: 
-            0 20px 60px rgba(0, 0, 0, 0.3),
-            0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
         animation: cardEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         overflow: hidden;
     }
@@ -451,26 +469,37 @@
     }
 
     @@keyframes shine {
-        0% { left: -100%; }
-        50%, 100% { left: 100%; }
+        0% {
+            left: -100%;
+        }
+        50%, 100% {
+            left: 100%;
+        }
     }
 
     /* Navigation */
     .top-navigation {
         position: relative;
         z-index: 10;
-        padding: 1.5rem 0;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
+        padding: 2rem 0 1rem;
+        background: transparent;
+        display: flex;
+        justify-content: center;
     }
 
     .nav-content {
-        max-width: 1400px;
+        width: min(1400px, calc(100% - 2.5rem));
         margin: 0 auto;
-        padding: 0 2rem;
+        padding: 1rem 1.5rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(14px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 16px 32px rgba(12, 19, 38, 0.16);
     }
 
     .nav-brand {
@@ -490,15 +519,19 @@
     }
 
     .brand-rope {
-        font-size: 50px;
+        font-size: 42px;
         display: inline-block;
         filter: drop-shadow(0 4px 20px rgba(248, 136, 233, 0.6));
         animation: brandFloat 3s ease-in-out infinite;
     }
 
     @@keyframes brandFloat {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-5px) rotate(5deg); }
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-5px) rotate(5deg);
+        }
     }
 
     .brand-glow {
@@ -514,18 +547,18 @@
     }
 
     @@keyframes glowPulse {
-        0%, 100% { 
+        0%, 100% {
             opacity: 0.6;
             transform: translate(-50%, -50%) scale(1);
         }
-        50% { 
+        50% {
             opacity: 1;
             transform: translate(-50%, -50%) scale(1.2);
         }
     }
 
     .brand-text {
-        font-size: 2rem;
+        font-size: 1.8rem;
         font-weight: 800;
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         -webkit-background-clip: text;
@@ -613,18 +646,34 @@
         z-index: 1;
     }
 
+    .btn-logout .btn-shimmer {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: none;
+        transition: left 0.5s ease;
+    }
+
+    .btn-logout:hover .btn-shimmer {
+        left: 100%;
+    }
+
     .btn-logout:hover {
         transform: translateY(-3px);
         box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
     }
 
-    /* Content Wrapper */
-    .content-wrapper {
-        position: relative;
-        z-index: 1;
-        max-width: 1400px;
+    
+    .content-wrapper{
+        min-height: 100vh;     /* full screen height */
+        width: min(1600px, calc(100% - 2rem));
+        max-width: none;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 3rem 2rem 2rem;
+        position: relative;
     }
 
     /* Welcome Section */
@@ -673,11 +722,11 @@
     }
 
     @@keyframes cornerFloat {
-        0%, 100% { 
+        0%, 100% {
             transform: translateY(0) rotate(0deg);
             opacity: 0.3;
         }
-        50% { 
+        50% {
             transform: translateY(-8px) rotate(15deg);
             opacity: 0.5;
         }
@@ -702,12 +751,23 @@
         animation: sparkleAnim 2s ease-in-out infinite;
     }
 
-    .sparkle:nth-child(2) { animation-delay: 0.3s; }
-    .sparkle:nth-child(3) { animation-delay: 0.6s; }
+    .sparkle:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+
+    .sparkle:nth-child(3) {
+        animation-delay: 0.6s;
+    }
 
     @@keyframes sparkleAnim {
-        0%, 100% { opacity: 0.3; transform: scale(1) rotate(0deg); }
-        50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        0%, 100% {
+            opacity: 0.3;
+            transform: scale(1) rotate(0deg);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.2) rotate(180deg);
+        }
     }
 
     .welcome-title {
@@ -745,8 +805,12 @@
     }
 
     @@keyframes messagePulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.02); }
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.02);
+        }
     }
 
     /* Main Grid */
@@ -773,8 +837,12 @@
     }
 
     @@keyframes iconBounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
     }
 
     .section-title {
@@ -836,8 +904,12 @@
     }
 
     @@keyframes shimmer {
-        0% { left: -100%; }
-        100% { left: 100%; }
+        0% {
+            left: -100%;
+        }
+        100% {
+            left: 100%;
+        }
     }
 
     .status-message {
@@ -889,8 +961,12 @@
     }
 
     @@keyframes badgePulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
     }
 
     /* Chat Notification */
@@ -1019,7 +1095,9 @@
     }
 
     @@keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     .chat-loading p,
@@ -1051,8 +1129,8 @@
         flex-direction: column;
         gap: 1rem;
         max-height: 600px;
-        overflow-y: auto;
         padding-right: 0.5rem;
+        overflow: visible;
     }
 
     .chat-list::-webkit-scrollbar {
@@ -1076,13 +1154,14 @@
         background: rgba(255, 255, 255, 0.5);
         border: 2px solid rgba(230, 230, 230, 0.8);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow: hidden;
+        overflow: visible;
     }
 
     .chat-card:hover {
         transform: translateY(-5px);
         border-color: #f888e9;
         box-shadow: 0 15px 40px rgba(248, 136, 233, 0.3);
+        z-index: 2;
     }
 
     .chat-card.unread {
@@ -1251,378 +1330,386 @@
             font-size: 3rem;
         }
     }
+    
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
 </style>
 
+
 @code {
-private string statusMessage = "";
-private string friendMessage = "";
+    private string statusMessage = "";
+    private string friendMessage = "";
 
-private bool chatLoading = true;
-private string? chatError;
-private int unreadCount;
-private List<ChatContactSummary> contactSummaries = new();
-private Dictionary<string, CompatibilitySnapshot> compatibilityByUser = new(StringComparer.OrdinalIgnoreCase);
-private static readonly JsonSerializerOptions messageJsonOptions = new() { PropertyNameCaseInsensitive = true };
-private DotNetObjectReference<Home>? dotNetRef;
-private IncomingChatNotification? latestNotification;
-private CancellationTokenSource? notificationHideCts;
+    private bool chatLoading = true;
+    private string? chatError;
+    private int unreadCount;
+    private List<ChatContactSummary> contactSummaries = new();
+    private Dictionary<string, CompatibilitySnapshot> compatibilityByUser = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly JsonSerializerOptions messageJsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private DotNetObjectReference<Home>? dotNetRef;
+    private IncomingChatNotification? latestNotification;
+    private CancellationTokenSource? notificationHideCts;
 
-protected override async Task OnInitializedAsync()
-{
-if (UserService.IsAuthenticated)
-{
-await LoadContacts();
-}
-else
-{
-chatLoading = false;
-}
-}
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserService.IsAuthenticated)
+        {
+            await LoadContacts();
+        }
+        else
+        {
+            chatLoading = false;
+        }
+    }
 
-protected override async Task OnAfterRenderAsync(bool firstRender)
-{
-if (firstRender && UserService.IsAuthenticated)
-{
-dotNetRef = DotNetObjectReference.Create(this);
-await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", dotNetRef);
-await EnsureChatConnection();
-}
-}
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && UserService.IsAuthenticated)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("setBlazorGameComponent", dotNetRef);
+            await EnsureChatConnection();
+        }
+    }
 
-private async Task EnsureChatConnection()
-{
-try
-{
-var username = UserService.CurrentUser ?? string.Empty;
-if (!string.IsNullOrWhiteSpace(username))
-{
-await JSRuntime.InvokeAsync<bool>("ensureChatAndSetUsername", username);
-}
-}
-catch (Exception ex)
-{
-Console.WriteLine($"Failed to ensure chat connection: {ex.Message}");
-}
-}
+    private async Task EnsureChatConnection()
+    {
+        try
+        {
+            var username = UserService.CurrentUser ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                await JSRuntime.InvokeAsync<bool>("ensureChatAndSetUsername", username);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to ensure chat connection: {ex.Message}");
+        }
+    }
 
-private async Task LoadContacts()
-{
-chatLoading = true;
-chatError = null;
+    private async Task LoadContacts()
+    {
+        chatLoading = true;
+        chatError = null;
 
-try
-{
-var current = UserService.CurrentUser ?? string.Empty;
-var normalizedCurrent = Normalize(current);
+        try
+        {
+            var current = UserService.CurrentUser ?? string.Empty;
+            var normalizedCurrent = Normalize(current);
 
-compatibilityByUser = BuildCompatibilityLookup(current);
+            compatibilityByUser = BuildCompatibilityLookup(current);
 
-var conversations = await MessageService.GetUserConversations(current);
-var summaryMap = new Dictionary<string, ChatContactSummary>(StringComparer.OrdinalIgnoreCase);
+            var conversations = await MessageService.GetUserConversations(current);
+            var summaryMap = new Dictionary<string, ChatContactSummary>(StringComparer.OrdinalIgnoreCase);
 
-foreach (var convo in conversations)
-{
-var partner = Normalize(convo.User1Username) == normalizedCurrent
-? convo.User2Username
-: convo.User1Username;
+            foreach (var convo in conversations)
+            {
+                var partner = Normalize(convo.User1Username) == normalizedCurrent
+                    ? convo.User2Username
+                    : convo.User1Username;
 
-var partnerNormalized = Normalize(partner);
-var displayName = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
-? snapshot.Username
-: partner;
+                var partnerNormalized = Normalize(partner);
+                var displayName = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
+                    ? snapshot.Username
+                    : partner;
 
-var lastMessage = (convo.Messages ?? new List<Message>())
-.OrderByDescending(m => m.SentAt)
-.FirstOrDefault();
+                var lastMessage = (convo.Messages ?? new List<Message>())
+                    .OrderByDescending(m => m.SentAt)
+                    .FirstOrDefault();
 
-var summary = new ChatContactSummary
-{
-Username = displayName,
-Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
-? comp.Score
-: (double?)null,
-LastMessageAt = lastMessage?.SentAt,
-LastMessagePreview = FormatPreview(lastMessage?.Content),
-HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent,
-HasMessages = lastMessage != null
-};
+                var summary = new ChatContactSummary
+                {
+                    Username = displayName,
+                    Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+                        ? comp.Score
+                        : (double?)null,
+                    LastMessageAt = lastMessage?.SentAt,
+                    LastMessagePreview = FormatPreview(lastMessage?.Content),
+                    HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent,
+                    HasMessages = lastMessage != null
+                };
 
-summaryMap[partnerNormalized] = summary;
-}
+                summaryMap[partnerNormalized] = summary;
+            }
 
-foreach (var kvp in compatibilityByUser)
-{
-if (!summaryMap.ContainsKey(kvp.Key))
-{
-summaryMap[kvp.Key] = new ChatContactSummary
-{
-Username = kvp.Value.Username,
-Compatibility = kvp.Value.Score,
-LastMessagePreview = "No messages yet",
-HasMessages = false
-};
-}
-}
+            foreach (var kvp in compatibilityByUser)
+            {
+                if (!summaryMap.ContainsKey(kvp.Key))
+                {
+                    summaryMap[kvp.Key] = new ChatContactSummary
+                    {
+                        Username = kvp.Value.Username,
+                        Compatibility = kvp.Value.Score,
+                        LastMessagePreview = "No messages yet",
+                        HasMessages = false
+                    };
+                }
+            }
 
-contactSummaries = summaryMap.Values
-.OrderByDescending(c => c.HasUnread)
-.ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
-.ThenBy(c => c.Username)
-.ToList();
+            contactSummaries = summaryMap.Values
+                .OrderByDescending(c => c.HasUnread)
+                .ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
+                .ThenBy(c => c.Username)
+                .ToList();
 
-unreadCount = contactSummaries.Count(c => c.HasUnread);
-}
-catch (Exception ex)
-{
-Console.WriteLine($"Failed to load chat contacts: {ex.Message}");
-chatError = "We couldn't load your chats right now. Please try again in a moment.";
-}
-finally
-{
-chatLoading = false;
-StateHasChanged();
-}
-}
+            unreadCount = contactSummaries.Count(c => c.HasUnread);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load chat contacts: {ex.Message}");
+            chatError = "We couldn't load your chats right now. Please try again in a moment.";
+        }
+        finally
+        {
+            chatLoading = false;
+            StateHasChanged();
+        }
+    }
 
-[JSInvokable("OnChatMessageReceived")]
-public async Task OnChatMessageReceived(string messageJson) => await HandleIncomingMessage(messageJson);
+    [JSInvokable("OnChatMessageReceived")]
+    public async Task OnChatMessageReceived(string messageJson) => await HandleIncomingMessage(messageJson);
 
-[JSInvokable("OnChatMessageSent")]
-public async Task OnChatMessageSent(string messageJson) => await HandleIncomingMessage(messageJson);
+    [JSInvokable("OnChatMessageSent")]
+    public async Task OnChatMessageSent(string messageJson) => await HandleIncomingMessage(messageJson);
 
-private async Task HandleIncomingMessage(string messageJson)
-{
-try
-{
-var message = System.Text.Json.JsonSerializer.Deserialize<Message>(messageJson, messageJsonOptions);
-if (message == null)
-{
-return;
-}
+    private async Task HandleIncomingMessage(string messageJson)
+    {
+        try
+        {
+            var message = System.Text.Json.JsonSerializer.Deserialize<Message>(messageJson, messageJsonOptions);
+            if (message == null)
+            {
+                return;
+            }
 
-var normalizedCurrent = Normalize(UserService.CurrentUser);
-var sender = Normalize(message.SenderId);
-var receiver = Normalize(message.ReceiverId);
+            var normalizedCurrent = Normalize(UserService.CurrentUser);
+            var sender = Normalize(message.SenderId);
+            var receiver = Normalize(message.ReceiverId);
 
-if (sender != normalizedCurrent && receiver != normalizedCurrent)
-{
-return;
-}
+            if (sender != normalizedCurrent && receiver != normalizedCurrent)
+            {
+                return;
+            }
 
-var partnerUsername = sender == normalizedCurrent ? message.ReceiverId : message.SenderId;
-var partnerNormalized = Normalize(partnerUsername);
-var partnerDisplay = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
-? snapshot.Username
-: partnerUsername;
+            var partnerUsername = sender == normalizedCurrent ? message.ReceiverId : message.SenderId;
+            var partnerNormalized = Normalize(partnerUsername);
+            var partnerDisplay = compatibilityByUser.TryGetValue(partnerNormalized, out var snapshot)
+                ? snapshot.Username
+                : partnerUsername;
 
-var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == partnerNormalized);
-if (summary == null)
-{
-summary = new ChatContactSummary
-{
-Username = partnerDisplay,
-Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
-? comp.Score
-: (double?)null
-};
-contactSummaries.Add(summary);
-}
-else
-{
-summary.Username = partnerDisplay;
-}
+            var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == partnerNormalized);
+            if (summary == null)
+            {
+                summary = new ChatContactSummary
+                {
+                    Username = partnerDisplay,
+                    Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+                        ? comp.Score
+                        : (double?)null
+                };
+                contactSummaries.Add(summary);
+            }
+            else
+            {
+                summary.Username = partnerDisplay;
+            }
 
-await RefreshContactSummary(partnerUsername, summary, normalizedCurrent);
+            await RefreshContactSummary(partnerUsername, summary, normalizedCurrent);
 
-if (receiver == normalizedCurrent)
-{
-ShowIncomingNotification(summary.Username, summary.LastMessagePreview);
-}
+            if (receiver == normalizedCurrent)
+            {
+                ShowIncomingNotification(summary.Username, summary.LastMessagePreview);
+            }
 
-contactSummaries = contactSummaries
-.OrderByDescending(c => c.HasUnread)
-.ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
-.ThenBy(c => c.Username)
-.ToList();
+            contactSummaries = contactSummaries
+                .OrderByDescending(c => c.HasUnread)
+                .ThenByDescending(c => c.LastMessageAt ?? DateTime.MinValue)
+                .ThenBy(c => c.Username)
+                .ToList();
 
-unreadCount = contactSummaries.Count(c => c.HasUnread);
+            unreadCount = contactSummaries.Count(c => c.HasUnread);
 
-await InvokeAsync(StateHasChanged);
-}
-catch (Exception ex)
-{
-Console.WriteLine($"Failed to handle incoming home chat message: {ex.Message}");
-}
-}
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to handle incoming home chat message: {ex.Message}");
+        }
+    }
 
-private async Task RefreshContactSummary(string partnerUsername, ChatContactSummary summary, string normalizedCurrent)
-{
-try
-{
-var conversation = await MessageService.GetConversation(UserService.CurrentUser ?? string.Empty, partnerUsername);
+    private async Task RefreshContactSummary(string partnerUsername, ChatContactSummary summary, string normalizedCurrent)
+    {
+        try
+        {
+            var conversation = await MessageService.GetConversation(UserService.CurrentUser ?? string.Empty, partnerUsername);
 
-var lastMessage = (conversation ?? new List<Message>())
-.OrderByDescending(m => m.SentAt)
-.FirstOrDefault();
+            var lastMessage = (conversation ?? new List<Message>())
+                .OrderByDescending(m => m.SentAt)
+                .FirstOrDefault();
 
-var partnerNormalized = Normalize(partnerUsername);
+            var partnerNormalized = Normalize(partnerUsername);
 
-summary.Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
-? comp.Score
-: (double?)null;
-summary.LastMessagePreview = FormatPreview(lastMessage?.Content);
-summary.LastMessageAt = lastMessage?.SentAt;
-summary.HasMessages = lastMessage != null;
-summary.HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent;
-}
-catch (Exception ex)
-{
-Console.WriteLine($"Failed to refresh contact summary for {partnerUsername}: {ex.Message}");
-}
-}
+            summary.Compatibility = compatibilityByUser.TryGetValue(partnerNormalized, out var comp)
+                ? comp.Score
+                : (double?)null;
+            summary.LastMessagePreview = FormatPreview(lastMessage?.Content);
+            summary.LastMessageAt = lastMessage?.SentAt;
+            summary.HasMessages = lastMessage != null;
+            summary.HasUnread = lastMessage != null && !lastMessage.IsRead && Normalize(lastMessage.ReceiverId) == normalizedCurrent;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to refresh contact summary for {partnerUsername}: {ex.Message}");
+        }
+    }
 
-private Dictionary<string, CompatibilitySnapshot> BuildCompatibilityLookup(string currentUser)
-{
-var normalizedCurrent = Normalize(currentUser);
-var map = new Dictionary<string, CompatibilitySnapshot>(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, CompatibilitySnapshot> BuildCompatibilityLookup(string currentUser)
+    {
+        var normalizedCurrent = Normalize(currentUser);
+        var map = new Dictionary<string, CompatibilitySnapshot>(StringComparer.OrdinalIgnoreCase);
 
-var history = CompatibilityService.GetPlayerHistory(currentUser) ?? new List<GameHistoryEntry>();
-foreach (var entry in history)
-{
-if (entry.AllResults == null)
-{
-continue;
-}
+        var history = CompatibilityService.GetPlayerHistory(currentUser) ?? new List<GameHistoryEntry>();
+        foreach (var entry in history)
+        {
+            if (entry.AllResults == null)
+            {
+                continue;
+            }
 
-foreach (var result in entry.AllResults)
-{
-var p1 = Normalize(result.Player1);
-var p2 = Normalize(result.Player2);
+            foreach (var result in entry.AllResults)
+            {
+                var p1 = Normalize(result.Player1);
+                var p2 = Normalize(result.Player2);
 
-if (p1 != normalizedCurrent && p2 != normalizedCurrent)
-{
-continue;
-}
+                if (p1 != normalizedCurrent && p2 != normalizedCurrent)
+                {
+                    continue;
+                }
 
-var partnerUsername = p1 == normalizedCurrent ? result.Player2 : result.Player1;
-var normalizedPartner = Normalize(partnerUsername);
-var percentage = result.Percentage;
+                var partnerUsername = p1 == normalizedCurrent ? result.Player2 : result.Player1;
+                var normalizedPartner = Normalize(partnerUsername);
+                var percentage = result.Percentage;
 
-if (!map.TryGetValue(normalizedPartner, out var snapshot) || percentage > snapshot.Score)
-{
-map[normalizedPartner] = new CompatibilitySnapshot(partnerUsername, percentage);
-}
-}
-}
+                if (!map.TryGetValue(normalizedPartner, out var snapshot) || percentage > snapshot.Score)
+                {
+                    map[normalizedPartner] = new CompatibilitySnapshot(partnerUsername, percentage);
+                }
+            }
+        }
 
-return map;
-}
+        return map;
+    }
 
-private string FormatPreview(string? content)
-{
-if (string.IsNullOrWhiteSpace(content))
-{
-return "No messages yet";
-}
+    private string FormatPreview(string? content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return "No messages yet";
+        }
 
-var trimmed = content.Trim();
-return trimmed.Length > 80 ? trimmed.Substring(0, 80) + "..." : trimmed;
-}
+        var trimmed = content.Trim();
+        return trimmed.Length > 80 ? trimmed.Substring(0, 80) + "..." : trimmed;
+    }
 
-private static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
+    private static string Normalize(string? value) => (value ?? string.Empty).Trim().ToLowerInvariant();
 
-private async Task OpenChat(string username)
-{
-if (string.IsNullOrWhiteSpace(username))
-{
-return;
-}
+    private async Task OpenChat(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return;
+        }
 
-try
-{
-await MessageService.MarkConversationAsRead(UserService.CurrentUser ?? string.Empty, username);
-}
-catch (Exception ex)
-{
-Console.WriteLine($"Failed to mark conversation as read: {ex.Message}");
-}
+        try
+        {
+            await MessageService.MarkConversationAsRead(UserService.CurrentUser ?? string.Empty, username);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to mark conversation as read: {ex.Message}");
+        }
 
-var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == Normalize(username));
-if (summary != null)
-{
-summary.HasUnread = false;
-unreadCount = contactSummaries.Count(c => c.HasUnread);
-}
+        var summary = contactSummaries.FirstOrDefault(c => Normalize(c.Username) == Normalize(username));
+        if (summary != null)
+        {
+            summary.HasUnread = false;
+            unreadCount = contactSummaries.Count(c => c.HasUnread);
+        }
 
-if (latestNotification?.Username != null && Normalize(latestNotification.Username) == Normalize(username))
-{
-DismissNotification();
-}
+        if (latestNotification?.Username != null && Normalize(latestNotification.Username) == Normalize(username))
+        {
+            DismissNotification();
+        }
 
-Navigation.NavigateTo($"/chat/{username}");
-}
+        Navigation.NavigateTo($"/chat/{username}");
+    }
 
-private void Logout()
-{
-UserService.LogoutUser();
-statusMessage = "";
-friendMessage = "";
-Navigation.NavigateTo("/", forceLoad: true);
-}
+    private void Logout()
+    {
+        UserService.LogoutUser();
+        statusMessage = "";
+        friendMessage = "";
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
 
-public void Dispose()
-{
-JSRuntime.InvokeVoidAsync("setBlazorGameComponent", (object?)null);
-dotNetRef?.Dispose();
-notificationHideCts?.Cancel();
-}
+    public void Dispose()
+    {
+        JSRuntime.InvokeVoidAsync("setBlazorGameComponent", (object?)null);
+        dotNetRef?.Dispose();
+        notificationHideCts?.Cancel();
+    }
 
-private void ShowIncomingNotification(string username, string preview)
-{
-notificationHideCts?.Cancel();
-notificationHideCts = new CancellationTokenSource();
+    private void ShowIncomingNotification(string username, string preview)
+    {
+        notificationHideCts?.Cancel();
+        notificationHideCts = new CancellationTokenSource();
 
-latestNotification = new IncomingChatNotification(username, preview);
-StateHasChanged();
+        latestNotification = new IncomingChatNotification(username, preview);
+        StateHasChanged();
 
-_ = AutoDismissNotification(notificationHideCts.Token);
-}
+        _ = AutoDismissNotification(notificationHideCts.Token);
+    }
 
-private async Task AutoDismissNotification(CancellationToken token)
-{
-try
-{
-await Task.Delay(TimeSpan.FromSeconds(8), token);
-if (token.IsCancellationRequested)
-{
-return;
-}
+    private async Task AutoDismissNotification(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(8), token);
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
 
-latestNotification = null;
-await InvokeAsync(StateHasChanged);
-}
-catch (TaskCanceledException)
-{
-}
-}
+            latestNotification = null;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
 
-private void DismissNotification()
-{
-notificationHideCts?.Cancel();
-latestNotification = null;
-StateHasChanged();
-}
+    private void DismissNotification()
+    {
+        notificationHideCts?.Cancel();
+        latestNotification = null;
+        StateHasChanged();
+    }
 
-private class ChatContactSummary
-{
-public string Username { get; set; } = string.Empty;
-public double? Compatibility { get; set; }
-public string LastMessagePreview { get; set; } = "No messages yet";
-public DateTime? LastMessageAt { get; set; }
-public bool HasUnread { get; set; }
-public bool HasMessages { get; set; }
-}
+    private class ChatContactSummary
+    {
+        public string Username { get; set; } = string.Empty;
+        public double? Compatibility { get; set; }
+        public string LastMessagePreview { get; set; } = "No messages yet";
+        public DateTime? LastMessageAt { get; set; }
+        public bool HasUnread { get; set; }
+        public bool HasMessages { get; set; }
+    }
 
-private record CompatibilitySnapshot(string Username, double Score);
-private record IncomingChatNotification(string Username, string Preview);
+    private record CompatibilitySnapshot(string Username, double Score);
+
+    private record IncomingChatNotification(string Username, string Preview);
 }
