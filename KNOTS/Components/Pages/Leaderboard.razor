@@ -2,6 +2,7 @@
 @using KNOTS.Services.Interfaces
 @using KNOTS.Models
 @using KNOTS.Services
+@using System.Globalization
 
 @inject InterfaceUserService UserService
 
@@ -52,14 +53,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @{
-                            int rank = 1;
-                        }
-                        @foreach (var user in leaderboard)
+                        @for (var i = 0; i < leaderboard.Count; i++)
                         {
+                            var rank = i + 1;
+                            var user = leaderboard[i];
+                            var rankClass = $"rank-number{(rank <= 3 ? " top-rank" : string.Empty)}";
                             <tr class="@(user.Username == UserService.CurrentUser ? "current-user-row" : "")">
                                 <td>
-                                    <span class="rank-number @(rank <= 3 ? "top-rank" : string.Empty)">@rank</span>
+                                    <span class="@rankClass">@rank</span>
                                 </td>
                                 <td>
                                     <strong>@user.Username</strong>
@@ -73,11 +74,10 @@
                                     <span class="match-badge">@user.BestMatchesCount</span>
                                 </td>
                                 <td>
-                                    <span class="compatibility-score">@user.AverageCompatibilityScore.ToString("F1")%</span>
+                                    <span class="compatibility-score">@string.Format(DisplayCulture, "{0:F1}%", user.AverageCompatibilityScore)</span>
                                 </td>
-                                <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td>@user.CreatedAt.ToString("MMM dd, yyyy", DisplayCulture)</td>
                             </tr>
-                            rank++;
                         }
                     </tbody>
                 </table>
@@ -353,6 +353,7 @@
 </style>
 
 @code {
+    private static readonly CultureInfo DisplayCulture = CultureInfo.GetCultureInfo("lt-LT");
     private List<User>? leaderboard = new List<User>();
     private int currentUserRank = 0;
     private int totalUsers = 0;
