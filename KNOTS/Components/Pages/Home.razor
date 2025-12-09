@@ -16,699 +16,1240 @@
 
 <PageTitle>Home</PageTitle>
 
-<div class="scene">
-    <div class="ambient-orbs"></div>
-    <div class="ambient-orbs ambient-orbs-2"></div>
-
-    <div class="full-screen-container">
-        @if (UserService.IsAuthenticated)
+<div class="home-container">
+    <!-- Animuotas fonas -->
+    <div class="background-animation">
+        <div class="floating-elements">
+            @for (int i = 0; i < 8; i++)
+            {
+                <div class="floating-element" style="animation-delay: @(i * -2.5)s;">🥨</div>
+            }
+        </div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        
+        @for (int i = 0; i < 30; i++)
         {
-        <nav class="top-navigation glass-nav">
-            <div class="nav-left">
+            <div class="particle"></div>
+        }
+        
+        <div class="mouse-glow" id="mouseGlow"></div>
+    </div>
+
+    @if (UserService.IsAuthenticated)
+    {
+        <!-- Navigation -->
+        <nav class="top-navigation">
+            <div class="nav-content">
                 <div class="nav-brand">
-                    <span class="brand-icon">✶</span>
+                    <div class="brand-icon-wrapper">
+                        <span class="brand-rope">🥨</span>
+                        <div class="brand-glow"></div>
+                    </div>
                     <span class="brand-text">KNOTS</span>
                 </div>
+                <div class="nav-links">
+                    <a href="/Home" class="nav-link active">
+                        <span>Home</span>
+                        <div class="link-shine"></div>
+                    </a>
+                    <a href="/activity" class="nav-link">
+                        <span>My Activity</span>
+                        <div class="link-shine"></div>
+                    </a>
+                    <a href="/leaderboard" class="nav-link">
+                        <span>Top Knotters</span>
+                        <div class="link-shine"></div>
+                    </a>
+                </div>
+                <button class="btn-logout" @onclick="Logout">
+                    <span>Logout</span>
+                    <div class="btn-shimmer"></div>
+                </button>
             </div>
-            <div class="nav-links">
-                <a href="/Home" class="nav-link active"><span>Home</span></a>
-                <a href="/activity" class="nav-link"><span>My Activity</span></a>
-                <a href="/leaderboard" class="nav-link"><span>View Top Knotters</span></a>
-            </div>
-            <button class="btn-logout glow-button" @onclick="Logout">
-                <span class="btn-inner">Logout</span>
-            </button>
         </nav>
 
+        <!-- Main Content -->
         <div class="content-wrapper">
-            <div class="welcome-section hero-card">
-                <div class="hero-header">
-                    <h1 class="welcome-title">
-                        Welcome, <span class="welcome-name">@UserService.CurrentUser</span>
-                    </h1>
-                    <p class="welcome-sub">
-                        Find your match. Keep the spark going. Make it unforgettable.
-                    </p>
+            <!-- Welcome Section -->
+            <div class="welcome-section glass-card">
+                <div class="card-shine"></div>
+                <div class="corner-decorations">
+                    <span class="corner-deco top-left">🥨</span>
+                    <span class="corner-deco top-right">🥨</span>
+                    <span class="corner-deco bottom-left">🥨</span>
+                    <span class="corner-deco bottom-right">🥨</span>
                 </div>
-
-                @if (!string.IsNullOrEmpty(friendMessage))
-                {
-                <div class="message-box pulse">@friendMessage</div>
-                }
+                
+                <div class="welcome-content">
+                    <div class="sparkles">
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            <svg class="sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
+                            </svg>
+                        }
+                    </div>
+                    
+                    <h1 class="welcome-title">
+                        Welcome back, <span class="username-highlight">@UserService.CurrentUser</span>
+                    </h1>
+                    <p class="welcome-subtitle">
+                        Find your match • Keep the spark going • Make it unforgettable
+                    </p>
+                    
+                    @if (!string.IsNullOrEmpty(friendMessage))
+                    {
+                        <div class="message-box">
+                            <span>@friendMessage</span>
+                        </div>
+                    }
+                </div>
             </div>
 
-            <div class="grid-sections">
-                <div class="game-section glass-card enter-up">
-                    <div class="section-header">
-                        <h2 class="section-title">Join a new game now</h2>
-                        <p class="section-description">
-                            Connect to our interactive server and get matched based on your answers.
-                        </p>
-                    </div>
+            <!-- Main Grid -->
+            <div class="main-grid">
+                <!-- Game Section -->
+                <div class="game-section glass-card">
+                    <div class="card-shine"></div>
+                    
+                    <div class="section-icon">🎮</div>
+                    <h2 class="section-title">Join New Game</h2>
+                    <p class="section-description">
+                        Connect to our interactive server and get matched based on your answers.
+                    </p>
 
-                    <a href="/game" class="btn-connect shine">
-                        <span class="btn-inner">Connect to game</span>
+                    <a href="/game" class="btn-connect">
+                        <span>Connect to Game</span>
+                        <div class="btn-shimmer"></div>
                     </a>
 
                     @if (!string.IsNullOrEmpty(statusMessage))
                     {
-                    <p class="status-message">@statusMessage</p>
+                        <p class="status-message">@statusMessage</p>
                     }
                 </div>
 
-                <div class="chat-section glass-card enter-up delay-1">
-                    <div class="chat-header-bar">
-                        <div>
-                            <h2 class="section-title">Messages</h2>
-                            <p class="chat-subtitle">Reconnect with players from previous games and pick up your conversations anytime.</p>
+                <!-- Chat Section -->
+                <div class="chat-section glass-card">
+                    <div class="card-shine"></div>
+                    
+                    <div class="chat-header">
+                        <div class="chat-header-left">
+                            <div class="section-icon">💬</div>
+                            <div>
+                                <h2 class="section-title">Messages</h2>
+                                <p class="chat-subtitle">Reconnect with your matches</p>
+                            </div>
                         </div>
                         @if (unreadCount > 0)
                         {
-                        <span class="unread-chip float-in">@unreadCount new</span>
+                            <span class="unread-badge">@unreadCount new</span>
                         }
                     </div>
 
                     @if (latestNotification != null)
                     {
-                    <div class="chat-notification glow-border">
-                        <div class="chat-notification-text">
-                            <div class="chat-notification-title">New message</div>
-                            <div class="chat-notification-body">
-                                <strong>@latestNotification.Username</strong>: @latestNotification.Preview
+                        <div class="chat-notification">
+                            <div class="notification-glow"></div>
+                            <div class="notification-content">
+                                <div class="notification-title">New message</div>
+                                <div class="notification-body">
+                                    <strong>@latestNotification.Username</strong>: @latestNotification.Preview
+                                </div>
+                            </div>
+                            <div class="notification-actions">
+                                <button class="btn-open-chat" @onclick="() => OpenChat(latestNotification.Username)">
+                                    <span>Open</span>
+                                    <div class="btn-shimmer"></div>
+                                </button>
+                                <button class="btn-dismiss" @onclick="DismissNotification">×</button>
                             </div>
                         </div>
-                        <div class="chat-notification-actions">
-                            <button class="btn-chat micro-shift" @onclick="() => OpenChat(latestNotification.Username)">Open chat</button>
-                            <button class="btn-dismiss" @onclick="DismissNotification">Dismiss</button>
-                        </div>
-                    </div>
                     }
 
                     @if (chatLoading)
                     {
-                    <div class="chat-loading">
-                        <div class="spinner-circle"></div>
-                        <p>Loading your chats...</p>
-                    </div>
+                        <div class="chat-loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading your chats...</p>
+                        </div>
                     }
                     else if (!string.IsNullOrWhiteSpace(chatError))
                     {
-                    <div class="chat-error">@chatError</div>
+                        <div class="chat-error">@chatError</div>
                     }
                     else if (contactSummaries.Count == 0)
                     {
-                    <div class="chat-empty">
-                        <h3>No chats yet</h3>
-                        <p>Play a game to meet new players and start messaging them directly from here.</p>
-                        <a href="/game" class="btn-connect shine"><span class="btn-inner">Find a match</span></a>
-                    </div>
+                        <div class="chat-empty">
+                            <div class="empty-icon">📭</div>
+                            <h3>No chats yet</h3>
+                            <p>Play a game to meet new players and start messaging!</p>
+                            <a href="/game" class="btn-find-match">
+                                <span>Find a Match</span>
+                                <div class="btn-shimmer"></div>
+                            </a>
+                        </div>
                     }
                     else
                     {
-                    <div class="chat-list">
-                        @foreach (var contact in contactSummaries)
-                        {
-                        <div class="chat-card @(contact.HasUnread ? "unread" : string.Empty) hover-rise">
-                            <div class="chat-card-main">
-                                <div class="chat-card-top">
-                                    <div class="chat-name">@contact.Username</div>
-                                    @if (contact.Compatibility.HasValue)
-                                    {
-                                    <span class="compat-chip">@contact.Compatibility.Value.ToString("F0")% match</span>
-                                    }
+                        <div class="chat-list">
+                            @foreach (var contact in contactSummaries)
+                            {
+                                <div class="chat-card @(contact.HasUnread ? "unread" : "")">
+                                    <div class="chat-card-glow"></div>
+                                    <div class="chat-card-content">
+                                        <div class="chat-card-header">
+                                            <div class="chat-info">
+                                                <div class="chat-name">@contact.Username</div>
+                                                @if (contact.Compatibility.HasValue)
+                                                {
+                                                    <span class="compat-badge">
+                                                        @contact.Compatibility.Value.ToString("F0")% match
+                                                    </span>
+                                                }
+                                            </div>
+                                            <div class="chat-meta">
+                                                @if (contact.LastMessageAt.HasValue)
+                                                {
+                                                    <span class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
+                                                }
+                                                @if (contact.HasUnread)
+                                                {
+                                                    <span class="new-badge">New</span>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="chat-preview">@contact.LastMessagePreview</div>
+                                        <button class="btn-open-chat-card" @onclick="() => OpenChat(contact.Username)">
+                                            <span>Open Chat</span>
+                                            <div class="btn-shimmer"></div>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="chat-preview">@contact.LastMessagePreview</div>
-                            </div>
-                            <div class="chat-card-meta">
-                                <div class="chat-meta-top">
-                                    @if (contact.LastMessageAt.HasValue)
-                                    {
-                                    <span class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
-                                    }
-                                    else
-                                    {
-                                    <span class="timestamp muted">No messages yet</span>
-                                    }
-                                    @if (contact.HasUnread)
-                                    {
-                                    <span class="pill pill-new wave">New</span>
-                                    }
-                                </div>
-                                <button class="btn-chat micro-shift" @onclick="() => OpenChat(contact.Username)">Open chat</button>
-                            </div>
+                            }
                         </div>
-                        }
-                    </div>
                     }
                 </div>
             </div>
         </div>
-        }
-        else
-        {
+    }
+    else
+    {
         <div class="not-logged-in">
-            <div class="login-card glass-card enter-up">
-                <h3 class="login-title">You are not logged in</h3>
-                <p><a href="/" class="link-login shine"><span class="btn-inner">Go to login page</span></a></p>
+            <div class="login-prompt glass-card">
+                <div class="card-shine"></div>
+                <div class="prompt-icon">🔒</div>
+                <h3>You are not logged in</h3>
+                <p>Please log in to access your KNOTS account</p>
+                <a href="/" class="btn-login-redirect">
+                    <span>Go to Login</span>
+                    <div class="btn-shimmer"></div>
+                </a>
             </div>
         </div>
-        }
-    </div>
+    }
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.querySelector('.home-container');
+        const mouseGlow = document.getElementById('mouseGlow');
+        
+        if (container && mouseGlow) {
+            container.addEventListener('mousemove', function(e) {
+                const rect = container.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                mouseGlow.style.left = x + '%';
+                mouseGlow.style.top = y + '%';
+            });
+        }
+        
+        const particles = document.querySelectorAll('.particle');
+        particles.forEach((particle) => {
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.width = (Math.random() * 3 + 1.5) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.opacity = Math.random() * 0.4 + 0.2;
+            particle.style.animationDelay = (Math.random() * 5) + 's';
+        });
+        
+        const floatingElements = document.querySelectorAll('.floating-element');
+        floatingElements.forEach((element) => {
+            element.style.left = Math.random() * 100 + '%';
+            element.style.top = Math.random() * 100 + '%';
+            element.style.fontSize = (Math.random() * 30 + 30) + 'px';
+        });
+    });
+</script>
+
 <style>
-    /* Base and animated background */
-    :root{
-        --accent-1: #f888e9;
-        --accent-2: #bd87f8;
-        --accent-3: #9ec2f3;
-        --text-strong: #1f1f1f;
-        --text-soft: #555;
-        --glass-bg: rgba(255,255,255,0.14);
-        --glass-bg-strong: rgba(255,255,255,0.22);
-        --border-soft: rgba(255,255,255,0.25);
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
-    .scene{
-        position: relative;
+    .home-container {
         min-height: 100vh;
-        overflow: hidden;
-        background: radial-gradient(1200px 600px at 10% 10%, rgba(248,136,233,0.25), transparent 50%),
-        radial-gradient(1000px 600px at 90% 90%, rgba(189,135,248,0.25), transparent 50%),
-        linear-gradient(135deg, #a8c5e8 0%, #b4d0ec 100%);
-        animation: bgShift 20s ease-in-out infinite alternate;
+        width: 100vw;
+        position: relative;
+        overflow-x: hidden;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #b4d0ec 0%, #a8c5e8 100%);
     }
 
-    @@keyframes bgShift{
-        0%{ filter: hue-rotate(0deg) saturate(1); }
-        100%{ filter: hue-rotate(12deg) saturate(1.15); }
-    }
-
-    .ambient-orbs, .ambient-orbs-2{
-        position: absolute;
-        inset: -30% -30%;
-        background:
-            radial-gradient(600px 600px at 20% 30%, rgba(248,136,233,0.12), transparent 60%),
-            radial-gradient(450px 450px at 80% 70%, rgba(189,135,248,0.10), transparent 60%);
-        animation: floatOrbs 30s ease-in-out infinite;
+    /* Background Animation */
+    .background-animation {
+        position: fixed;
+        inset: 0;
+        animation: gradientShift 15s ease infinite;
         pointer-events: none;
         z-index: 0;
     }
-    .ambient-orbs-2{ animation-delay: 8s; opacity: 0.6; }
 
-    @@keyframes floatOrbs{
-        0%{ transform: translate3d(0,0,0) scale(1); }
-        50%{ transform: translate3d(1.5%, -1%, 0) scale(1.03); }
-        100%{ transform: translate3d(0,0,0) scale(1); }
+    @@keyframes gradientShift {
+        0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+        50% { filter: hue-rotate(10deg) brightness(1.05); }
     }
 
-    /* Layout */
-    .full-screen-container {
-        min-height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        display: flex;
-        flex-direction: column;
+    .floating-elements {
+        position: absolute;
+        inset: 0;
+    }
+
+    .floating-element {
+        position: absolute;
+        opacity: 0.15;
+        animation: floatElement 20s ease-in-out infinite;
+        filter: blur(2px);
+    }
+
+    @@keyframes floatElement {
+        0%, 100% { 
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 0.1;
+        }
+        25% { 
+            transform: translate(20px, -30px) rotate(90deg) scale(1.2);
+            opacity: 0.2;
+        }
+        50% { 
+            transform: translate(-15px, 25px) rotate(180deg) scale(0.9);
+            opacity: 0.15;
+        }
+        75% { 
+            transform: translate(25px, 15px) rotate(270deg) scale(1.1);
+            opacity: 0.18;
+        }
+    }
+
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.4;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, #f888e9 0%, transparent 70%);
+        top: -10%;
+        left: -10%;
+        animation-duration: 25s;
+    }
+
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, #bd87f8 0%, transparent 70%);
+        bottom: -10%;
+        right: -10%;
+        animation-duration: 20s;
+        animation-delay: -5s;
+    }
+
+    .orb-3 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, #a8c5e8 0%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-duration: 30s;
+        animation-delay: -10s;
+    }
+
+    @@keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0); }
+        25% { transform: translate(30px, -30px); }
+        50% { transform: translate(-20px, 20px); }
+        75% { transform: translate(20px, 30px); }
+    }
+
+    .particle {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        animation: particleFloat 8s infinite linear;
+    }
+
+    @@keyframes particleFloat {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-20px); }
+    }
+
+    .mouse-glow {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    /* Glass Card Effect */
+    .glass-card {
         position: relative;
-        z-index: 1;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        border-radius: 30px;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        animation: cardEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        overflow: hidden;
     }
 
-    .glass-nav{
-        backdrop-filter: blur(14px) saturate(1.1);
-        background: linear-gradient(180deg, var(--glass-bg) 0%, rgba(255,255,255,0.08) 100%);
-        border-bottom: 1px solid var(--border-soft);
+    @@keyframes cardEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
 
+    .card-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shine 3s infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes shine {
+        0% { left: -100%; }
+        50%, 100% { left: 100%; }
+    }
+
+    /* Navigation */
     .top-navigation {
-        padding: 1rem 2rem;
+        position: relative;
+        z-index: 10;
+        padding: 1.5rem 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .nav-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
 
-    .nav-left{
-        display:flex; align-items:center; gap:.75rem;
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
 
-    .brand-icon{
-        display:inline-block;
-        width: 34px; height: 34px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-        box-shadow: 0 6px 14px rgba(189,135,248,0.35);
-        color: white; display:flex; align-items:center; justify-content:center;
-        font-size: 1rem; transform: rotate(-8deg);
+    .brand-icon-wrapper {
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.3s ease;
     }
-    .brand-text{
-        font-size: 1.4rem; font-weight: 800; letter-spacing: 2px;
-        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-        -webkit-background-clip: text; background-clip: text; color: transparent;
+
+    .brand-icon-wrapper:hover {
+        transform: scale(1.15) rotate(10deg);
+    }
+
+    .brand-rope {
+        font-size: 50px;
+        display: inline-block;
+        filter: drop-shadow(0 4px 20px rgba(248, 136, 233, 0.6));
+        animation: brandFloat 3s ease-in-out infinite;
+    }
+
+    @@keyframes brandFloat {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-5px) rotate(5deg); }
+    }
+
+    .brand-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 120%;
+        height: 120%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(circle, rgba(248, 136, 233, 0.4) 0%, transparent 70%);
+        animation: glowPulse 2s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes glowPulse {
+        0%, 100% { 
+            opacity: 0.6;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        50% { 
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+    }
+
+    .brand-text {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 3px;
     }
 
     .nav-links {
         display: flex;
         gap: 1rem;
-        flex: 1;
-        justify-content: center;
     }
 
     .nav-link {
         position: relative;
-        color: #222;
+        padding: 0.75rem 1.5rem;
+        border-radius: 15px;
         text-decoration: none;
+        color: #333;
         font-weight: 700;
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
-        transition: transform .2s ease, background .3s ease, color .3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
     }
-    .nav-link span { position: relative; z-index: 1; }
-    .nav-link::before{
-        content:"";
-        position:absolute; inset:0;
-        background: linear-gradient(135deg, rgba(248,136,233,0.18), rgba(189,135,248,0.22));
-        opacity:0; transition: opacity .3s ease;
-        border-radius: 12px;
-    }
-    .nav-link:hover { transform: translateY(-2px); color:#111; }
-    .nav-link:hover::before{ opacity:1; }
-    .nav-link.active{
-        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-        color: white; box-shadow: 0 8px 20px rgba(189,135,248,0.35);
+
+    .nav-link span {
+        position: relative;
+        z-index: 1;
     }
 
-    .glow-button{
-        position: relative; border: none; background: transparent; padding: 0;
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 15px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
-    .glow-button .btn-inner{
-        display:inline-block; background: #222; color:white; font-weight:700;
-        padding:.6rem 1.2rem; border-radius: 12px;
-        box-shadow: 0 10px 26px rgba(0,0,0,0.25), 0 0 0 0 rgba(248,136,233,0.0);
-        transition: transform .2s ease, box-shadow .3s ease;
+
+    .nav-link:hover::before {
+        opacity: 1;
     }
-    .glow-button:hover .btn-inner{
+
+    .nav-link:hover {
         transform: translateY(-2px);
-        box-shadow: 0 14px 30px rgba(0,0,0,0.28), 0 0 16px 4px rgba(248,136,233,0.35);
+        color: #f888e9;
     }
 
+    .nav-link.active {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        box-shadow: 0 8px 25px rgba(248, 136, 233, 0.4);
+    }
+
+    .link-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .nav-link:hover .link-shine {
+        left: 100%;
+    }
+
+    .btn-logout {
+        position: relative;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #666 0%, #444 100%);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-logout span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-logout:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Content Wrapper */
     .content-wrapper {
-        max-width: 1200px;
+        position: relative;
+        z-index: 1;
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 2.5rem 2rem 3rem;
+        padding: 2rem;
     }
 
-    /* Hero */
-    .hero-card{
+    /* Welcome Section */
+    .welcome-section {
+        padding: 3rem 2.5rem;
+        margin-bottom: 2rem;
         text-align: center;
-        margin: 1.5rem auto 2.25rem;
-        padding: 2rem 2rem 2.25rem;
-        backdrop-filter: blur(14px) saturate(1.1);
-        background: linear-gradient(180deg, var(--glass-bg-strong) 0%, rgba(255,255,255,0.12) 100%);
-        border-radius: 22px;
-        border: 1px solid var(--border-soft);
-        box-shadow: 0 14px 40px rgba(0,0,0,0.15);
     }
+
+    .corner-decorations {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .corner-deco {
+        position: absolute;
+        font-size: 35px;
+        opacity: 0.3;
+        animation: cornerFloat 4s ease-in-out infinite;
+        filter: drop-shadow(0 2px 10px rgba(248, 136, 233, 0.3));
+    }
+
+    .corner-deco.top-left {
+        top: 20px;
+        left: 20px;
+        animation-delay: 0s;
+    }
+
+    .corner-deco.top-right {
+        top: 20px;
+        right: 20px;
+        animation-delay: 1s;
+    }
+
+    .corner-deco.bottom-left {
+        bottom: 20px;
+        left: 20px;
+        animation-delay: 2s;
+    }
+
+    .corner-deco.bottom-right {
+        bottom: 20px;
+        right: 20px;
+        animation-delay: 3s;
+    }
+
+    @@keyframes cornerFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.3;
+        }
+        50% { 
+            transform: translateY(-8px) rotate(15deg);
+            opacity: 0.5;
+        }
+    }
+
+    .welcome-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .sparkles {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .sparkle {
+        width: 20px;
+        height: 20px;
+        color: #f888e9;
+        animation: sparkleAnim 2s ease-in-out infinite;
+    }
+
+    .sparkle:nth-child(2) { animation-delay: 0.3s; }
+    .sparkle:nth-child(3) { animation-delay: 0.6s; }
+
+    @@keyframes sparkleAnim {
+        0%, 100% { opacity: 0.3; transform: scale(1) rotate(0deg); }
+        50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+    }
+
     .welcome-title {
-        color: var(--text-strong);
-        font-size: 2.6rem;
-        font-weight: 900;
-        letter-spacing: .5px;
-        margin-bottom: .35rem;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 1rem;
+        line-height: 1.2;
     }
-    .welcome-name{
-        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-        -webkit-background-clip: text; background-clip: text; color: transparent;
+
+    .username-highlight {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
-    .welcome-sub{
-        color: var(--text-soft);
-        font-size: 1.05rem;
-        margin: 0.25rem auto 0;
-        max-width: 560px;
+
+    .welcome-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.5rem;
     }
+
     .message-box {
         display: inline-block;
-        margin-top: 1rem;
-        background: rgba(255, 255, 255, 0.3);
-        padding: 0.85rem 1.25rem;
-        border-radius: 14px;
-        color: #222;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.15), rgba(189, 135, 248, 0.15));
+        padding: 1rem 1.5rem;
+        border-radius: 15px;
+        color: #333;
         font-weight: 700;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        border: 2px solid rgba(248, 136, 233, 0.3);
+        animation: messagePulse 2s ease-in-out infinite;
     }
 
-    /* Grid sections */
-    .grid-sections{
-        display:grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-    @@media (max-width: 992px){
-    .grid-sections{ grid-template-columns: 1fr; }
+    @@keyframes messagePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
     }
 
-    /* Cards */
-    .glass-card{
-        backdrop-filter: blur(12px) saturate(1.1);
-        background: linear-gradient(180deg, var(--glass-bg) 0%, rgba(255,255,255,0.08) 100%);
-        border: 1px solid var(--border-soft);
-        border-radius: 22px;
-        box-shadow: 0 12px 34px rgba(0,0,0,0.18);
-        padding: 2rem;
-        transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+    /* Main Grid */
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 2rem;
     }
-    .glass-card:hover{
-        transform: translateY(-6px);
-        box-shadow: 0 18px 48px rgba(0,0,0,0.22);
-        border-color: rgba(248,136,233,0.35);
+
+    /* Game Section */
+    .game-section {
+        padding: 2.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .section-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: iconBounce 2s ease-in-out infinite;
+    }
+
+    @@keyframes iconBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
     }
 
     .section-title {
-        color: var(--text-strong);
-        font-size: 1.75rem;
-        font-weight: 900;
-        margin-bottom: 0.35rem;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
     }
+
     .section-description {
-        color: var(--text-soft);
+        color: #666;
         font-size: 1rem;
         line-height: 1.6;
-        margin-bottom: 1.25rem;
+        margin-bottom: 2rem;
+        max-width: 400px;
     }
 
-    /* Buttons */
-    .btn-connect {
-        display: inline-block;
+    .btn-connect,
+    .btn-find-match,
+    .btn-login-redirect {
         position: relative;
-        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-        color: white;
-        padding: 1rem 2.6rem;
-        border-radius: 14px;
-        text-decoration: none;
-        font-weight: 900;
-        font-size: 1.15rem;
-        box-shadow: 0 10px 26px rgba(189,135,248,0.35);
-        transition: transform .2s ease, box-shadow .35s ease;
-        overflow: hidden;
-    }
-    .btn-connect .btn-inner{ position: relative; z-index: 1; }
-    .btn-connect::after{
-        content:"";
-        position:absolute; top:0; left:-120%;
-        width:120%; height:100%;
-        background: linear-gradient(90deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.35) 48%, rgba(255,255,255,0.0) 100%);
-        transform: skewX(-12deg);
-        transition: left .6s ease;
-    }
-    .btn-connect:hover{
-        transform: translateY(-3px);
-        box-shadow: 0 16px 38px rgba(189,135,248,0.45);
-    }
-    .btn-connect:hover::after{ left: -5%; }
-
-    .btn-chat {
-        background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);
-        color: white;
+        display: inline-block;
+        padding: 1rem 2.5rem;
         border: none;
-        padding: 0.6rem 1.1rem;
-        border-radius: 12px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
         font-weight: 800;
+        font-size: 1.1rem;
+        text-decoration: none;
         cursor: pointer;
-        box-shadow: 0 8px 22px rgba(189,135,248,0.35);
-        transition: transform .2s ease, box-shadow .3s ease;
-    }
-    .btn-chat:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 28px rgba(189,135,248,0.45);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(248, 136, 233, 0.4);
     }
 
-    /* Status and chips */
+    .btn-connect span,
+    .btn-find-match span,
+    .btn-login-redirect span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-connect:hover,
+    .btn-find-match:hover,
+    .btn-login-redirect:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(248, 136, 233, 0.6);
+    }
+
+    .btn-shimmer {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @@keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
     .status-message {
         margin-top: 1rem;
-        color: #333;
-        font-weight: 700;
-        opacity: .9;
+        color: #666;
+        font-weight: 600;
     }
 
-    .chat-header-bar {
+    /* Chat Section */
+    .chat-section {
+        padding: 2rem;
+    }
+
+    .chat-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
         gap: 1rem;
-        margin-bottom: 1rem;
     }
-    .chat-subtitle {
+
+    .chat-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .chat-header-left .section-icon {
+        font-size: 2.5rem;
         margin: 0;
-        color: var(--text-soft);
+    }
+
+    .chat-subtitle {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .unread-badge {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        box-shadow: 0 8px 20px rgba(248, 136, 233, 0.4);
+        animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @@keyframes badgePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Chat Notification */
+    .chat-notification {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.15), rgba(189, 135, 248, 0.15));
+        border: 2px solid rgba(248, 136, 233, 0.4);
+        margin-bottom: 1.5rem;
+        animation: notificationSlide 0.5s ease;
+        overflow: hidden;
+    }
+
+    @@keyframes notificationSlide {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .notification-glow {
+        position: absolute;
+        inset: -2px;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.3), rgba(189, 135, 248, 0.3));
+        filter: blur(10px);
+        z-index: -1;
+        animation: glowPulse 2s ease-in-out infinite;
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-title {
+        font-weight: 800;
+        color: #f888e9;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .notification-body {
+        color: #333;
         font-size: 0.95rem;
     }
-    .unread-chip {
-        background: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);
-        color: white;
-        padding: 0.35rem 0.75rem;
-        border-radius: 999px;
-        font-weight: 900;
-        font-size: 0.88rem;
-        box-shadow: 0 8px 22px rgba(189,135,248,0.35);
+
+    .notification-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
     }
 
-    /* Notification */
-    .chat-notification {
+    .btn-open-chat,
+    .btn-open-chat-card {
+        position: relative;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.4);
+    }
+
+    .btn-open-chat span,
+    .btn-open-chat-card span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-open-chat:hover,
+    .btn-open-chat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(248, 136, 233, 0.6);
+    }
+
+    .btn-dismiss {
+        width: 35px;
+        height: 35px;
+        border: 2px solid #f888e9;
+        background: transparent;
+        color: #f888e9;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0.85rem 1rem;
-        border-radius: 16px;
-        border: 1px solid rgba(248, 136, 233, 0.5);
-        background: linear-gradient(180deg, rgba(248, 136, 233, 0.12) 0%, rgba(189, 135, 248, 0.07) 100%);
-        box-shadow: 0 12px 30px rgba(189,135,248,0.25);
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-        position: relative;
-    }
-    .glow-border::before{
-        content:"";
-        position:absolute; inset:-2px;
-        border-radius: 18px;
-        background: linear-gradient(135deg, rgba(248,136,233,0.25), rgba(189,135,248,0.25));
-        filter: blur(12px);
-        z-index:-1; opacity:.6;
-    }
-    .chat-notification-title {
-        font-weight: 900;
-        color: #a14ac0;
-        letter-spacing: 0.02em;
-    }
-    .chat-notification-body {
-        color: #222;
-    }
-    .btn-dismiss {
-        background: transparent;
-        border: 1px solid var(--accent-1);
-        color: #a14ac0;
-        padding: 0.45rem 0.9rem;
-        border-radius: 10px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .btn-dismiss:hover {
-        background: rgba(248, 136, 233, 0.12);
-        transform: translateY(-1px);
+        justify-content: center;
+        line-height: 1;
     }
 
-    /* Chat list and cards */
+    .btn-dismiss:hover {
+        background: #f888e9;
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    /* Chat Loading/Empty/Error */
+    .chat-loading,
+    .chat-empty,
+    .chat-error {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(248, 136, 233, 0.2);
+        border-top-color: #f888e9;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .chat-loading p,
+    .chat-empty p,
+    .chat-error {
+        color: #666;
+        font-size: 1rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: iconBounce 2s ease-in-out infinite;
+    }
+
+    .chat-empty h3 {
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+    }
+
+    .btn-find-match {
+        margin-top: 1rem;
+    }
+
+    /* Chat List */
     .chat-list {
         display: flex;
         flex-direction: column;
         gap: 1rem;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
     }
-    .chat-card {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 1rem;
-        padding: 1rem 1.25rem;
-        border: 1px solid rgba(230, 230, 230, 0.6);
-        border-radius: 16px;
-        background: rgba(255,255,255,0.6);
-        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
-        backdrop-filter: blur(6px);
+
+    .chat-list::-webkit-scrollbar {
+        width: 8px;
     }
-    .chat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
-        border-color: rgba(248,136,233,0.35);
-        background: rgba(255,255,255,0.75);
-    }
-    .chat-card.unread {
-        border-color: var(--accent-1);
-        background: linear-gradient(180deg, rgba(248, 136, 233, 0.10) 0%, rgba(255,255,255,0.8) 100%);
-    }
-    .chat-card-main { display: flex; flex-direction: column; gap: 0.35rem; }
-    .chat-card-top { display: flex; align-items: center; gap: 0.5rem; }
-    .chat-name {
-        font-weight: 900;
-        font-size: 1.05rem;
-        color: #1f1f1f;
-    }
-    .compat-chip {
-        background: #eef2ff;
-        color: #4b4db5;
-        padding: 0.25rem 0.65rem;
+
+    .chat-list::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.3);
         border-radius: 10px;
+    }
+
+    .chat-list::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        border-radius: 10px;
+    }
+
+    .chat-card {
+        position: relative;
+        padding: 1.5rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid rgba(230, 230, 230, 0.8);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .chat-card:hover {
+        transform: translateY(-5px);
+        border-color: #f888e9;
+        box-shadow: 0 15px 40px rgba(248, 136, 233, 0.3);
+    }
+
+    .chat-card.unread {
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.1), rgba(189, 135, 248, 0.1));
+        border-color: #f888e9;
+    }
+
+    .chat-card-glow {
+        position: absolute;
+        inset: -2px;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.2), rgba(189, 135, 248, 0.2));
+        filter: blur(15px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+
+    .chat-card:hover .chat-card-glow {
+        opacity: 1;
+    }
+
+    .chat-card-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .chat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .chat-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .chat-name {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #333;
+    }
+
+    .compat-badge {
+        background: linear-gradient(135deg, #e7f3ff, #f0e7ff);
+        color: #6b5fc7;
+        padding: 0.35rem 0.75rem;
+        border-radius: 12px;
         font-weight: 800;
         font-size: 0.85rem;
-        border: 1px solid rgba(75,77,181,0.25);
+        border: 1px solid rgba(107, 95, 199, 0.3);
     }
-    .chat-preview {
-        color: var(--text-soft);
-        font-size: 0.95rem;
-        line-height: 1.4;
-    }
-    .chat-card-meta {
+
+    .chat-meta {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
         gap: 0.5rem;
     }
-    .chat-meta-top {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #777;
-        font-size: 0.9rem;
-    }
+
     .timestamp {
-        color: #666;
-        font-weight: 800;
-    }
-    .timestamp.muted { color: #aaa; }
-    .pill {
-        padding: 0.2rem 0.65rem;
-        border-radius: 999px;
-        font-weight: 900;
+        color: #999;
         font-size: 0.85rem;
-        border: 1px solid var(--accent-1);
-    }
-    .pill-new {
-        background: #fff;
-        color: var(--accent-1);
-        box-shadow: 0 8px 20px rgba(248,136,233,0.25);
+        font-weight: 600;
     }
 
-    /* Loading and empty states */
-    .chat-loading,
-    .chat-empty {
-        text-align: center;
-        padding: 2rem;
-        color: var(--text-soft);
+    .new-badge {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.25rem 0.65rem;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        animation: badgePulse 2s ease-in-out infinite;
     }
-    .spinner-circle{
-        width: 34px; height:34px; border-radius:50%;
-        border: 3px solid rgba(248,136,233,0.25);
-        border-top-color: var(--accent-1);
-        animation: spin 1s linear infinite;
-        margin: 0 auto .75rem;
-    }
-    @@keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Not logged in */
+    .chat-preview {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+
+    .btn-open-chat-card {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Not Logged In */
     .not-logged-in {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: calc(100vh - 80px);
-        color: #111;
-        text-align: center;
         padding: 2rem;
     }
-    .login-card{
-        max-width: 520px;
+
+    .login-prompt {
+        max-width: 500px;
         width: 100%;
+        padding: 3rem 2.5rem;
         text-align: center;
     }
-    .login-title{
-        font-size: 2rem;
+
+    .prompt-icon {
+        font-size: 4rem;
         margin-bottom: 1rem;
-        font-weight: 900;
-        color: var(--text-strong);
-    }
-    .link-login{
-        display:inline-block;
-        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-        color: white;
-        padding: .85rem 1.4rem;
-        border-radius: 12px;
-        font-weight: 900;
-        text-decoration: none;
-        box-shadow: 0 10px 26px rgba(189,135,248,0.35);
-        transition: transform .2s ease, box-shadow .3s ease;
-        position: relative; overflow:hidden;
-    }
-    .link-login .btn-inner{ position:relative; z-index:1; }
-    .link-login::after{
-        content:""; position:absolute; top:0; left:-120%;
-        width:120%; height:100%;
-        background: linear-gradient(90deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.35) 48%, rgba(255,255,255,0.0) 100%);
-        transform: skewX(-12deg); transition:left .6s ease;
-    }
-    .link-login:hover{ transform: translateY(-2px); box-shadow: 0 16px 36px rgba(189,135,248,0.45); }
-    .link-login:hover::after{ left: -5%; }
-
-    /* Micro-animations utility classes */
-    .pulse{ animation: pulse 2.2s ease-in-out infinite; }
-    @@keyframes pulse{
-        0%{ transform: scale(1); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-        50%{ transform: scale(1.02); box-shadow: 0 12px 30px rgba(0,0,0,0.18); }
-        100%{ transform: scale(1); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        animation: iconBounce 2s ease-in-out infinite;
     }
 
-    .hover-rise:hover{ transform: translateY(-3px); }
-    .micro-shift:hover{ transform: translateY(-2px); }
-
-    .enter-up{
-        opacity: 0; transform: translateY(12px);
-        animation: enterUp .6s ease forwards;
-    }
-    .delay-1{ animation-delay: .12s; }
-    @@keyframes enterUp{
-        to{ opacity: 1; transform: translateY(0); }
-    }
-
-    .float-in{
-        animation: floatIn .6s ease forwards;
-        transform: translateY(6px);
-    }
-    @@keyframes floatIn{
-        to{ transform: translateY(0); }
-    }
-
-    /* Responsive tweaks */
-    @@media (max-width: 768px) {
-    .top-navigation {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .nav-links {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        justify-content: center;
-    }
-    .welcome-title {
+    .login-prompt h3 {
         font-size: 2rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
     }
-    .section-title {
-        font-size: 1.45rem;
+
+    .login-prompt p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
     }
-    .game-section {
-        padding: 1.6rem 1.4rem;
+
+    /* Responsive */
+    @@media (max-width: 1200px) {
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
     }
-    .chat-card {
-        grid-template-columns: 1fr;
-    }
-    .chat-card-meta {
-        align-items: flex-start;
-    }
+
+    @@media (max-width: 768px) {
+        .nav-content {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+        }
+
+        .brand-text {
+            font-size: 1.5rem;
+        }
+
+        .brand-rope {
+            font-size: 40px;
+        }
+
+        .corner-deco {
+            font-size: 25px;
+        }
+
+        .section-icon {
+            font-size: 3rem;
+        }
     }
 </style>
 
@@ -1062,7 +1603,6 @@ await InvokeAsync(StateHasChanged);
 }
 catch (TaskCanceledException)
 {
-// ignored
 }
 }
 
