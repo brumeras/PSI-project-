@@ -2,7 +2,6 @@
 @using KNOTS.Services.Interfaces
 @using KNOTS.Models
 @using KNOTS.Services
-@using System.Globalization
 
 @inject InterfaceUserService UserService
 
@@ -70,45 +69,44 @@
     }
     else if (leaderboard != null && leaderboard.Any())
     {
-        <div class="leaderboard-card">
-            <div class="table-responsive">
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Username</th>
-                            <th>Games Played</th>
-                            <th>Best Matches</th>
-                            <th>Avg Compatibility</th>
-                            <th>Member Since</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (var i = 0; i < leaderboard.Count; i++)
+    <div class="leaderboard-card">
+        <div class="card-shine"></div>
+        <span class="card-rope top-left">🥨</span>
+        <span class="card-rope top-right">🥨</span>
+
+        <div class="table-responsive">
+            <table class="leaderboard-table">
+                <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Username</th>
+                    <th>Games Played</th>
+                    <th>Best Matches</th>
+                    <th>Avg Compatibility</th>
+                    <th>Member Since</th>
+                </tr>
+                </thead>
+                <tbody>
+                @{
+                int rank = 1;
+                }
+                @foreach (var user in leaderboard)
+                {
+                <tr class="@(user.Username == UserService.CurrentUser ? "current-user-row" : "") @GetRankClass(rank)">
+                    <td>
+                                    <span class="rank-number @GetRankClass(rank)">
+                                        @if (rank <= 3)
+                                        {
+                                        <i class="bi @GetRankIcon(rank) rank-icon"></i>
+                                        }
+                                        #@rank
+                                    </span>
+                    </td>
+                    <td>
+                        <strong>@user.Username</strong>
+                        @if (user.Username == UserService.CurrentUser)
                         {
-                            var rank = i + 1;
-                            var user = leaderboard[i];
-                            var rankClass = $"rank-number{(rank <= 3 ? " top-rank" : string.Empty)}";
-                            <tr class="@(user.Username == UserService.CurrentUser ? "current-user-row" : "")">
-                                <td>
-                                    <span class="@rankClass">@rank</span>
-                                </td>
-                                <td>
-                                    <strong>@user.Username</strong>
-                                    @if (user.Username == UserService.CurrentUser)
-                                    {
-                                        <span class="you-badge">You</span>
-                                    }
-                                </td>
-                                <td>@user.TotalGamesPlayed</td>
-                                <td>
-                                    <span class="match-badge">@user.BestMatchesCount</span>
-                                </td>
-                                <td>
-                                    <span class="compatibility-score">@string.Format(DisplayCulture, "{0:F1}%", user.AverageCompatibilityScore)</span>
-                                </td>
-                                <td>@user.CreatedAt.ToString("MMM dd, yyyy", DisplayCulture)</td>
-                            </tr>
+                        <span class="you-badge">You</span>
                         }
                     </td>
                     <td>@user.TotalGamesPlayed</td>
@@ -675,59 +673,57 @@
 </style>
 
 @code {
-    private static readonly CultureInfo DisplayCulture = CultureInfo.GetCultureInfo("lt-LT");
-    private List<User>? leaderboard = new List<User>();
-    private int currentUserRank = 0;
-    private int totalUsers = 0;
-    private bool isLoading = true;
+private List<User>? leaderboard = new List<User>();
+private int currentUserRank = 0;
+private int totalUsers = 0;
+private bool isLoading = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        Console.WriteLine("=== LEADERBOARD PAGE LOADING ===");
-        await Task.Delay(300);
-        LoadLeaderboard();
-        isLoading = false;
-        StateHasChanged();
-    }
+protected override async Task OnInitializedAsync()
+{
+await Task.Delay(300);
+LoadLeaderboard();
+isLoading = false;
+StateHasChanged();
+}
 
-    private void LoadLeaderboard()
-    {
-        try
-        {
-            Console.WriteLine("=== LoadLeaderboard START ===");
-            
-            totalUsers = UserService.GetTotalUsersCount();
-            Console.WriteLine($"Total users count: {totalUsers}");
-            
-            leaderboard = UserService.GetLeaderboard(10);
-            Console.WriteLine($"Leaderboard returned: {leaderboard?.Count ?? 0} users");
-            
-            if (leaderboard != null && leaderboard.Any())
-            {
-                Console.WriteLine("=== USERS IN LEADERBOARD: ===");
-                foreach (var user in leaderboard)
-                {
-                    Console.WriteLine($"  - {user.Username}: Games={user.TotalGamesPlayed}, Avg={user.AverageCompatibilityScore:F2}, Best={user.BestMatchesCount}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("!!! LEADERBOARD IS EMPTY OR NULL !!!");
-            }
-        
-            if (UserService.IsAuthenticated && !string.IsNullOrEmpty(UserService.CurrentUser))
-            {
-                currentUserRank = UserService.GetUserRank(UserService.CurrentUser);
-                Console.WriteLine($"Current user rank: {currentUserRank}");
-            }
-            
-            Console.WriteLine("=== LoadLeaderboard END ===");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"!!! ERROR loading leaderboard: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            leaderboard = new List<User>();
-        }
-    }
+private void LoadLeaderboard()
+{
+try
+{
+totalUsers = UserService.GetTotalUsersCount();
+leaderboard = UserService.GetLeaderboard(10);
+
+if (UserService.IsAuthenticated && !string.IsNullOrEmpty(UserService.CurrentUser))
+{
+currentUserRank = UserService.GetUserRank(UserService.CurrentUser);
+}
+}
+catch (Exception ex)
+{
+Console.WriteLine($"Error loading leaderboard: {ex.Message}");
+leaderboard = new List<User>();
+}
+}
+
+private string GetRankClass(int rank)
+{
+return rank switch
+{
+1 => "rank-1",
+2 => "rank-2",
+3 => "rank-3",
+_ => string.Empty
+};
+}
+
+private string GetRankIcon(int rank)
+{
+return rank switch
+{
+1 => "bi-trophy-fill",
+2 => "bi-award-fill",
+3 => "bi-star-fill",
+_ => string.Empty
+};
+}
 }
