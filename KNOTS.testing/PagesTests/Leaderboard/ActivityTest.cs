@@ -24,9 +24,6 @@ namespace KNOTS.Tests.ReflectionCode
             _mockUserService = new Mock<InterfaceUserService>();
         }
 
-        // --- PAGALBINĖS FUNKCIJOS REFLEKSIJAI ---
-        // Paliekame, nes jos reikalingos kitiems laukams (pvz., gameHistory) nustatyti.
-
         private void SetPrivateField(object obj, string fieldName, object value)
         {
             var field = obj.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
@@ -71,11 +68,7 @@ namespace KNOTS.Tests.ReflectionCode
                 AllResults = new List<CompatibilityScore> { new CompatibilityScore() }
             },
         };
-
-        // =========================================================================
-        // TESTAS 1: GET AVERAGE COMPATIBILITY (STATISTIKA)
-        // =========================================================================
-        // Šis testas veikia, nes nereikia Inject'inti Mock Service (UserService/CompatibilityService)
+        
         [Fact]
         public void GetAverageCompatibility_CalculatesCorrectAverage()
         {
@@ -101,10 +94,6 @@ namespace KNOTS.Tests.ReflectionCode
             Assert.Equal("80.0", result);
         }
 
-        // =========================================================================
-        // TESTAS 2: GET BEST MATCH EVER (STATISTIKA)
-        // =========================================================================
-        // Šis testas veikia
         [Fact]
         public void GetBestMatchEver_ReturnsHighestMatchPlayer()
         {
@@ -123,11 +112,7 @@ namespace KNOTS.Tests.ReflectionCode
             // Assert
             Assert.Equal("TheBEST", result);
         }
-
-        // =========================================================================
-        // TESTAS 3: DETALIŲ RODMAS IR UŽDARYMAS
-        // =========================================================================
-        // Šis testas veikia
+        
         [Fact]
         public void ShowAndCloseDetails_TogglesSelectedGame()
         {

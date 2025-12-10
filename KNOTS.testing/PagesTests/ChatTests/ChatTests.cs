@@ -445,7 +445,8 @@ namespace TestProject1.PagesTests
                 .Add(p => p.MatchedUsername, "matcheduser"));
 
             // Assert
-            var homeButton = cut.Find(".btn-home");
+            var homeButton = cut.FindAll("a.nav-link")
+                .First(a => a.TextContent.Contains("Home"));
             Assert.Equal("/Home", homeButton.GetAttribute("href"));
         }
 

@@ -109,6 +109,7 @@ namespace KNOTS.Tests.Integration
         [Fact]
         public async Task Should_Display_Top_Three_Ranks_With_Special_Styling()
         {
+            _mockUserService.Reset();
             // Arrange
             _mockUserService.Setup(s => s.IsAuthenticated).Returns(true);
             _mockUserService.Setup(s => s.GetTotalUsersCount()).Returns(5);
@@ -128,7 +129,7 @@ namespace KNOTS.Tests.Integration
             await Task.Delay(400);
 
             // Assert
-            var topRanks = cut.FindAll(".top-rank");
+            var topRanks = cut.FindAll("span.rank-1, span.rank-2, span.rank-3");
             Assert.Equal(3, topRanks.Count);
             
             Assert.Contains("1", topRanks[0].TextContent);
@@ -228,7 +229,7 @@ namespace KNOTS.Tests.Integration
 
             // Act
             var cut = Render<Leaderboard>();
-            await Task.Delay(400);
+            cut.WaitForState(() => cut.FindAll("th").Count > 0);
 
             // Assert
             var headers = cut.FindAll("th");
@@ -268,7 +269,7 @@ namespace KNOTS.Tests.Integration
 
             // Assert
             var cells = cut.FindAll("tbody td");
-            Assert.Contains("kov. 15, 2024", cells[cells.Count - 1].TextContent);
+            Assert.Contains("Mar 15, 2024", cells[cells.Count - 1].TextContent);
         }
 
         [Fact]
