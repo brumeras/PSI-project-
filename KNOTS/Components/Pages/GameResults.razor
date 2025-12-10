@@ -110,12 +110,8 @@
                 }
                 
                 <div class="action-section">
-                    <div class="auto-save">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <span>@(hasSavedResults ? "Results saved automatically." : "Saving results automatically...")</span>
-                    </div>
-                    <button class="btn-finish" @onclick="FinishViewing">
-                        Finish
+                    <button class="btn-save" @onclick="SaveToHistory">
+                        Save Results & Finish
                     </button>
                 </div>
             </div>
@@ -211,9 +207,10 @@
     }
 
     .best-match {
-        background: linear-gradient(135deg, #fffbea 0%, #fff9db 100%);
-        border-color: #ffd700;
+        background: linear-gradient(135deg, #fdefff 0%, #f4e4ff 100%);
+        border-color: #bd87f8;
         border-width: 3px;
+        box-shadow: 0 6px 16px rgba(189, 135, 248, 0.25);
     }
 
     .result-header-row {
@@ -418,42 +415,24 @@
         margin-top: 2rem;
         padding-top: 2rem;
         border-top: 2px solid #e0e0e0;
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
     }
 
-    .auto-save {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
+    .btn-save {
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
-        padding: 0.85rem 1.5rem;
+        border: none;
+        padding: 1rem 3rem;
         border-radius: 12px;
-        font-weight: 700;
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
         box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
     }
 
-    .btn-finish {
-        background: white;
-        color: #bd87f8;
-        border: 2px solid #bd87f8;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.15);
-    }
-
-    .btn-finish:hover {
-        background: #bd87f8;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.3);
+    .btn-save:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
     }
 
     .no-results-card {
@@ -507,37 +486,34 @@
     
     [Parameter]
     public EventCallback OnResultsSaved { get; set; }
-
+    
     private List<CompatibilityScore>? compatibilityResults;
     private bool isCalculating = false;
-    private bool hasSavedResults = false;
-    private bool saveInProgress = false;
     private int expandedIndex = -1;
     
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         if (!string.IsNullOrEmpty(RoomCode))
         {
-            await CalculateResultsAsync();
+            CalculateResults();
         }
     }
-
-    private async Task CalculateResultsAsync()
+    
+    private void CalculateResults()
     {
         isCalculating = true;
         StateHasChanged();
-
+        
         try
         {
             var players = GameRoomService.GetRoomPlayerUsernames(RoomCode ?? "");
-
+            
             if (players.Count >= 2)
             {
                 compatibilityResults = CompatibilityService.CalculateAllCompatibilities(
-                    RoomCode ?? "",
+                    RoomCode ?? "", 
                     players
                 );
-                await EnsureResultsSavedAsync();
             }
         }
         catch (Exception ex)
@@ -578,37 +554,14 @@
         Navigation.NavigateTo($"/chat/{username}");
     }
     
-    private async Task EnsureResultsSavedAsync()
+    private async Task SaveToHistory()
     {
-        if (hasSavedResults || saveInProgress)
-        {
-            return;
-        }
-
-        if (string.IsNullOrEmpty(RoomCode) || compatibilityResults == null || !compatibilityResults.Any())
-        {
-            return;
-        }
-
-        saveInProgress = true;
-
-        try
+        if (!string.IsNullOrEmpty(RoomCode))
         {
             var players = GameRoomService.GetRoomPlayerUsernames(RoomCode);
             CompatibilityService.SaveGameToHistory(RoomCode, players);
-            hasSavedResults = true;
-        }
-        finally
-        {
-            saveInProgress = false;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task FinishViewing()
-    {
-        if (OnResultsSaved.HasDelegate)
-        {
+            CompatibilityService.ClearRoomData(RoomCode);
+            
             await OnResultsSaved.InvokeAsync();
         }
     }

@@ -5,8 +5,36 @@
 @layout EmptyLayout
 @rendermode InteractiveServer
 
-<div class="login-container">
+<div class="login-container" id="loginContainer">
+    <!-- Animuotas fonas su riestainiukais -->
+    <div class="background-animation">
+        <div class="floating-rope-hearts">
+            @for (int i = 0; i < 6; i++)
+            {
+                <div class="floating-rope-heart" style="animation-delay: @(i * -2)s;">🥨</div>
+            }
+        </div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        
+        @for (int i = 0; i < 25; i++)
+        {
+            <div class="particle"></div>
+        }
+        
+        <div class="mouse-glow" id="mouseGlow"></div>
+    </div>
+
     <div class="login-card">
+        <div class="card-shine"></div>
+        
+        <!-- Kampiniai riestainiukai -->
+        <span class="corner-rope top-left">🥨</span>
+        <span class="corner-rope top-right">🥨</span>
+        <span class="corner-rope bottom-left">🥨</span>
+        <span class="corner-rope bottom-right">🥨</span>
+        
         @if (UserService.IsAuthenticated)
         {
             <h3 class="text-center mb-3">Welcome, @UserService.CurrentUser!</h3>
@@ -14,7 +42,27 @@
         }
         else
         {
-            <h1 class="login-title">KNOTS</h1>
+            <!-- Logo su interaktyviu riestainiuku -->
+            <div class="logo-container">
+                <div class="main-rope-heart">
+                    <span class="rope-emoji">🥨</span>
+                    <div class="rope-glow"></div>
+                </div>
+                <h1 class="login-title">KNOTS</h1>
+                <div class="logo-tagline">Connect • Match • Chat</div>
+            </div>
+
+            <div class="sparkles-container">
+                <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
+                </svg>
+                <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
+                </svg>
+                <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
+                </svg>
+            </div>
 
             <div class="input-group">
                 <label for="usernameInput">Username</label>
@@ -29,9 +77,11 @@
             <div class="button-group">
                 <button class="btn-login" @onclick="LoginToWeb">
                     Login
+                    <div class="btn-shimmer"></div>
                 </button>
                 <button class="btn-signup" @onclick="RegisterToWeb">
                     Sign up
+                    <div class="btn-shimmer"></div>
                 </button>
             </div>
 
@@ -42,6 +92,43 @@
         }
     </div>
 </div>
+
+<script>
+    // Mouse tracking efektas
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('loginContainer');
+        const mouseGlow = document.getElementById('mouseGlow');
+        
+        if (container && mouseGlow) {
+            container.addEventListener('mousemove', function(e) {
+                const rect = container.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                mouseGlow.style.left = x + '%';
+                mouseGlow.style.top = y + '%';
+            });
+        }
+        
+        // Dalelių animacija
+        const particles = document.querySelectorAll('.particle');
+        particles.forEach((particle, i) => {
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.width = (Math.random() * 3 + 1.5) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.opacity = Math.random() * 0.4 + 0.2;
+            particle.style.animationDelay = (Math.random() * 5) + 's';
+        });
+        
+        // Floating ropes positioning
+        const floatingRopes = document.querySelectorAll('.floating-rope-heart');
+        floatingRopes.forEach((rope, i) => {
+            rope.style.left = Math.random() * 100 + '%';
+            rope.style.top = Math.random() * 100 + '%';
+            rope.style.fontSize = (Math.random() * 30 + 30) + 'px';
+        });
+    });
+</script>
 
 <style>
     * {
@@ -56,34 +143,331 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        
-        background: url('/images/rope_heart.png') no-repeat center center fixed;
-        background-size: cover;
-        background-color: #b4d0ec;
-        
+        position: relative;
+        overflow: hidden;
         padding: 2rem;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #b4d0ec 0%, #a8c5e8 100%);
     }
 
+    /* Background Animation */
+    .background-animation {
+        position: absolute;
+        inset: 0;
+        animation: gradientShift 15s ease infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes gradientShift {
+        0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+        50% { filter: hue-rotate(10deg) brightness(1.05); }
+    }
+
+    .floating-rope-hearts {
+        position: absolute;
+        inset: 0;
+    }
+
+    .floating-rope-heart {
+        position: absolute;
+        opacity: 0.15;
+        animation: floatRope 20s ease-in-out infinite;
+        filter: blur(2px);
+    }
+
+    @@keyframes floatRope {
+        0%, 100% { 
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 0.1;
+        }
+        25% { 
+            transform: translate(20px, -30px) rotate(90deg) scale(1.2);
+            opacity: 0.2;
+        }
+        50% { 
+            transform: translate(-15px, 25px) rotate(180deg) scale(0.9);
+            opacity: 0.15;
+        }
+        75% { 
+            transform: translate(25px, 15px) rotate(270deg) scale(1.1);
+            opacity: 0.18;
+        }
+    }
+
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.4;
+        animation: float 20s ease-in-out infinite;
+    }
+
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, #f888e9 0%, transparent 70%);
+        top: -10%;
+        left: -10%;
+        animation-duration: 25s;
+    }
+
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, #bd87f8 0%, transparent 70%);
+        bottom: -10%;
+        right: -10%;
+        animation-duration: 20s;
+        animation-delay: -5s;
+    }
+
+    .orb-3 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, #a8c5e8 0%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-duration: 30s;
+        animation-delay: -10s;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(30px, -30px) rotate(90deg); }
+        50% { transform: translate(-20px, 20px) rotate(180deg); }
+        75% { transform: translate(20px, 30px) rotate(270deg); }
+    }
+
+    .particle {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        animation: particleFloat 8s infinite linear;
+    }
+
+    @@keyframes particleFloat {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-20px); }
+    }
+
+    .mouse-glow {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+    }
+
+    /* Login Card */
     .login-card {
-        background: rgb(248, 242, 242);
+        position: relative;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
         padding: 3rem 2.5rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        width: 80%;
-        max-width: 400px;
-        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        width: 90%;
+        max-width: 450px;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        animation: cardEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    @@keyframes cardEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .card-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shine 3s infinite;
+    }
+
+    @@keyframes shine {
+        0% { left: -100%; }
+        50%, 100% { left: 100%; }
+    }
+
+    /* Kampiniai riestainiukai */
+    .corner-rope {
+        position: absolute;
+        font-size: 35px;
+        opacity: 0.3;
+        transition: all 0.3s ease;
+        animation: cornerFloat 4s ease-in-out infinite;
+        filter: drop-shadow(0 2px 10px rgba(248, 136, 233, 0.3));
+    }
+
+    .corner-rope.top-left {
+        top: 20px;
+        left: 20px;
+        animation-delay: 0s;
+    }
+
+    .corner-rope.top-right {
+        top: 20px;
+        right: 20px;
+        animation-delay: 1s;
+    }
+
+    .corner-rope.bottom-left {
+        bottom: 20px;
+        left: 20px;
+        animation-delay: 2s;
+    }
+
+    .corner-rope.bottom-right {
+        bottom: 20px;
+        right: 20px;
+        animation-delay: 3s;
+    }
+
+    @@keyframes cornerFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.3;
+        }
+        50% { 
+            transform: translateY(-8px) rotate(15deg);
+            opacity: 0.5;
+        }
+    }
+
+    .login-card:hover .corner-rope {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+
+    /* Logo su riestainiuku */
+    .logo-container {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: logoFloat 3s ease-in-out infinite;
+    }
+
+    @@keyframes logoFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+    }
+
+    .main-rope-heart {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .main-rope-heart:hover {
+        transform: scale(1.15) rotate(10deg);
+    }
+
+    .main-rope-heart:hover .rope-emoji {
+        animation: heartBounce 0.6s ease;
+    }
+
+    .rope-emoji {
+        font-size: 80px;
+        display: inline-block;
+        filter: drop-shadow(0 4px 20px rgba(248, 136, 233, 0.6));
+        animation: ropeFloat 3s ease-in-out infinite;
+    }
+
+    @@keyframes ropeFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+        }
+        50% { 
+            transform: translateY(-10px) rotate(5deg);
+        }
+    }
+
+    @@keyframes heartBounce {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.2) rotate(-10deg); }
+        75% { transform: scale(0.95) rotate(10deg); }
+    }
+
+    .rope-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 120%;
+        height: 120%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(circle, rgba(248, 136, 233, 0.4) 0%, transparent 70%);
+        animation: glowPulse 2s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes glowPulse {
+        0%, 100% { 
+            opacity: 0.6;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        50% { 
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
     }
 
     .login-title {
-        text-align: center;
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #f888e9;
-        margin-bottom: 2rem;
-        letter-spacing: 3px;
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 5px;
+        margin-bottom: 0.5rem;
     }
 
+    .logo-tagline {
+        color: #666;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+    }
+
+    .sparkles-container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .sparkle-icon {
+        width: 20px;
+        height: 20px;
+        color: #f888e9;
+        animation: sparkle 2s ease-in-out infinite;
+    }
+
+    .sparkle-icon:nth-child(2) { animation-delay: 0.3s; }
+    .sparkle-icon:nth-child(3) { animation-delay: 0.6s; }
+
+    @@keyframes sparkle {
+        0%, 100% { opacity: 0.3; transform: scale(1) rotate(0deg); }
+        50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+    }
+
+    /* Form Elements */
     .input-group {
         margin-bottom: 1.5rem;
     }
@@ -98,77 +482,71 @@
 
     .form-input {
         width: 100%;
-        padding: 0.875rem 1rem;
+        padding: 1rem 1.25rem;
         border: 2px solid #e0e0e0;
-        border-radius: 10px;
+        border-radius: 15px;
         font-size: 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: white;
     }
 
     .form-input:focus {
         outline: none;
         border-color: #f888e9;
-        box-shadow: 0 0 0 3px rgba(248, 136, 233, 0.1);
+        box-shadow: 
+            0 0 0 4px rgba(248, 136, 233, 0.1),
+            0 10px 25px rgba(248, 136, 233, 0.2);
+        transform: translateY(-2px);
     }
 
     .form-input::placeholder {
         color: #999;
     }
 
+    /* Buttons */
     .button-group {
         display: flex;
         gap: 1rem;
         margin-top: 2rem;
     }
 
-    .btn-login, .btn-signup {
+    .btn-login, .btn-signup, .btn-logout-full {
         flex: 1;
-        padding: 1rem;
+        position: relative;
+        padding: 1.1rem 1.5rem;
         border: none;
-        border-radius: 10px;
-        font-weight: bold;
+        border-radius: 15px;
+        font-weight: 700;
         font-size: 1rem;
         cursor: pointer;
-        transition: all 0.3s ease;
         color: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
     }
 
     .btn-login {
         background: linear-gradient(135deg, #f888e9 0%, #f56ec8 100%);
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        box-shadow: 0 8px 25px rgba(248, 136, 233, 0.4);
     }
 
     .btn-login:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.6);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(248, 136, 233, 0.6);
     }
 
     .btn-signup {
         background: linear-gradient(135deg, #bd87f8 0%, #9d6ce8 100%);
-        box-shadow: 0 4px 12px rgba(189, 135, 248, 0.4);
+        box-shadow: 0 8px 25px rgba(189, 135, 248, 0.4);
     }
 
     .btn-signup:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(189, 135, 248, 0.6);
-    }
-
-    .btn-login:active, .btn-signup:active {
-        transform: translateY(0);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(189, 135, 248, 0.6);
     }
 
     .btn-logout-full {
         width: 100%;
-        padding: 1rem;
         background-color: #666;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        font-weight: bold;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
     }
 
     .btn-logout-full:hover {
@@ -177,23 +555,61 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
+    .btn-shimmer {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @@keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    /* Status Message */
     .status-message {
         text-align: center;
         margin-top: 1.5rem;
-        color: #666;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.1), rgba(189, 135, 248, 0.1));
+        border-radius: 12px;
+        color: #333;
         font-weight: 600;
-        padding: 0.75rem;
-        background: rgba(248, 136, 233, 0.1);
-        border-radius: 8px;
+        border: 2px solid rgba(248, 136, 233, 0.3);
+        animation: messageSlide 0.5s ease;
     }
 
+    @@keyframes messageSlide {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
     @@media (max-width: 500px) {
         .login-card {
             padding: 2rem 1.5rem;
         }
 
         .login-title {
-            font-size: 2rem;
+            font-size: 2.5rem;
+        }
+
+        .rope-emoji {
+            font-size: 60px;
+        }
+
+        .corner-rope {
+            font-size: 25px;
         }
 
         .button-group {

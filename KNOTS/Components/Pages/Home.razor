@@ -16,554 +16,1328 @@
 
 <PageTitle>Home</PageTitle>
 
-<div class="full-screen-container">
+<div class="home-container">
+    <!-- Animuotas fonas -->
+    <div class="background-animation">
+        <div class="floating-elements">
+            @for (int i = 0; i < 8; i++)
+            {
+                <div class="floating-element" style="animation-delay: @(i * -2.5)s;">🥨</div>
+            }
+        </div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+
+        @for (int i = 0; i < 30; i++)
+        {
+            <div class="particle"></div>
+        }
+
+        <div class="mouse-glow" id="mouseGlow"></div>
+    </div>
+
     @if (UserService.IsAuthenticated)
     {
+        <!-- Navigation -->
         <nav class="top-navigation">
-            <div class="nav-brand">KNOTS</div>
-            <div class="nav-links">
-                <a href="/Home" class="nav-link active">Home</a>
-                <a href="/activity" class="nav-link">My Activity</a>
-                <a href="/leaderboard" class="nav-link">View Top Knotters</a>
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <div class="brand-icon-wrapper">
+                        <span class="brand-rope">🥨</span>
+                        <div class="brand-glow"></div>
+                    </div>
+                    <span class="brand-text">KNOTS</span>
+                </div>
+                <div class="nav-links">
+                    <a href="/Home" class="nav-link active">
+                        <span>Home</span>
+                        <div class="link-shine"></div>
+                    </a>
+                    <a href="/activity" class="nav-link">
+                        <span>My Activity</span>
+                        <div class="link-shine"></div>
+                    </a>
+                    <a href="/leaderboard" class="nav-link">
+                        <span>Top Knotters</span>
+                        <div class="link-shine"></div>
+                    </a>
+                </div>
+                <button class="btn-logout" @onclick="Logout">
+                    <span>Logout</span>
+                    <div class="btn-shimmer"></div>
+                </button>
             </div>
-            <button class="btn-logout" @onclick="Logout">Logout</button>
         </nav>
 
+        <!-- Main Content -->
         <div class="content-wrapper">
-            <div class="welcome-section">
-                <h1 class="welcome-title">Welcome, @UserService.CurrentUser!</h1>
+            <!-- Welcome Section -->
+            <div class="welcome-section glass-card">
+                <div class="card-shine"></div>
+                <div class="corner-decorations">
+                    <span class="corner-deco top-left">🥨</span>
+                    <span class="corner-deco top-right">🥨</span>
+                    <span class="corner-deco bottom-left">🥨</span>
+                    <span class="corner-deco bottom-right">🥨</span>
+                </div>
 
-                @if (!string.IsNullOrEmpty(friendMessage))
-                {
-                    <div class="message-box">@friendMessage</div>
-                }
-            </div>
-
-            <div class="game-section">
-                <h2 class="section-title">Join a new game now!</h2>
-                <p class="section-description">
-                    You will be connected to an interactive server, where you can find your match based on your answers!
-                </p>
-
-                <a href="/game" class="btn-connect">Connect to game</a>
-
-                @if (!string.IsNullOrEmpty(statusMessage))
-                {
-                    <p class="status-message">@statusMessage</p>
-                }
-            </div>
-
-            <div class="chat-section">
-                <div class="chat-header-bar">
-                    <div>
-                        <h2 class="section-title">Messages</h2>
-                        <p class="chat-subtitle">Reconnect with players from previous games and pick up your conversations anytime.</p>
+                <div class="welcome-content">
+                    <div class="sparkles">
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            <svg class="sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z"/>
+                            </svg>
+                        }
                     </div>
-                    @if (unreadCount > 0)
+
+                    <h1 class="welcome-title">
+                        Welcome back, <span class="username-highlight">@UserService.CurrentUser</span>
+                    </h1>
+                    <p class="welcome-subtitle">
+                        Find your match • Keep the spark going • Make it unforgettable
+                    </p>
+
+                    @if (!string.IsNullOrEmpty(friendMessage))
                     {
-                        <span class="unread-chip">@unreadCount new</span>
+                        <div class="message-box">
+                            <span>@friendMessage</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="main-grid">
+                <!-- Game Section -->
+                <div class="game-section glass-card">
+                    <div class="card-shine"></div>
+
+                    <div class="section-icon">🎮</div>
+                    <h2 class="section-title">Join New Game</h2>
+                    <p class="section-description">
+                        Connect to our interactive server and get matched based on your answers.
+                    </p>
+
+                    <a href="/game" class="btn-connect">
+                        <span>Connect to Game</span>
+                        <div class="btn-shimmer"></div>
+                    </a>
+
+                    @if (!string.IsNullOrEmpty(statusMessage))
+                    {
+                        <p class="status-message">@statusMessage</p>
                     }
                 </div>
 
-                @if (latestNotification != null)
-                {
-                    <div class="chat-notification">
-                        <div class="chat-notification-text">
-                            <div class="chat-notification-title">New message</div>
-                            <div class="chat-notification-body">
-                                <strong>@latestNotification.Username</strong>: @latestNotification.Preview
-                            </div>
-                        </div>
-                        <div class="chat-notification-actions">
-                            <button class="btn-chat" @onclick="() => OpenChat(latestNotification.Username)">Open chat</button>
-                            <button class="btn-dismiss" @onclick="DismissNotification">Dismiss</button>
-                        </div>
-                    </div>
-                }
+                <!-- Chat Section -->
+                <div class="chat-section glass-card">
+                    <div class="card-shine"></div>
 
-                @if (chatLoading)
-                {
-                    <div class="chat-loading">
-                        <div class="spinner-border" style="color: #f888e9;" role="status"></div>
-                        <p>Loading your chats...</p>
-                    </div>
-                }
-                else if (!string.IsNullOrWhiteSpace(chatError))
-                {
-                    <div class="chat-error">@chatError</div>
-                }
-                else if (contactSummaries.Count == 0)
-                {
-                    <div class="chat-empty">
-                        <h3>No chats yet</h3>
-                        <p>Play a game to meet new players and start messaging them directly from here.</p>
-                        <a href="/game" class="btn-connect">Find a match</a>
-                    </div>
-                }
-                else
-                {
-                    <div class="chat-list">
-                        @foreach (var contact in contactSummaries)
-                        {
-                            <div class="chat-card @(contact.HasUnread ? "unread" : string.Empty)">
-                                <div class="chat-card-main">
-                                    <div class="chat-card-top">
-                                        <div class="chat-name">@contact.Username</div>
-                                        @if (contact.Compatibility.HasValue)
-                                        {
-                                            <span class="compat-chip">@contact.Compatibility.Value.ToString("F0")% match</span>
-                                        }
-                                    </div>
-                                    <div class="chat-preview">@contact.LastMessagePreview</div>
-                                </div>
-                                <div class="chat-card-meta">
-                                    <div class="chat-meta-top">
-                                        @if (contact.LastMessageAt.HasValue)
-                                        {
-                                            <span class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="timestamp muted">No messages yet</span>
-                                        }
-                                        @if (contact.HasUnread)
-                                        {
-                                            <span class="pill pill-new">New</span>
-                                        }
-                                    </div>
-                                    <button class="btn-chat" @onclick="() => OpenChat(contact.Username)">Open chat</button>
-                                </div>
+                    <div class="chat-header">
+                        <div class="chat-header-left">
+                            <div class="section-icon">💬</div>
+                            <div>
+                                <h2 class="section-title">Messages</h2>
+                                <p class="chat-subtitle">Reconnect with your matches</p>
                             </div>
+                        </div>
+                        @if (unreadCount > 0)
+                        {
+                            <span class="unread-badge">@unreadCount new</span>
                         }
                     </div>
-                }
+
+                    @if (latestNotification != null)
+                    {
+                        <div class="chat-notification">
+                            <div class="notification-glow"></div>
+                            <div class="notification-content">
+                                <div class="notification-title">New message</div>
+                                <div class="notification-body">
+                                    <strong>@latestNotification.Username</strong>: @latestNotification.Preview
+                                </div>
+                            </div>
+                            <div class="notification-actions">
+                                <button class="btn-open-chat" @onclick="() => OpenChat(latestNotification.Username)">
+                                    <span>Open</span>
+                                    <div class="btn-shimmer"></div>
+                                </button>
+                                <button class="btn-dismiss" @onclick="DismissNotification">×</button>
+                            </div>
+                        </div>
+                    }
+
+                    @if (chatLoading)
+                    {
+                        <div class="chat-loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading your chats...</p>
+                        </div>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(chatError))
+                    {
+                        <div class="chat-error">@chatError</div>
+                    }
+                    else if (contactSummaries.Count == 0)
+                    {
+                        <div class="chat-empty">
+                            <div class="empty-icon">📭</div>
+                            <h3>No chats yet</h3>
+                            <p>Play a game to meet new players and start messaging!</p>
+                            <a href="/game" class="btn-find-match">
+                                <span>Find a Match</span>
+                                <div class="btn-shimmer"></div>
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="chat-list">
+                            @foreach (var contact in contactSummaries)
+                            {
+                                <div class="chat-card @(contact.HasUnread ? "unread" : "")">
+                                    <div class="chat-card-glow"></div>
+                                    <div class="chat-card-content">
+                                        <div class="chat-card-header">
+                                            <div class="chat-info">
+                                                <div class="chat-name">@contact.Username</div>
+                                                @if (contact.Compatibility.HasValue)
+                                                {
+                                                    <span class="compat-badge">
+                                                        @contact.Compatibility.Value.ToString("F0")% match
+                                                    </span>
+                                                }
+                                            </div>
+                                            <div class="chat-meta">
+                                                @if (contact.LastMessageAt.HasValue)
+                                                {
+                                                    <span
+                                                        class="timestamp">@contact.LastMessageAt.Value.ToLocalTime().ToString("MMM dd, HH:mm")</span>
+                                                }
+                                                @if (contact.HasUnread)
+                                                {
+                                                    <span class="new-badge">New</span>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="chat-preview">@contact.LastMessagePreview</div>
+                                        <button class="btn-open-chat-card" @onclick="() => OpenChat(contact.Username)">
+                                            <span>Open Chat</span>
+                                            <div class="btn-shimmer"></div>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     }
     else
     {
         <div class="not-logged-in">
-            <h3>You are not logged in.</h3>
-            <p><a href="/" class="link-login">Go to login page</a></p>
+            <div class="login-prompt glass-card">
+                <div class="card-shine"></div>
+                <div class="prompt-icon">🔒</div>
+                <h3>You are not logged in</h3>
+                <p>Please log in to access your KNOTS account</p>
+                <a href="/" class="btn-login-redirect">
+                    <span>Go to Login</span>
+                    <div class="btn-shimmer"></div>
+                </a>
+            </div>
         </div>
     }
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.querySelector('.home-container');
+        const mouseGlow = document.getElementById('mouseGlow');
+
+        if (container && mouseGlow) {
+            container.addEventListener('mousemove', function (e) {
+                const rect = container.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                mouseGlow.style.left = x + '%';
+                mouseGlow.style.top = y + '%';
+            });
+        }
+
+        const particles = document.querySelectorAll('.particle');
+        particles.forEach((particle) => {
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.width = (Math.random() * 3 + 1.5) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.opacity = Math.random() * 0.4 + 0.2;
+            particle.style.animationDelay = (Math.random() * 5) + 's';
+        });
+
+        const floatingElements = document.querySelectorAll('.floating-element');
+        floatingElements.forEach((element) => {
+            element.style.left = Math.random() * 100 + '%';
+            element.style.top = Math.random() * 100 + '%';
+            element.style.fontSize = (Math.random() * 30 + 30) + 'px';
+        });
+    });
+</script>
+
 <style>
-    .full-screen-container {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #b4d0ec 0%, #a8c5e8 100%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
-    .top-navigation {
+
+    .home-container {
+        min-height: 100vh;
+        width: 100%;
+        position: relative;
+        overflow-x: visible;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #b4d0ec 0%, #a8c5e8 100%);
+    }
+
+
+    /* Background Animation */
+    .background-animation {
+        position: fixed;
+        inset: 0;
+        animation: gradientShift 15s ease infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    @@keyframes gradientShift {
+        0%, 100% {
+            filter: hue-rotate(0deg) brightness(1);
+        }
+        50% {
+            filter: hue-rotate(10deg) brightness(1.05);
+        }
+    }
+
+    .floating-elements {
+        position: absolute;
+        inset: 0;
+    }
+
+    .floating-element {
+        position: absolute;
+        opacity: 0.15;
+        animation: floatElement 20s ease-in-out infinite;
+        filter: blur(2px);
+    }
+
+    @@keyframes floatElement {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 0.1;
+        }
+        25% {
+            transform: translate(20px, -30px) rotate(90deg) scale(1.2);
+            opacity: 0.2;
+        }
+        50% {
+            transform: translate(-15px, 25px) rotate(180deg) scale(0.9);
+            opacity: 0.15;
+        }
+        75% {
+            transform: translate(25px, 15px) rotate(270deg) scale(1.1);
+            opacity: 0.18;
+        }
+    }
+
+    .gradient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.4;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, #f888e9 0%, transparent 70%);
+        top: -10%;
+        left: -10%;
+        animation-duration: 25s;
+    }
+
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, #bd87f8 0%, transparent 70%);
+        bottom: -10%;
+        right: -10%;
+        animation-duration: 20s;
+        animation-delay: -5s;
+    }
+
+    .orb-3 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, #a8c5e8 0%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-duration: 30s;
+        animation-delay: -10s;
+    }
+
+    @@keyframes floatOrb {
+        0%, 100% {
+            transform: translate(0, 0);
+        }
+        25% {
+            transform: translate(30px, -30px);
+        }
+        50% {
+            transform: translate(-20px, 20px);
+        }
+        75% {
+            transform: translate(20px, 30px);
+        }
+    }
+
+    .particle {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        animation: particleFloat 8s infinite linear;
+    }
+
+    @@keyframes particleFloat {
+        0% {
+            transform: translateY(0);
+        }
+        100% {
+            transform: translateY(-20px);
+        }
+    }
+
+    .mouse-glow {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    /* Glass Card Effect */
+    .glass-card {
+        position: relative;
         background: rgba(255, 255, 255, 0.95);
-        padding: 1rem 2rem;
+        backdrop-filter: blur(20px) saturate(180%);
+        border-radius: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        animation: cardEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        overflow: hidden;
+    }
+
+    @@keyframes cardEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .card-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shine 3s infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes shine {
+        0% {
+            left: -100%;
+        }
+        50%, 100% {
+            left: 100%;
+        }
+    }
+
+    /* Navigation */
+    .top-navigation {
+        position: relative;
+        z-index: 10;
+        padding: 2rem 0 1rem;
+        background: transparent;
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-content {
+        width: min(1400px, calc(100% - 2.5rem));
+        margin: 0 auto;
+        padding: 1rem 1.5rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(14px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 16px 32px rgba(12, 19, 38, 0.16);
     }
 
     .nav-brand {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #f888e9;
-        letter-spacing: 2px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .brand-icon-wrapper {
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .brand-icon-wrapper:hover {
+        transform: scale(1.15) rotate(10deg);
+    }
+
+    .brand-rope {
+        font-size: 42px;
+        display: inline-block;
+        filter: drop-shadow(0 4px 20px rgba(248, 136, 233, 0.6));
+        animation: brandFloat 3s ease-in-out infinite;
+    }
+
+    @@keyframes brandFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-5px) rotate(5deg);
+        }
+    }
+
+    .brand-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 120%;
+        height: 120%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(circle, rgba(248, 136, 233, 0.4) 0%, transparent 70%);
+        animation: glowPulse 2s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes glowPulse {
+        0%, 100% {
+            opacity: 0.6;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        50% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+    }
+
+    .brand-text {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 3px;
     }
 
     .nav-links {
         display: flex;
-        gap: 2rem;
-        flex: 1;
-        justify-content: center;
+        gap: 1rem;
     }
 
     .nav-link {
-        color: #333;
+        position: relative;
+        padding: 0.75rem 1.5rem;
+        border-radius: 15px;
         text-decoration: none;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
+        color: #333;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .nav-link span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 15px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .nav-link:hover::before {
+        opacity: 1;
     }
 
     .nav-link:hover {
-        background-color: #f888e9;
-        color: white;
+        transform: translateY(-2px);
+        color: #f888e9;
     }
 
     .nav-link.active {
-        background-color: #bd87f8;
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
+        box-shadow: 0 8px 25px rgba(248, 136, 233, 0.4);
+    }
+
+    .link-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .nav-link:hover .link-shine {
+        left: 100%;
     }
 
     .btn-logout {
-        background-color: #666;
-        color: white;
+        position: relative;
+        padding: 0.75rem 1.5rem;
         border: none;
-        padding: 0.5rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #666 0%, #444 100%);
+        color: white;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-logout span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-logout .btn-shimmer {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: none;
+        transition: left 0.5s ease;
+    }
+
+    .btn-logout:hover .btn-shimmer {
+        left: 100%;
     }
 
     .btn-logout:hover {
-        background-color: #555;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
     }
 
-    .content-wrapper {
-        max-width: 1200px;
+    
+    .content-wrapper{
+        min-height: 100vh;     /* full screen height */
+        width: min(1600px, calc(100% - 2rem));
+        max-width: none;
         margin: 0 auto;
-        padding: 3rem 2rem;
+        padding: 3rem 2rem 2rem;
+        position: relative;
     }
 
+    /* Welcome Section */
     .welcome-section {
+        padding: 3rem 2.5rem;
+        margin-bottom: 2rem;
         text-align: center;
-        margin-bottom: 3rem;
+    }
+
+    .corner-decorations {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .corner-deco {
+        position: absolute;
+        font-size: 35px;
+        opacity: 0.3;
+        animation: cornerFloat 4s ease-in-out infinite;
+        filter: drop-shadow(0 2px 10px rgba(248, 136, 233, 0.3));
+    }
+
+    .corner-deco.top-left {
+        top: 20px;
+        left: 20px;
+        animation-delay: 0s;
+    }
+
+    .corner-deco.top-right {
+        top: 20px;
+        right: 20px;
+        animation-delay: 1s;
+    }
+
+    .corner-deco.bottom-left {
+        bottom: 20px;
+        left: 20px;
+        animation-delay: 2s;
+    }
+
+    .corner-deco.bottom-right {
+        bottom: 20px;
+        right: 20px;
+        animation-delay: 3s;
+    }
+
+    @@keyframes cornerFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.3;
+        }
+        50% {
+            transform: translateY(-8px) rotate(15deg);
+            opacity: 0.5;
+        }
+    }
+
+    .welcome-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .sparkles {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .sparkle {
+        width: 20px;
+        height: 20px;
+        color: #f888e9;
+        animation: sparkleAnim 2s ease-in-out infinite;
+    }
+
+    .sparkle:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+
+    .sparkle:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+
+    @@keyframes sparkleAnim {
+        0%, 100% {
+            opacity: 0.3;
+            transform: scale(1) rotate(0deg);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.2) rotate(180deg);
+        }
     }
 
     .welcome-title {
-        color: white;
         font-size: 2.5rem;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        font-weight: 800;
+        color: #333;
         margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .username-highlight {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .welcome-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.5rem;
     }
 
     .message-box {
-        background: rgba(255, 255, 255, 0.9);
-        padding: 1rem 2rem;
-        border-radius: 12px;
-        color: #333;
-        font-weight: 600;
         display: inline-block;
-        margin-top: 1rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.15), rgba(189, 135, 248, 0.15));
+        padding: 1rem 1.5rem;
+        border-radius: 15px;
+        color: #333;
+        font-weight: 700;
+        border: 2px solid rgba(248, 136, 233, 0.3);
+        animation: messagePulse 2s ease-in-out infinite;
     }
 
+    @@keyframes messagePulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.02);
+        }
+    }
+
+    /* Main Grid */
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 2rem;
+    }
+
+    /* Game Section */
     .game-section {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 3rem;
-        border-radius: 20px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        padding: 2.5rem;
         text-align: center;
-        max-width: 700px;
-        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .section-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: iconBounce 2s ease-in-out infinite;
+    }
+
+    @@keyframes iconBounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
     }
 
     .section-title {
-        color: #f888e9;
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
     }
 
     .section-description {
-        color: #555;
-        font-size: 1.1rem;
+        color: #666;
+        font-size: 1rem;
         line-height: 1.6;
         margin-bottom: 2rem;
+        max-width: 400px;
     }
 
-    .btn-connect {
+    .btn-connect,
+    .btn-find-match,
+    .btn-login-redirect {
+        position: relative;
         display: inline-block;
+        padding: 1rem 2.5rem;
+        border: none;
+        border-radius: 15px;
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
-        padding: 1rem 3rem;
-        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.1rem;
         text-decoration: none;
-        font-weight: bold;
-        font-size: 1.2rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(248, 136, 233, 0.4);
     }
 
-    .btn-connect:hover {
+    .btn-connect span,
+    .btn-find-match span,
+    .btn-login-redirect span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-connect:hover,
+    .btn-find-match:hover,
+    .btn-login-redirect:hover {
         transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.6);
+        box-shadow: 0 15px 40px rgba(248, 136, 233, 0.6);
+    }
+
+    .btn-shimmer {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @@keyframes shimmer {
+        0% {
+            left: -100%;
+        }
+        100% {
+            left: 100%;
+        }
     }
 
     .status-message {
-        margin-top: 1.5rem;
+        margin-top: 1rem;
         color: #666;
         font-weight: 600;
     }
 
+    /* Chat Section */
     .chat-section {
-        margin-top: 2.5rem;
-        background: rgba(255, 255, 255, 0.95);
         padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     }
 
-    .chat-header-bar {
+    .chat-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
         gap: 1rem;
-        margin-bottom: 1rem;
+    }
+
+    .chat-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .chat-header-left .section-icon {
+        font-size: 2.5rem;
+        margin: 0;
     }
 
     .chat-subtitle {
+        color: #666;
+        font-size: 0.9rem;
         margin: 0;
-        color: #555;
+    }
+
+    .unread-badge {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        box-shadow: 0 8px 20px rgba(248, 136, 233, 0.4);
+        animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @@keyframes badgePulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    /* Chat Notification */
+    .chat-notification {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.15), rgba(189, 135, 248, 0.15));
+        border: 2px solid rgba(248, 136, 233, 0.4);
+        margin-bottom: 1.5rem;
+        animation: notificationSlide 0.5s ease;
+        overflow: hidden;
+    }
+
+    @@keyframes notificationSlide {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .notification-glow {
+        position: absolute;
+        inset: -2px;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.3), rgba(189, 135, 248, 0.3));
+        filter: blur(10px);
+        z-index: -1;
+        animation: glowPulse 2s ease-in-out infinite;
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-title {
+        font-weight: 800;
+        color: #f888e9;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .notification-body {
+        color: #333;
         font-size: 0.95rem;
     }
 
-    .unread-chip {
+    .notification-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-open-chat,
+    .btn-open-chat-card {
+        position: relative;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 12px;
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
-        padding: 0.4rem 0.8rem;
-        border-radius: 999px;
         font-weight: 700;
-        font-size: 0.9rem;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.4);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(248, 136, 233, 0.4);
     }
 
+    .btn-open-chat span,
+    .btn-open-chat-card span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-open-chat:hover,
+    .btn-open-chat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(248, 136, 233, 0.6);
+    }
+
+    .btn-dismiss {
+        width: 35px;
+        height: 35px;
+        border: 2px solid #f888e9;
+        background: transparent;
+        color: #f888e9;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+    .btn-dismiss:hover {
+        background: #f888e9;
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    /* Chat Loading/Empty/Error */
     .chat-loading,
-    .chat-empty {
-        text-align: center;
-        padding: 2rem;
-        color: #555;
-    }
-
+    .chat-empty,
     .chat-error {
-        background: #ffe3e3;
-        color: #b71c1c;
-        padding: 1rem;
-        border-radius: 12px;
-        font-weight: 600;
+        text-align: center;
+        padding: 3rem 2rem;
     }
 
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(248, 136, 233, 0.2);
+        border-top-color: #f888e9;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .chat-loading p,
+    .chat-empty p,
+    .chat-error {
+        color: #666;
+        font-size: 1rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: iconBounce 2s ease-in-out infinite;
+    }
+
+    .chat-empty h3 {
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+    }
+
+    .btn-find-match {
+        margin-top: 1rem;
+    }
+
+    /* Chat List */
     .chat-list {
         display: flex;
         flex-direction: column;
         gap: 1rem;
+        max-height: 600px;
+        padding-right: 0.5rem;
+        overflow: visible;
+    }
+
+    .chat-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-list::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+    }
+
+    .chat-list::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
+        border-radius: 10px;
     }
 
     .chat-card {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 1rem;
-        padding: 1rem 1.25rem;
-        border: 1px solid #e6e6e6;
-        border-radius: 14px;
-        background: #fafafa;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        padding: 1.5rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid rgba(230, 230, 230, 0.8);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: visible;
     }
 
     .chat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        transform: translateY(-5px);
+        border-color: #f888e9;
+        box-shadow: 0 15px 40px rgba(248, 136, 233, 0.3);
+        z-index: 2;
     }
 
     .chat-card.unread {
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.1), rgba(189, 135, 248, 0.1));
         border-color: #f888e9;
-        background: linear-gradient(180deg, rgba(248, 136, 233, 0.08) 0%, #fafafa 100%);
     }
 
-    .chat-card-main {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
+    .chat-card-glow {
+        position: absolute;
+        inset: -2px;
+        background: linear-gradient(135deg, rgba(248, 136, 233, 0.2), rgba(189, 135, 248, 0.2));
+        filter: blur(15px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
     }
 
-    .chat-card-top {
+    .chat-card:hover .chat-card-glow {
+        opacity: 1;
+    }
+
+    .chat-card-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .chat-card-header {
         display: flex;
-        align-items: center;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
         gap: 0.5rem;
     }
 
+    .chat-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
     .chat-name {
-        font-weight: 700;
-        font-size: 1.05rem;
-        color: #2f2f2f;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #333;
     }
 
-    .compat-chip {
-        background: #eef2ff;
-        color: #4b4db5;
-        padding: 0.25rem 0.65rem;
-        border-radius: 10px;
-        font-weight: 700;
+    .compat-badge {
+        background: linear-gradient(135deg, #e7f3ff, #f0e7ff);
+        color: #6b5fc7;
+        padding: 0.35rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 800;
         font-size: 0.85rem;
+        border: 1px solid rgba(107, 95, 199, 0.3);
     }
 
-    .chat-preview {
-        color: #555;
-        font-size: 0.95rem;
-        line-height: 1.4;
-    }
-
-    .chat-card-meta {
+    .chat-meta {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
         gap: 0.5rem;
     }
 
-    .chat-meta-top {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #777;
-        font-size: 0.9rem;
-    }
-
     .timestamp {
-        color: #777;
+        color: #999;
+        font-size: 0.85rem;
         font-weight: 600;
     }
 
-    .timestamp.muted {
-        color: #aaa;
-    }
-
-    .pill {
-        padding: 0.2rem 0.65rem;
-        border-radius: 999px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        border: 1px solid #f888e9;
-    }
-
-    .pill-new {
-        background: #fff;
-        color: #f888e9;
-    }
-
-    .btn-chat {
+    .new-badge {
         background: linear-gradient(135deg, #f888e9 0%, #bd87f8 100%);
         color: white;
-        border: none;
-        padding: 0.55rem 1.15rem;
+        padding: 0.25rem 0.65rem;
         border-radius: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(248, 136, 233, 0.35);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .btn-chat:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(248, 136, 233, 0.45);
-    }
-
-    .chat-notification {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0.85rem 1rem;
-        border-radius: 14px;
-        border: 1px solid #f888e9;
-        background: linear-gradient(180deg, rgba(248, 136, 233, 0.1) 0%, rgba(189, 135, 248, 0.05) 100%);
-        box-shadow: 0 6px 18px rgba(248, 136, 233, 0.18);
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .chat-notification-text {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-    }
-
-    .chat-notification-title {
         font-weight: 800;
-        color: #c154d0;
-        letter-spacing: 0.02em;
+        font-size: 0.75rem;
+        animation: badgePulse 2s ease-in-out infinite;
     }
 
-    .chat-notification-body {
-        color: #333;
+    .chat-preview {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
     }
 
-    .chat-notification-actions {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
+    .btn-open-chat-card {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
     }
 
-    .btn-dismiss {
-        background: transparent;
-        border: 1px solid #f888e9;
-        color: #c154d0;
-        padding: 0.45rem 0.9rem;
-        border-radius: 10px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-dismiss:hover {
-        background: rgba(248, 136, 233, 0.12);
-    }
-
+    /* Not Logged In */
     .not-logged-in {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
-        color: white;
+        padding: 2rem;
+    }
+
+    .login-prompt {
+        max-width: 500px;
+        width: 100%;
+        padding: 3rem 2.5rem;
         text-align: center;
     }
 
-    .not-logged-in h3 {
-        font-size: 2rem;
+    .prompt-icon {
+        font-size: 4rem;
         margin-bottom: 1rem;
+        animation: iconBounce 2s ease-in-out infinite;
     }
 
-    .link-login {
-        color: #f888e9;
-        font-weight: bold;
-        text-decoration: none;
-        font-size: 1.2rem;
+    .login-prompt h3 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
     }
 
-    .link-login:hover {
-        color: #bd87f8;
-        text-decoration: underline;
+    .login-prompt p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 1200px) {
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     @@media (max-width: 768px) {
-        .top-navigation {
+        .nav-content {
             flex-direction: column;
             gap: 1rem;
         }
 
         .nav-links {
-            flex-direction: column;
-            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .welcome-title {
             font-size: 1.8rem;
         }
 
-        .section-title {
+        .brand-text {
             font-size: 1.5rem;
         }
 
-        .game-section {
-            padding: 2rem 1.5rem;
+        .brand-rope {
+            font-size: 40px;
         }
 
-        .chat-card {
-            grid-template-columns: 1fr;
+        .corner-deco {
+            font-size: 25px;
         }
 
-        .chat-card-meta {
-            align-items: flex-start;
+        .section-icon {
+            font-size: 3rem;
         }
     }
+    
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
 </style>
+
 
 @code {
     private string statusMessage = "";
@@ -915,7 +1689,6 @@
         }
         catch (TaskCanceledException)
         {
-            // ignored
         }
     }
 
@@ -937,5 +1710,6 @@
     }
 
     private record CompatibilitySnapshot(string Username, double Score);
+
     private record IncomingChatNotification(string Username, string Preview);
 }
