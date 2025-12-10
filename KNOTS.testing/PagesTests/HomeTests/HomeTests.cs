@@ -65,7 +65,6 @@ namespace KNOTS.Tests.Integration
         {
             // Arrange
             _mockUserService.Setup(x => x.IsAuthenticated).Returns(false);
-
             // Act
             var cut = Render<Home>();
 
@@ -73,8 +72,8 @@ namespace KNOTS.Tests.Integration
             var heading = cut.Find("h3");
             Assert.Contains("You are not logged in", heading.TextContent);
             
-            var link = cut.Find(".link-login");
-            Assert.Contains("Go to login page", link.TextContent);
+            var link = cut.Find(".btn-login-redirect");
+            Assert.Contains("Go to Login", link.TextContent);
         }
 
         [Fact]
@@ -90,7 +89,7 @@ namespace KNOTS.Tests.Integration
 
             // Assert
             var welcomeTitle = cut.Find(".welcome-title");
-            Assert.Contains("Welcome, TestUser", welcomeTitle.TextContent);
+            Assert.Contains("Welcome back, TestUser", welcomeTitle.TextContent);
         }
 
         [Fact]
@@ -109,7 +108,7 @@ namespace KNOTS.Tests.Integration
             Assert.Equal(3, navLinks.Count);
             Assert.Contains("Home", navLinks[0].TextContent);
             Assert.Contains("My Activity", navLinks[1].TextContent);
-            Assert.Contains("View Top Knotters", navLinks[2].TextContent);
+            Assert.Contains("Top Knotters", navLinks[2].TextContent);
         }
 
         [Fact]
@@ -163,7 +162,7 @@ namespace KNOTS.Tests.Integration
             // Assert
             var chatCard = cut.Find(".chat-card");
             var chatName = chatCard.QuerySelector(".chat-name");
-            var compatChip = chatCard.QuerySelector(".compat-chip");
+            var compatChip = chatCard.QuerySelector(".compat-badge");
             var chatPreview = chatCard.QuerySelector(".chat-preview");
             
             Assert.NotNull(chatName);
@@ -199,10 +198,10 @@ namespace KNOTS.Tests.Integration
             var chatCard = cut.Find(".chat-card");
             Assert.Contains("unread", chatCard.ClassList);
             
-            var newPill = cut.Find(".pill-new");
+            var newPill = cut.Find(".new-badge");
             Assert.Contains("New", newPill.TextContent);
             
-            var unreadChip = cut.Find(".unread-chip");
+            var unreadChip = cut.Find(".unread-badge");
             Assert.Contains("1 new", unreadChip.TextContent);
         }
 
@@ -250,7 +249,7 @@ namespace KNOTS.Tests.Integration
             var cut = Render<Home>();
             await Task.Delay(100);
             
-            var openChatButton = cut.Find(".btn-chat");
+            var openChatButton = cut.Find(".btn-open-chat-card");
             openChatButton.Click();
 
             // Assert
@@ -405,8 +404,8 @@ namespace KNOTS.Tests.Integration
             Assert.NotEmpty(notifications);
             
             var notification = notifications.First();
-            var title = notification.QuerySelector(".chat-notification-title");
-            var body = notification.QuerySelector(".chat-notification-body");
+            var title = notification.QuerySelector(".notification-title");
+            var body = notification.QuerySelector(".notification-body");
             
             Assert.NotNull(title);
             Assert.Contains("New message", title.TextContent);
@@ -558,8 +557,11 @@ namespace KNOTS.Tests.Integration
             // Assert
             var chatCard = cut.Find(".chat-card");
             var chatName = chatCard.QuerySelector(".chat-name");
-            var compatChip = chatCard.QuerySelector(".compat-chip");
+            var compatChip = chatCard.QuerySelector(".compat-badge");
             var chatPreview = chatCard.QuerySelector(".chat-preview");
+            
+            Console.WriteLine(cut.Markup);
+
             
             Assert.NotNull(chatName);
             Assert.Contains("Partner1", chatName.TextContent);

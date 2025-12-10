@@ -1,4 +1,5 @@
-﻿using Bunit;
+﻿using AngleSharp.Dom;
+using Bunit;
 using Xunit;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ using KNOTS.Services.Interfaces;
 using Microsoft.AspNetCore.Components;
 using KNOTS.Components;
 using KNOTS.Components.Pages;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace KNOTS.Tests.Components
 {
@@ -302,56 +304,28 @@ namespace KNOTS.Tests.Components
                 Assert.Contains("You & user3", cut.Markup);
             });
         }
-
         
-        [Fact]
-        public void Component_SavesResults_Automatically()
-        {
-            // Arrange
-            var results = CreateMockCompatibilityResults();
-            SetupMocksForCalculation(results);
-
-            var players = new List<string> { "user1", "user2", "user3" };
-            _mockGameRoomService.Setup(s => s.GetRoomPlayerUsernames("TEST123"))
-                .Returns(players);
-
-            // Act
-            var cut = Render<GameResults>(parameters => parameters
-                .Add(p => p.RoomCode, "TEST123")
-                .Add(p => p.CurrentUsername, "user1"));
-
-            // Assert
-            cut.WaitForAssertion(() =>
-            {
-                _mockCompatibilityService.Verify(
-                    s => s.SaveGameToHistory("TEST123", players),
-                    Times.Once);
-                
-                Assert.Contains("Results saved automatically", cut.Markup);
-            });
-        }
-
         [Fact]
         public async Task Component_InvokesOnResultsSaved_WhenFinishClicked()
         {
             // Arrange
             var results = CreateMockCompatibilityResults();
             SetupMocksForCalculation(results);
-            
+    
+            _mockGameRoomService.Setup(s => s.GetRoomPlayerUsernames("TEST123"))
+                .Returns(new List<string> { "user1", "user2" });
+
             bool callbackInvoked = false;
             EventCallback onResultsSaved = EventCallback.Factory.Create(this, () => callbackInvoked = true);
 
-            // Act
             var cut = Render<GameResults>(parameters => parameters
                 .Add(p => p.RoomCode, "TEST123")
                 .Add(p => p.CurrentUsername, "user1")
                 .Add(p => p.OnResultsSaved, onResultsSaved));
 
-            await cut.WaitForAssertionAsync(async () =>
-            {
-                var finishButton = cut.Find(".btn-finish");
-                await finishButton.ClickAsync(new Microsoft.AspNetCore.Components.Web.MouseEventArgs());
-            });
+            // Act
+            var saveButton = cut.Find(".btn-save");
+            await saveButton.ClickAsync(new MouseEventArgs());
 
             // Assert
             Assert.True(callbackInvoked);
@@ -446,27 +420,7 @@ namespace KNOTS.Tests.Components
                 Assert.DoesNotContain("Your Personal Matches", cut.Markup);
             });
         }
-
-        [Fact]
-        public void Component_ShowsAutoSaveIndicator()
-        {
-            // Arrange
-            var results = CreateMockCompatibilityResults();
-            SetupMocksForCalculation(results);
-
-            // Act
-            var cut = Render<GameResults>(parameters => parameters
-                .Add(p => p.RoomCode, "TEST123")
-                .Add(p => p.CurrentUsername, "user1"));
-
-            // Assert
-            cut.WaitForAssertion(() =>
-            {
-                var autoSave = cut.Find(".auto-save");
-                Assert.NotNull(autoSave);
-            });
-        }
-
+        
         // Helper methods
         private List<CompatibilityScore> CreateMockCompatibilityResults()
         {
