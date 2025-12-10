@@ -304,55 +304,7 @@ namespace KNOTS.Tests.Components
                 Assert.Contains("You & user3", cut.Markup);
             });
         }
-
-       /* 
-        [Fact]
-        public async Task Component_SavesResults_Automatically()
-        {
-            // Arrange
-            var results = CreateMockCompatibilityResults();
-
-            // Use your helper to set up mocks
-            SetupMocksForCalculation(results);
-
-            // Track whether SaveGameToHistory was called
-            var saveCalled = false;
-            _mockCompatibilityService.Setup(s => s.SaveGameToHistory(
-                    It.IsAny<string>(),
-                    It.IsAny<List<string>>()))
-                .Callback(() => saveCalled = true);
-
-            // ACT & ASSERT (Combined for async actions)
-            IRenderedComponent<GameResults> cut = null;
-
-            // *** THE CRITICAL FIX IS HERE ***
-            // Wrap the render inside InvokeAsync to ensure the component's
-            // OnInitializedAsync (or similar) runs fully in the Blazor context.
-            await this.InvokeAsync(() =>
-            {
-                cut = Render<GameResults>(parameters => parameters
-                    .Add(p => p.RoomCode, "TEST123")
-                    .Add(p => p.CurrentUsername, "user1"));
-            });
-    
-            // Now that the component has rendered and started its async initialization,
-            // we use WaitForState to wait for the result of that async call.
-            cut.WaitForState(() => saveCalled == true, timeout: TimeSpan.FromSeconds(5));
-
-            // Assertions
-            Assert.True(saveCalled); 
-
-            // Optionally verify auto-save indicator exists
-            var autoSave = cut.Find(".auto-save");
-            Assert.NotNull(autoSave);
-            Assert.Contains("Results saved automatically", cut.Markup);
-
-            // Verify SaveGameToHistory was called exactly once
-            _mockCompatibilityService.Verify(s => s.SaveGameToHistory(
-                It.IsAny<string>(),
-                It.IsAny<List<string>>()), Times.Once);
-        }
-*/
+        
         [Fact]
         public async Task Component_InvokesOnResultsSaved_WhenFinishClicked()
         {
@@ -468,27 +420,7 @@ namespace KNOTS.Tests.Components
                 Assert.DoesNotContain("Your Personal Matches", cut.Markup);
             });
         }
-/*
-        [Fact]
-        public void Component_ShowsAutoSaveIndicator()
-        {
-            // Arrange
-            var results = CreateMockCompatibilityResults();
-            SetupMocksForCalculation(results);
-
-            // Act
-            var cut = Render<GameResults>(parameters => parameters
-                .Add(p => p.RoomCode, "TEST123")
-                .Add(p => p.CurrentUsername, "user1"));
-
-            // Assert
-            cut.WaitForAssertion(() =>
-            {
-                var autoSave = cut.Find(".auto-save");
-                Assert.NotNull(autoSave);
-            });
-        }
-*/
+        
         // Helper methods
         private List<CompatibilityScore> CreateMockCompatibilityResults()
         {
